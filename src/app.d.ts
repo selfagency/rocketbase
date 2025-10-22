@@ -1,10 +1,10 @@
-// See https://svelte.dev/docs/kit/types#app.d.ts
-// for information about these interfaces
+import type { ILogLayer } from 'loglauyer';
+
 declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			log: import('loglayer').LogLayer;
+			log: ILogLayer;
 			reqtime: number;
 		}
 		// interface PageData {}

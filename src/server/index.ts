@@ -71,6 +71,7 @@ if (process.env.NODE_ENV === 'development') {
 // Proxy Errsole dashboard
 app.use('/logs', errsole.proxyMiddleware());
 
+// Instantiate server
 app.listen(port, (err: Error) => {
 	if (err) throw err;
 	log.info(`Server is running on http://localhost:${port}`);

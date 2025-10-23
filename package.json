@@ -5,6 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "pnpx dotenv-cli -e .env.dynamic -- vite dev",
+		"dev:all": "pnpx foreman start -j Procfile.dev",
 		"build": "vite build",
 		"preview": "pnpx dotenv-cli -e .env.dynamic -- vite preview",
 		"prepare": "svelte-kit sync || echo ''",

@@ -9,6 +9,7 @@ node_modules
 /.svelte-kit
 /build
 /logs
+/pb_data
 
 # OS
 .DS_Store

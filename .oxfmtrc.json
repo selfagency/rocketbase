@@ -11,5 +11,9 @@
   "trailingComma": "es5",
   "useTabs": false,
   "experimentalSortPackageJson": false,
-  "ignorePatterns": ["node_modules/", "dist/", "build/"]
+  "ignorePatterns": [
+    "node_modules/",
+    ".svelte-kit/",
+    "build/"
+  ]
 }

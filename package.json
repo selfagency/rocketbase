@@ -2,44 +2,14 @@
   "name": "rocketbase",
   "version": "0.1.0",
   "description": "Rapid application development with PocketBase and SvelteKit.",
-  "main": "dist/index.js",
-  "scripts": {
-    "lint": "oxlint && oxfmt",
-    "lint:fix": "oxlint --fix && oxfmt --write",
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsx src/index.ts",
-    "start": "node dist/index.js",
-    "test:watch": "vitest watch",
-    "test": "vitest"
-  },
-  "keywords": [
-    "pocketbase",
-    "rocketbase",
-    "pocketbase-sdk",
-    "pocketbase-client",
-    "cms",
-    "headless-cms",
-    "svelte",
-    "sveltekit"
-  ],
   "author": "Daniel Sieradski <daniel@self.agency> (https://self.agency)",
   "license": "MIT",
-  "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264",
-  "devDependencies": {
-    "@types/node": "^25.2.0",
-    "consola": "^3.4.2",
-    "execa": "^9.6.1",
-    "ora": "^9.2.0",
-    "oxfmt": "^0.28.0",
-    "oxlint": "^1.43.0",
-    "oxlint-tsgolint": "^0.11.4",
-    "prompts": "^2.4.2",
-    "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
-  },
-  "engines": {
-    "node": "20.x"
+  "packageManager": "pnpm@10.28.2",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@tailwindcss/oxide",
+      "esbuild",
+      "sqlite3"
+    ]
   }
 }

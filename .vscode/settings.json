@@ -1,0 +1,12 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll.oxc": "always"
+  },
+  "oxc.typeAware": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "i18n-ally.localesPaths": [
+    "template/messages",
+    "template/src/lib/paraglide/messages"
+  ]
+}

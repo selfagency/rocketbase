@@ -8,5 +8,8 @@
   "i18n-ally.localesPaths": [
     "template/messages",
     "template/src/lib/paraglide/messages"
-  ]
+  ],
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  }
 }

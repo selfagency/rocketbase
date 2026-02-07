@@ -147,33 +147,145 @@ When the CLI creates a new project, it should:
 
 ## Issue Tracking with Beads
 
-This project uses **bd** (beads) for issue tracking:
+**CRITICAL: Always use beads to track development work!**
+
+This project uses **bd** (beads) for issue tracking. Claude Code should use beads for ALL development tasks.
+
+### Beads Commands Reference
 
 ```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --status in_progress  # Claim work
-bd close <id> --reason "Description"  # Complete work
-bd sync               # Force sync with git
+# Basic Operations
+bd status                # Overview of all issues
+bd list                  # List all issues
+bd new "Description"     # Create new issue
+bd show <id>             # View issue details
+bd work <id>             # Start working on issue (sets status to in_progress)
+bd done <id>             # Mark issue as complete
+bd sync                  # Force sync with git
+
+# Advanced Operations
+bd ready                 # Find available work (not blocked)
+bd update <id> --status <status>  # Manually update status
+bd close <id> --reason "Description"  # Close with reason
 ```
 
-**Workflow:**
-1. Find work: `bd ready --json`
-2. Claim issue: `bd update bd-XXX --status in_progress --json`
-3. Read details: `bd show bd-XXX --json`
-4. Implement changes
-5. Close issue: `bd close bd-XXX --reason "Implemented X" --json`
-6. Commit: `git commit -m "feat: add X (bd-XXX)"`
-7. Push: `git push`
-8. Sync: `bd sync`
+### Beads Workflow for Claude Code
 
-**Critical: Session Completion ("Landing the Plane")**
+**MANDATORY: Follow this workflow for every task**
+
+#### 1. Starting a New Task
+
+When the user asks you to implement something:
+
+```bash
+# Check existing beads first
+bd status
+bd list
+
+# Create a bead for the work
+bd new "Implement user authentication with PocketBase"
+# Note the returned ID (e.g., bd-1)
+
+# Start working
+bd work bd-1
+```
+
+#### 2. During Development
+
+- Keep the bead ID in mind as you work
+- Break large tasks into multiple beads if needed
+- Use `bd show bd-1` to review the task description
+
+#### 3. Completing Work
+
+```bash
+# Mark the bead as done
+bd done bd-1
+
+# Commit with bead reference
+git add .
+git commit -m "feat: add user authentication (bd-1)"
+
+# Push changes
+git push
+
+# Sync beads with git
+bd sync
+```
+
+### When to Create Beads
+
+Create beads for:
+- ✅ **New features** - "Add 2FA support"
+- ✅ **Bug fixes** - "Fix OTP verification flow"
+- ✅ **Refactoring** - "Simplify auth state management"
+- ✅ **Tests** - "Add E2E tests for auth flows"
+- ✅ **Documentation** - "Update API documentation"
+- ✅ **Performance** - "Optimize database queries"
+
+Do NOT create beads for:
+- ❌ Reading/exploring code
+- ❌ Answering questions
+- ❌ Planning (use plan mode instead)
+
+### Beads Best Practices
+
+1. **One Bead Per Logical Unit**: Each bead represents a single, cohesive piece of work
+2. **Descriptive Titles**: Use clear, actionable descriptions
+   - ✅ Good: "Fix 2FA email field removal"
+   - ❌ Bad: "Fix stuff"
+3. **Work Status Updates**: Always use `bd work` and `bd done` to update status
+4. **Reference in Commits**: Include bead ID in commit messages: `(bd-XXX)`
+5. **Complete Before New Work**: Finish and close current bead before starting new work
+
+### Example Workflow
+
+```bash
+# User says: "The 2FA flow is broken"
+
+# 1. Create bead
+bd new "Fix 2FA OTP verification flow"
+# Returns: Created issue bd-1
+
+# 2. Start working
+bd work bd-1
+
+# 3. Make changes to fix the issue
+# ... edit files ...
+
+# 4. Complete the bead
+bd done bd-1
+
+# 5. Commit with reference
+git add .
+git commit -m "fix: correct 2FA state management (bd-1)
+
+- Remove unnecessary email field
+- Fix OTP form visibility
+- Update state handling in Svelte component"
+
+# 6. Push and sync
+git push
+bd sync
+```
+
+### Beads Status Values
+
+- `open` - New, not started
+- `in_progress` - Currently being worked on
+- `blocked` - Cannot proceed (dependency or issue)
+- `closed` - Completed
+- `ready` - Open and unblocked, ready to start
+
+### Critical: Session Completion ("Landing the Plane")
 
 Work is NOT complete until `git push` succeeds. Always:
-1. Run quality gates if code changed
-2. Update issue status
-3. `git pull --rebase && bd sync && git push`
-4. Verify `git status` shows "up to date with origin"
+1. Mark bead as done: `bd done <id>`
+2. Run quality gates if code changed: `pnpm run check`
+3. Commit with bead reference
+4. Push: `git pull --rebase && git push`
+5. Sync beads: `bd sync`
+6. Verify: `git status` shows "up to date with origin"
 
 ## Common Patterns
 

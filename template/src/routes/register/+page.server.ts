@@ -1,5 +1,5 @@
-import { fail, redirect } from '@sveltejs/kit';
 import * as m from '$lib/paraglide/messages';
+import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
@@ -7,7 +7,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 const registerSchema = z
 	.object({
-		email: z.string().email(m['validation.email_invalid']()),
+		email: z.email(m['validation.email_invalid']()),
 		password: z.string().min(8, m['validation.password_min_length']()),
 		passwordConfirm: z.string(),
 		name: z.string().min(2, m['validation.name_min_length']())

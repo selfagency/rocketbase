@@ -22,16 +22,64 @@
   );
 
   const { form: formData, enhance, errors } = $derived(form);
+
+  let showMfaForm = $state(false);
+  let mfaData = $state({ mfaId: '', otpId: '', email: '' });
+  let mfaCode = $state('');
+
+  $effect(() => {
+    if ((data as any).mfaRequired) {
+      showMfaForm = true;
+      mfaData = {
+        mfaId: (data as any).mfaId || '',
+        otpId: (data as any).otpId || '',
+        email: (data as any).email || ''
+      };
+    }
+  });
 </script>
 
 <div class="flex min-h-screen items-center justify-center px-4">
   <Card class="w-full max-w-md">
     <CardHeader>
       <CardTitle>{m['auth.login.title']()}</CardTitle>
-      <CardDescription>{m['auth.login.description']()}</CardDescription>
+      <CardDescription>
+        {#if showMfaForm}
+          Enter the verification code sent to your email
+        {:else}
+          {m['auth.login.description']()}
+        {/if}
+      </CardDescription>
     </CardHeader>
     <CardContent>
-      <form method="POST" use:enhance class="space-y-4">
+      {#if showMfaForm}
+        <!-- MFA Verification Form -->
+        <form method="POST" action="?/verifyMfa" class="space-y-4">
+          <input type="hidden" name="mfaId" value={mfaData.mfaId} />
+          <input type="hidden" name="otpId" value={mfaData.otpId} />
+          <input type="hidden" name="email" value={mfaData.email} />
+
+          <div class="space-y-2">
+            <Label for="code">Verification Code</Label>
+            <Input
+              id="code"
+              name="code"
+              type="text"
+              placeholder="Enter 6-digit code"
+              bind:value={mfaCode}
+              maxlength={6}
+              required
+            />
+          </div>
+
+          <Button type="submit" class="w-full">Verify Code</Button>
+          <Button type="button" variant="outline" class="w-full" onclick={() => window.location.reload()}>
+            Back to Login
+          </Button>
+        </form>
+      {:else}
+        <!-- Standard Login Form -->
+        <form method="POST" use:enhance class="space-y-4">
         <div class="space-y-2">
           <Label for="email">{m['auth.login.email_label']()}</Label>
           <Input
@@ -69,6 +117,7 @@
 
         <Button type="submit" class="w-full">{m['auth.login.submit_button']()}</Button>
       </form>
+      {/if}
     </CardContent>
   </Card>
 </div>

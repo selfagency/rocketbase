@@ -19,9 +19,12 @@
 					<p class="text-muted-foreground">{m['home.logged_in_message']()}</p>
 				</div>
 
-				<form method="POST" action="/logout">
-					<Button type="submit" variant="outline">{m['home.logout_button']()}</Button>
-				</form>
+				<div class="flex gap-2">
+					<Button href="/account" variant="outline">Account Settings</Button>
+					<form method="POST" action="/logout">
+						<Button type="submit" variant="outline">{m['home.logout_button']()}</Button>
+					</form>
+				</div>
 			{:else}
 				<div class="space-y-2">
 					<p class="text-lg">{m['home.not_logged_in']()}</p>

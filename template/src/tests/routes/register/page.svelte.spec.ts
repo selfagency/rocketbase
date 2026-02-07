@@ -1,0 +1,41 @@
+import { render } from 'vitest-browser-svelte';
+import { describe, it, expect } from 'vitest';
+import RegisterPage from '../../../routes/register/+page.svelte';
+
+type PageData = { form: any };
+
+describe('Register Page Component', () => {
+	const mockFormData: PageData = {
+		form: {
+			valid: true,
+			posted: false,
+			errors: {},
+			data: { email: '', password: '', passwordConfirm: '', name: '' },
+			constraints: {},
+			message: undefined,
+			id: 'test-form'
+		}
+	};
+
+	it('renders registration form without errors', async () => {
+		expect.assertions(1);
+		const { container } = await render(RegisterPage, { props: { data: mockFormData } });
+		expect(container).toBeTruthy();
+	});
+
+	it('renders with validation errors', async () => {
+		expect.assertions(1);
+		const dataWithErrors: PageData = {
+			form: {
+				...mockFormData.form,
+				valid: false,
+				errors: {
+					name: ['Name must be at least 2 characters'],
+					email: ['Invalid email address']
+				}
+			}
+		};
+		const { container } = await render(RegisterPage, { props: { data: dataWithErrors } });
+		expect(container).toBeTruthy();
+	});
+});

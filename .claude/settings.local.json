@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(pnpm check:*)",
+      "Bash(pnpm list:*)",
+      "WebSearch",
+      "mcp__cognitionai_deepwiki__read_wiki_structure",
+      "mcp__cognitionai_deepwiki__read_wiki_contents",
+      "mcp__cognitionai_deepwiki__ask_question",
+      "WebFetch(domain:inlang.com)"
+    ]
+  }
+}

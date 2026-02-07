@@ -1,0 +1,249 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+**Rocketbase** is a TypeScript/Node.js CLI tool that scaffolds production-ready full-stack applications using **PocketBase** (backend) and **SvelteKit** (frontend). The project has two main components:
+
+- `cli/` — CLI scaffolding tool (TypeScript/Node.js)
+- `template/` — SvelteKit + PocketBase project template
+
+**Critical Rule:** Never build routes/components directly in generated projects. Build them in `template/`, then the CLI copies them into new projects.
+
+## Package Manager
+
+**Always use `pnpm`**. Never use npm or yarn.
+
+## Development Commands
+
+### CLI Development (`cli/`)
+
+```bash
+cd cli
+pnpm dev              # Run CLI in development mode (tsx)
+tsx watch src/index.ts  # Watch mode
+pnpm build            # Build for production (tsup)
+pnpm lint             # Run linter and formatter (oxlint + oxfmt)
+pnpm lint:fix         # Auto-fix lint issues
+pnpm test             # Run unit tests (vitest)
+pnpm test:watch       # Run tests in watch mode
+```
+
+### Template Development (`template/`)
+
+```bash
+cd template
+pnpm dev              # Start SvelteKit dev server (localhost:5173)
+pnpm pb               # Start PocketBase server (port 8090)
+pnpm build            # Build for production
+pnpm build:types      # Generate TypeScript types from PocketBase schema
+pnpm preview          # Preview production build
+pnpm check            # Type-check with svelte-check
+pnpm test             # Run all tests
+pnpm test:unit        # Run unit tests (vitest)
+pnpm test:e2e         # Run E2E tests (Playwright)
+pnpm add-ui           # Add shadcn-svelte components
+```
+
+### Root-Level Operations
+
+```bash
+pnpm lint             # Lint entire project
+cd cli && pnpm build  # Build CLI
+cd template && pnpm build  # Build template
+```
+
+## High-Level Architecture
+
+### Monorepo Structure
+
+This is a pnpm workspace with two packages:
+
+1. **CLI Package** (`cli/`) — Scaffolding engine
+   - Entry point: `cli/src/index.ts` (currently minimal, will expand)
+   - Built with `tsup` to `dist/` directory
+   - Dependencies: `tsx`, `execa`, `consola`, `ora`, `prompts`
+
+2. **Template Package** (`template/`) — Source of truth for scaffolded projects
+   - Standard SvelteKit project structure
+   - Pre-configured with PocketBase integration, Tailwind, shadcn-svelte
+   - The CLI copies this entire directory when creating new projects
+
+### Template Architecture
+
+**Frontend Stack:**
+- SvelteKit 5 with TypeScript
+- Tailwind CSS 4 with shadcn-svelte components (neutral base color)
+- Vite 7 with custom plugins (SVG support, Paraglide i18n, MCP dev tools)
+- Vitest for unit testing (browser mode with Playwright for component tests, node mode for server tests)
+- Playwright for E2E testing
+
+**Backend Integration:**
+- PocketBase server runs separately on port 8090
+- PocketBase JavaScript client (`pocketbase` npm package)
+- Type generation from PocketBase schema via `pocketbase-typegen`
+- No API proxy route needed — direct client-side usage
+
+**Key Template Files:**
+- `src/hooks.server.ts` — SvelteKit server hooks (auth handling)
+- `src/hooks.ts` — Client hooks
+- `src/pocketbase.d.ts` — Generated PocketBase types
+- `vite.config.ts` — Vite configuration with plugins
+- `svelte.config.js` — Uses `@sveltejs/adapter-node`
+- `pb_migrations/` — PocketBase schema migrations
+- `pb_hooks/` — PocketBase server-side hooks (Go/JavaScript)
+
+**Testing Setup:**
+- Vitest with two test projects:
+  - `client` — Browser tests for Svelte components (`.svelte.{test,spec}.{js,ts}`)
+  - `server` — Node tests for server code (`.{test,spec}.{js,ts}`)
+- Playwright for E2E tests in `e2e/`
+
+**Internationalization:**
+- Paraglide for i18n, configured with `project.inlang/`
+- Messages in `messages/` directory
+
+### PocketBase Integration Pattern
+
+The template uses PocketBase without an API proxy. Client-side code can directly instantiate PocketBase:
+
+```typescript
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+```
+
+Auth state is managed through cookies and synchronized in `src/hooks.server.ts`.
+
+### CLI Scaffolding Workflow
+
+When the CLI creates a new project, it should:
+
+1. Check/install PocketBase binary (platform-aware)
+2. Prompt for project name
+3. Copy `template/` directory to target location
+4. Run `pnpm install` in the new project
+5. Initialize git repository
+6. Initialize PocketBase (`pocketbase serve` to create `pb_data/`)
+7. Create PocketBase admin user
+8. Display success message with next steps
+
+## Code Quality Standards
+
+**Linting & Formatting:**
+- Use `oxlint` (Rust-based linter) and `oxfmt` (Rust-based formatter)
+- Configuration in `.oxlintrc.json` and `.oxfmtrc.json`
+- Always run `pnpm lint:fix` before committing
+
+**TypeScript:**
+- Strict mode enabled
+- All code must be type-safe
+- Use generated PocketBase types in template
+
+**Testing:**
+- Unit tests required for CLI utilities
+- Component tests for Svelte components (browser mode)
+- E2E tests for critical user flows
+
+## Issue Tracking with Beads
+
+This project uses **bd** (beads) for issue tracking:
+
+```bash
+bd ready              # Find available work
+bd show <id>          # View issue details
+bd update <id> --status in_progress  # Claim work
+bd close <id> --reason "Description"  # Complete work
+bd sync               # Force sync with git
+```
+
+**Workflow:**
+1. Find work: `bd ready --json`
+2. Claim issue: `bd update bd-XXX --status in_progress --json`
+3. Read details: `bd show bd-XXX --json`
+4. Implement changes
+5. Close issue: `bd close bd-XXX --reason "Implemented X" --json`
+6. Commit: `git commit -m "feat: add X (bd-XXX)"`
+7. Push: `git push`
+8. Sync: `bd sync`
+
+**Critical: Session Completion ("Landing the Plane")**
+
+Work is NOT complete until `git push` succeeds. Always:
+1. Run quality gates if code changed
+2. Update issue status
+3. `git pull --rebase && bd sync && git push`
+4. Verify `git status` shows "up to date with origin"
+
+## Common Patterns
+
+**CLI Implementation:**
+- Use `consola` for all logging (info, success, error, warn)
+- Use `execa` for shell command execution
+- Use `prompts` for user input
+- Use `ora` for progress spinners
+
+**Template Development:**
+- Build features in `template/src/`, not in generated projects
+- Use shadcn-svelte for UI components
+- Use `radashi` for utility functions (modern Lodash alternative)
+- Use Zod with `sveltekit-superforms` for form validation
+- Import SVGs as components: `import Logo from '$lib/assets/logo.svg?component'`
+
+**SvelteKit Patterns:**
+- Server-only code in `src/lib/server/`
+- Load functions in `+page.server.ts` for SSR data fetching
+- Form actions in `+page.server.ts` for mutations
+- Use `$app/stores` for client-side reactive stores
+
+## Build & Native Dependencies
+
+The root `package.json` and template `package.json` both specify native dependencies that must be built:
+
+```json
+{
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@tailwindcss/oxide",
+      "esbuild",
+      "sqlite3"
+    ]
+  }
+}
+```
+
+This ensures pnpm only rebuilds these specific native modules.
+
+## Versioning & Commits
+
+- Follow **Conventional Commits**: `feat:`, `fix:`, `chore:`, `docs:`
+- Follow **Semantic Versioning**
+- Include beads issue ID in commits: `(bd-XXX)`
+
+## Node.js Version
+
+Both CLI and template require Node.js 20.x (specified in `.nvmrc` and `engines` field).
+
+## Key Dependencies Summary
+
+**CLI:**
+- `tsx` — TypeScript execution
+- `tsup` — Build tool
+- `execa` — Process execution
+- `consola` — Logging
+- `ora` — Spinners
+- `prompts` — User input
+- `oxlint/oxfmt` — Linting/formatting
+
+**Template:**
+- `@sveltejs/kit` — Framework
+- `pocketbase` — Backend client
+- `tailwindcss` — CSS framework
+- `bits-ui` — Headless component primitives (used by shadcn-svelte)
+- `zod` — Schema validation
+- `sveltekit-superforms` — Form handling
+- `radashi` — Utility library
+- `@poppanator/sveltekit-svg` — SVG component support
+- `@inlang/paraglide-js` — i18n
+- `vitest` — Testing
+- `playwright` — E2E testing

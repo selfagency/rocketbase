@@ -13,7 +13,7 @@
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "vitest.configSearchPatternInclude": "./template/vite.config.ts",
-  "vite.devCommand": "pnpm --workspace template run dev ",
+  "vite.devCommand": "pnpm --filter template run dev ",
   "vite.buildCommand": "pnpm --filter template run build ",
   "vite.port": 5173,
   "vite.showTerminal": true,

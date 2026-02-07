@@ -12,6 +12,7 @@ export enum Collections {
 	Otps = "_otps",
 	Superusers = "_superusers",
 	Audit = "audit",
+	Logs = "logs",
 	Metadata = "metadata",
 	Pages = "pages",
 	Pageviews = "pageviews",
@@ -123,6 +124,21 @@ export type AuditRecord = {
 	user: RecordIdString
 }
 
+export enum LogsLevelOptions {
+	"INFO" = "INFO",
+	"WARN" = "WARN",
+	"ERROR" = "ERROR",
+	"CRITICAL" = "CRITICAL",
+}
+export type LogsRecord<Tmetadata = unknown> = {
+	created: IsoAutoDateString
+	id: string
+	level: LogsLevelOptions
+	message: string
+	metadata?: null | Tmetadata
+	source: string
+}
+
 export enum MetadataTypeOptions {
 	"string" = "string",
 	"integer" = "integer",
@@ -167,6 +183,7 @@ export type PageviewsRecord = {
 	referer?: string
 	region?: string
 	url: string
+	userAgent?: string
 	utm?: string
 }
 
@@ -233,6 +250,7 @@ export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemF
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
 export type AuditResponse<Texpand = unknown> = Required<AuditRecord> & BaseSystemFields<Texpand>
+export type LogsResponse<Tmetadata = unknown, Texpand = unknown> = Required<LogsRecord<Tmetadata>> & BaseSystemFields<Texpand>
 export type MetadataResponse<Texpand = unknown> = Required<MetadataRecord> & BaseSystemFields<Texpand>
 export type PagesResponse<Texpand = unknown> = Required<PagesRecord> & BaseSystemFields<Texpand>
 export type PageviewsResponse<Texpand = unknown> = Required<PageviewsRecord> & BaseSystemFields<Texpand>
@@ -250,6 +268,7 @@ export type CollectionRecords = {
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
 	audit: AuditRecord
+	logs: LogsRecord
 	metadata: MetadataRecord
 	pages: PagesRecord
 	pageviews: PageviewsRecord
@@ -266,6 +285,7 @@ export type CollectionResponses = {
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
 	audit: AuditResponse
+	logs: LogsResponse
 	metadata: MetadataResponse
 	pages: PagesResponse
 	pageviews: PageviewsResponse

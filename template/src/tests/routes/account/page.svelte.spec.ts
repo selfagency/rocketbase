@@ -4,9 +4,10 @@ import AccountPage from '../../../routes/account/+page.svelte';
 
 type PageData = {
 	profileForm: any;
-	twoFactorRequestForm: any;
-	twoFactorVerifyForm: any;
-	twoFactorEnabled: boolean;
+	passwordForm: any;
+	mfaRequired: boolean;
+	mfaOptIn: boolean;
+	mfaEnabled: boolean;
 	user: any;
 };
 
@@ -18,7 +19,9 @@ describe('Account Page Component', () => {
 		title: 'Developer',
 		bio: 'Test bio',
 		website: 'https://example.com',
-		avatar: ''
+		avatar: '',
+		verified: false,
+		role: 'user'
 	};
 
 	const mockFormData: PageData = {
@@ -31,31 +34,29 @@ describe('Account Page Component', () => {
 				email: 'test@example.com',
 				title: 'Developer',
 				bio: 'Test bio',
-				website: 'https://example.com'
+				website: 'https://example.com',
+				avatar: undefined
 			},
 			constraints: {},
 			message: undefined,
-			id: 'profile-form'
+			id: 'profileForm'
 		},
-		twoFactorRequestForm: {
+		passwordForm: {
 			valid: true,
 			posted: false,
 			errors: {},
-			data: {},
+			data: {
+				oldPassword: '',
+				password: '',
+				passwordConfirm: ''
+			},
 			constraints: {},
 			message: undefined,
-			id: 'tfa-request-form'
+			id: 'passwordForm'
 		},
-		twoFactorVerifyForm: {
-			valid: true,
-			posted: false,
-			errors: {},
-			data: { otpId: '', code: '' },
-			constraints: {},
-			message: undefined,
-			id: 'tfa-verify-form'
-		},
-		twoFactorEnabled: false,
+		mfaRequired: false,
+		mfaOptIn: false,
+		mfaEnabled: false,
 		user: mockUser
 	};
 
@@ -65,13 +66,14 @@ describe('Account Page Component', () => {
 		expect(container).toBeTruthy();
 	});
 
-	it('renders with 2FA enabled', async () => {
+	it('renders with MFA enabled', async () => {
 		expect.assertions(1);
-		const dataWith2FA: PageData = {
+		const dataWithMFA: PageData = {
 			...mockFormData,
-			twoFactorEnabled: true
+			mfaOptIn: true,
+			mfaEnabled: true
 		};
-		const { container } = await render(AccountPage, { props: { data: dataWith2FA } });
+		const { container } = await render(AccountPage, { props: { data: dataWithMFA } });
 		expect(container).toBeTruthy();
 	});
 

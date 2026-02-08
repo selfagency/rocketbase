@@ -8,9 +8,10 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
-	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
+	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import * as m from '$lib/paraglide/messages';
+	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -23,7 +24,12 @@
 
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.form, {
-		validators: zod4Client(forgotPasswordSchema)
+		validators: zod4Client(forgotPasswordSchema),
+		onUpdated: ({ form }) => {
+			if (form.valid && form.posted) {
+				toast.success(m['auth.forgot_password.success']());
+			}
+		}
 	});
 
 	const { form, enhance } = superFormObj;
@@ -53,10 +59,10 @@
 			{/if}
 
 			<form method="POST" use:enhance class="space-y-4">
-				<FormField form={superFormObj} name="email">
-					<FormControl>
+				<Form.Field form={superFormObj} name="email">
+					<Form.Control>
 						{#snippet children({ props })}
-							<FormLabel>{m['auth.forgot_password.email_label']()}</FormLabel>
+							<Form.Label>{m['auth.forgot_password.email_label']()}</Form.Label>
 							<Input
 								{...props}
 								bind:value={$form.email}
@@ -64,9 +70,9 @@
 								placeholder={m['auth.forgot_password.email_placeholder']()}
 							/>
 						{/snippet}
-					</FormControl>
-					<FormFieldErrors />
-				</FormField>
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
 
 				<div class="text-sm">
 					{m['auth.forgot_password.login_link_text']()}

@@ -7,9 +7,10 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
-	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
+	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import * as m from '$lib/paraglide/messages';
+	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -30,7 +31,12 @@
 
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.form, {
-		validators: zod4Client(registerSchema)
+		validators: zod4Client(registerSchema),
+		onUpdated: ({ form }) => {
+			if (form.valid && form.posted) {
+				toast.success(m['auth.register.success']());
+			}
+		}
 	});
 
 	const { form, enhance } = superFormObj;
@@ -44,10 +50,10 @@
 		</CardHeader>
 		<CardContent>
 			<form method="POST" use:enhance class="space-y-4">
-				<FormField form={superFormObj} name="name">
-					<FormControl>
+				<Form.Field form={superFormObj} name="name">
+					<Form.Control>
 						{#snippet children({ props })}
-							<FormLabel>{m['auth.register.name_label']()}</FormLabel>
+							<Form.Label>{m['auth.register.name_label']()}</Form.Label>
 							<Input
 								{...props}
 								bind:value={$form.name}
@@ -55,14 +61,14 @@
 								placeholder={m['auth.register.name_placeholder']()}
 							/>
 						{/snippet}
-					</FormControl>
-					<FormFieldErrors />
-				</FormField>
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
 
-				<FormField form={superFormObj} name="email">
-					<FormControl>
+				<Form.Field form={superFormObj} name="email">
+					<Form.Control>
 						{#snippet children({ props })}
-							<FormLabel>{m['auth.register.email_label']()}</FormLabel>
+							<Form.Label>{m['auth.register.email_label']()}</Form.Label>
 							<Input
 								{...props}
 								bind:value={$form.email}
@@ -70,14 +76,14 @@
 								placeholder={m['auth.register.email_placeholder']()}
 							/>
 						{/snippet}
-					</FormControl>
-					<FormFieldErrors />
-				</FormField>
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
 
-				<FormField form={superFormObj} name="password">
-					<FormControl>
+				<Form.Field form={superFormObj} name="password">
+					<Form.Control>
 						{#snippet children({ props })}
-							<FormLabel>{m['auth.register.password_label']()}</FormLabel>
+							<Form.Label>{m['auth.register.password_label']()}</Form.Label>
 							<Input
 								{...props}
 								bind:value={$form.password}
@@ -85,14 +91,14 @@
 								placeholder={m['auth.register.password_placeholder']()}
 							/>
 						{/snippet}
-					</FormControl>
-					<FormFieldErrors />
-				</FormField>
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
 
-				<FormField form={superFormObj} name="passwordConfirm">
-					<FormControl>
+				<Form.Field form={superFormObj} name="passwordConfirm">
+					<Form.Control>
 						{#snippet children({ props })}
-							<FormLabel>{m['auth.register.password_confirm_label']()}</FormLabel>
+							<Form.Label>{m['auth.register.password_confirm_label']()}</Form.Label>
 							<Input
 								{...props}
 								bind:value={$form.passwordConfirm}
@@ -100,9 +106,9 @@
 								placeholder={m['auth.register.password_confirm_placeholder']()}
 							/>
 						{/snippet}
-					</FormControl>
-					<FormFieldErrors />
-				</FormField>
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
 
 				<div class="text-sm">
 					{m['auth.register.login_link_text']()}

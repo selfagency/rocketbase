@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -8,11 +10,12 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
-	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
+	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as m from '$lib/paraglide/messages';
 	import { AlertCircle } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -26,7 +29,14 @@
 
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.form, {
-		validators: zod4Client(loginSchema)
+		validators: zod4Client(loginSchema),
+		onUpdated: ({ form }) => {
+			// Don't show success toast if MFA is required
+			const actionResult = $page.form as any;
+			if (form.valid && form.posted && !actionResult?.mfaRequired) {
+				toast.success(m['auth.login.success']());
+			}
+		}
 	});
 
 	const { form, enhance, message } = superFormObj;
@@ -35,14 +45,28 @@
 	let mfaData = $state({ mfaId: '', otpId: '', email: '' });
 	let mfaCode = $state('');
 
+	// Watch for MFA data from action result
 	$effect(() => {
-		if ((data as any).mfaRequired) {
+		const actionResult = $page.form as any;
+		if (actionResult?.mfaRequired) {
 			showMfaForm = true;
 			mfaData = {
-				mfaId: (data as any).mfaId || '',
-				otpId: (data as any).otpId || '',
-				email: (data as any).email || ''
+				mfaId: actionResult.mfaId || '',
+				otpId: actionResult.otpId || '',
+				email: actionResult.email || ''
 			};
+		}
+	});
+
+	// Watch for MFA success
+	$effect(() => {
+		const actionResult = $page.form as any;
+		if (actionResult?.success) {
+			toast.success(m['auth.login.success']());
+			// Redirect to home after showing toast
+			setTimeout(() => {
+				goto('/');
+			}, 1000);
 		}
 	});
 </script>
@@ -63,6 +87,13 @@
 			{#if showMfaForm}
 				<!-- MFA Verification Form -->
 				<form method="POST" action="?/verifyMfa" class="space-y-4">
+					{#if $page.form?.message}
+						<Alert variant="destructive">
+							<AlertCircle class="h-4 w-4" />
+							<AlertDescription>{$page.form.message}</AlertDescription>
+						</Alert>
+					{/if}
+
 					<input type="hidden" name="mfaId" value={mfaData.mfaId} />
 					<input type="hidden" name="otpId" value={mfaData.otpId} />
 					<input type="hidden" name="email" value={mfaData.email} />
@@ -73,9 +104,9 @@
 							id="code"
 							name="code"
 							type="text"
-							placeholder="Enter 6-digit code"
+							placeholder="Enter 8-digit code"
 							bind:value={mfaCode}
-							maxlength={6}
+							maxlength={8}
 							required
 						/>
 					</div>
@@ -99,10 +130,10 @@
 							<AlertDescription>{$message}</AlertDescription>
 						</Alert>
 					{/if}
-					<FormField form={superFormObj} name="email">
-						<FormControl>
+					<Form.Field form={superFormObj} name="email">
+						<Form.Control>
 							{#snippet children({ props })}
-								<FormLabel>{m['auth.login.email_label']()}</FormLabel>
+								<Form.Label>{m['auth.login.email_label']()}</Form.Label>
 								<Input
 									{...props}
 									bind:value={$form.email}
@@ -110,14 +141,14 @@
 									placeholder={m['auth.login.email_placeholder']()}
 								/>
 							{/snippet}
-						</FormControl>
-						<FormFieldErrors />
-					</FormField>
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
 
-					<FormField form={superFormObj} name="password">
-						<FormControl>
+					<Form.Field form={superFormObj} name="password">
+						<Form.Control>
 							{#snippet children({ props })}
-								<FormLabel>{m['auth.login.password_label']()}</FormLabel>
+								<Form.Label>{m['auth.login.password_label']()}</Form.Label>
 								<Input
 									{...props}
 									bind:value={$form.password}
@@ -125,9 +156,9 @@
 									placeholder={m['auth.login.password_placeholder']()}
 								/>
 							{/snippet}
-						</FormControl>
-						<FormFieldErrors />
-					</FormField>
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
 
 					<div class="flex items-center justify-between text-sm">
 						<a href="/register" class="text-primary hover:underline"

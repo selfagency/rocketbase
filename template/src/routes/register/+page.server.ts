@@ -38,12 +38,13 @@ export const actions: Actions = {
 		}
 
 		try {
-			// Create user
+			// Create user with default 'user' role
 			await locals.pb.collection('users').create({
 				email: form.data.email,
 				password: form.data.password,
 				passwordConfirm: form.data.passwordConfirm,
-				name: form.data.name
+				name: form.data.name,
+				role: 'user'
 			});
 
 			// Auto-login after registration

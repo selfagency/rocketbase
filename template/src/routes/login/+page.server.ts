@@ -31,7 +31,17 @@ export const actions: Actions = {
 		}
 
 		try {
-			await locals.pb.collection('users').authWithPassword(form.data.email, form.data.password);
+			const authData = await locals.pb
+				.collection('users')
+				.authWithPassword(form.data.email, form.data.password);
+
+			// Check if account is disabled
+			if (authData.record.disabled) {
+				// Clear auth and show error
+				locals.pb.authStore.clear();
+				form.message = m['auth.login.account_disabled']();
+				return fail(403, { form });
+			}
 		} catch (err: any) {
 			console.error('Login error:', err);
 
@@ -40,7 +50,17 @@ export const actions: Actions = {
 			if (mfaId) {
 				// MFA is required - request OTP and return to show OTP form
 				try {
-					const otpResponse = await locals.pb.collection('users').requestOTP(form.data.email);
+					console.log('MFA required, requesting OTP for:', form.data.email);
+					console.log('Using mfaId:', mfaId);
+
+					// Request OTP with mfaId to link to MFA session
+					const otpResponse = await locals.pb
+						.collection('users')
+						.requestOTP(form.data.email, { mfaId } as any);
+
+					console.log('OTP request successful');
+					console.log('OTP Response:', { otpId: otpResponse.otpId });
+
 					return {
 						form,
 						mfaRequired: true,
@@ -55,7 +75,7 @@ export const actions: Actions = {
 				}
 			}
 
-			form.message = 'Invalid email or password';
+			form.message = m['auth.login.invalid_credentials']();
 			return fail(400, { form });
 		}
 
@@ -74,19 +94,56 @@ export const actions: Actions = {
 		}
 
 		try {
-			// Authenticate with OTP and include the mfaId to complete MFA flow
-			await locals.pb.collection('users').authWithOTP(otpId, code, { mfaId: mfaId });
+			console.log('=== MFA Verification Debug ===');
+			console.log('Form data received:', { otpId, code: code?.substring(0, 3) + '***', email });
+			console.log('Code length:', code?.length);
+
+			// authWithOTP signature: authWithOTP(otpId: string, password: string, options?: CommonOptions)
+			// The 'password' parameter is actually the OTP code
+			console.log('Calling: pb.collection("users").authWithOTP(otpId, code, { mfaId })');
+
+			const authData = await locals.pb
+				.collection('users')
+				.authWithOTP(otpId, code, { mfaId } as any);
+
+			console.log('MFA verification succeeded!');
+			console.log('Auth data received:', {
+				userId: authData.record?.id,
+				email: authData.record?.email
+			});
+
+			// Check if account is disabled after MFA
+			if (authData.record.disabled) {
+				locals.pb.authStore.clear();
+				return fail(403, {
+					mfaRequired: true,
+					mfaId: mfaId,
+					otpId: otpId,
+					email: email,
+					message: m['auth.login.account_disabled']()
+				});
+			}
+
+			// Return success - let client handle toast and redirect
+			console.log('MFA verification successful!');
+			return { success: true };
 		} catch (err) {
-			console.error('MFA verification error:', err);
+			console.error('=== MFA verification error ===');
+			console.error('Full error object:', err);
+			console.error('Error details:', {
+				status: (err as any)?.status,
+				response: (err as any)?.response,
+				message: (err as any)?.message,
+				data: (err as any)?.data
+			});
+
 			return fail(400, {
 				mfaRequired: true,
 				mfaId: mfaId,
 				otpId: otpId,
 				email: email,
-				message: 'Invalid verification code'
+				message: `Invalid verification code - ${(err as any)?.message || 'Unknown error'}`
 			});
 		}
-
-		redirect(303, '/');
 	}
 };

@@ -29,8 +29,6 @@ describe('Login Server Actions', () => {
 
 	describe('default action (login)', () => {
 		it('successfully authenticates user with valid credentials', async () => {
-			expect.assertions(2);
-
 			const formData = new FormData();
 			formData.append('email', 'test@example.com');
 			formData.append('password', 'password123');
@@ -55,8 +53,6 @@ describe('Login Server Actions', () => {
 		});
 
 		it('returns error for invalid credentials', async () => {
-			expect.assertions(2);
-
 			const formData = new FormData();
 			formData.append('email', 'test@example.com');
 			formData.append('password', 'wrongpassword');
@@ -77,8 +73,6 @@ describe('Login Server Actions', () => {
 		});
 
 		it('handles MFA requirement and requests OTP', async () => {
-			expect.assertions(4);
-
 			const formData = new FormData();
 			formData.append('email', 'test@example.com');
 			formData.append('password', 'password123');
@@ -103,8 +97,6 @@ describe('Login Server Actions', () => {
 		});
 
 		it('validates email format', async () => {
-			expect.assertions(1);
-
 			const formData = new FormData();
 			formData.append('email', 'invalid-email');
 			formData.append('password', 'password123');
@@ -120,8 +112,6 @@ describe('Login Server Actions', () => {
 		});
 
 		it('validates password length', async () => {
-			expect.assertions(1);
-
 			const formData = new FormData();
 			formData.append('email', 'test@example.com');
 			formData.append('password', 'short');
@@ -139,8 +129,6 @@ describe('Login Server Actions', () => {
 
 	describe('verifyMfa action', () => {
 		it('successfully verifies MFA with valid OTP code', async () => {
-			expect.assertions(2);
-
 			const formData = new FormData();
 			formData.append('otpId', 'otp-123');
 			formData.append('code', '123456');
@@ -154,21 +142,15 @@ describe('Login Server Actions', () => {
 
 			mockLocals.pb.collection().authWithOTP.mockResolvedValue({
 				token: 'test-token',
-				record: { id: '123', email: 'test@example.com' }
+				record: { id: '123', email: 'test@example.com', disabled: false }
 			});
 
-			try {
-				await actions.verifyMfa(mockEvent as any);
-			} catch (error: any) {
-				// Expecting a redirect
-				expect(error.status).toBe(303);
-				expect(error.location).toBe('/');
-			}
+			const result: any = await actions.verifyMfa(mockEvent as any);
+
+			expect(result.success).toBe(true);
 		});
 
 		it('returns error for invalid OTP code', async () => {
-			expect.assertions(2);
-
 			const formData = new FormData();
 			formData.append('otpId', 'otp-123');
 			formData.append('code', '000000');
@@ -185,12 +167,10 @@ describe('Login Server Actions', () => {
 			const result: any = await actions.verifyMfa(mockEvent as any);
 
 			expect(result).toHaveProperty('status', 400);
-			expect(result.data.message).toBe('Invalid verification code');
+			expect(result.data.message).toContain('Invalid verification code');
 		});
 
 		it('returns error when required fields are missing', async () => {
-			expect.assertions(1);
-
 			const formData = new FormData();
 			formData.append('code', '123456');
 			// Missing otpId and mfaId

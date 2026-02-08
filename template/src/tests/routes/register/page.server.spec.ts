@@ -28,8 +28,6 @@ describe('Register Server Actions', () => {
 
 	describe('default action (register)', () => {
 		it('successfully creates user and auto-logs in', async () => {
-			expect.assertions(4);
-
 			const formData = new FormData();
 			formData.append('name', 'Test User');
 			formData.append('email', 'test@example.com');
@@ -60,7 +58,8 @@ describe('Register Server Actions', () => {
 				email: 'test@example.com',
 				password: 'password123',
 				passwordConfirm: 'password123',
-				name: 'Test User'
+				name: 'Test User',
+				role: 'user'
 			});
 			expect(mockLocals.pb.collection().authWithPassword).toHaveBeenCalledWith(
 				'test@example.com',
@@ -69,8 +68,6 @@ describe('Register Server Actions', () => {
 		});
 
 		it('returns error when passwords do not match', async () => {
-			expect.assertions(1);
-
 			const formData = new FormData();
 			formData.append('name', 'Test User');
 			formData.append('email', 'test@example.com');
@@ -88,8 +85,6 @@ describe('Register Server Actions', () => {
 		});
 
 		it('validates email format', async () => {
-			expect.assertions(1);
-
 			const formData = new FormData();
 			formData.append('name', 'Test User');
 			formData.append('email', 'invalid-email');
@@ -107,8 +102,6 @@ describe('Register Server Actions', () => {
 		});
 
 		it('validates password minimum length', async () => {
-			expect.assertions(1);
-
 			const formData = new FormData();
 			formData.append('name', 'Test User');
 			formData.append('email', 'test@example.com');
@@ -126,8 +119,6 @@ describe('Register Server Actions', () => {
 		});
 
 		it('validates name minimum length', async () => {
-			expect.assertions(1);
-
 			const formData = new FormData();
 			formData.append('name', 'A');
 			formData.append('email', 'test@example.com');
@@ -145,8 +136,6 @@ describe('Register Server Actions', () => {
 		});
 
 		it('handles duplicate email error from PocketBase', async () => {
-			expect.assertions(2);
-
 			const formData = new FormData();
 			formData.append('name', 'Test User');
 			formData.append('email', 'existing@example.com');

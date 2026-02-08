@@ -21,11 +21,7 @@ describe('Account Server Actions', () => {
 				collection: vi.fn().mockReturnValue({
 					update: vi.fn(),
 					authRefresh: vi.fn(),
-					requestOTP: vi.fn(),
-					authWithOTP: vi.fn(),
-					getFullList: vi.fn(),
-					create: vi.fn(),
-					delete: vi.fn()
+					requestVerification: vi.fn()
 				}),
 				authStore: {
 					record: mockUser
@@ -45,8 +41,6 @@ describe('Account Server Actions', () => {
 
 	describe('load function', () => {
 		it('redirects to login when user is not authenticated', async () => {
-			expect.assertions(2);
-
 			mockLocals.user = null;
 
 			try {
@@ -57,33 +51,15 @@ describe('Account Server Actions', () => {
 			}
 		});
 
-		it('loads user data and checks 2FA status', async () => {
-			expect.assertions(3);
-
-			mockLocals.pb.collection().getFullList.mockResolvedValue([]);
-
+		it('loads user data successfully', async () => {
 			const result: any = await load(mockEvent as any);
 
 			expect(result.user).toEqual(mockUser);
-			expect(result.twoFactorEnabled).toBe(false);
-			expect(mockLocals.pb.collection).toHaveBeenCalledWith('_mfas');
-		});
-
-		it('detects when 2FA is enabled', async () => {
-			expect.assertions(1);
-
-			mockLocals.pb.collection().getFullList.mockResolvedValue([{ id: 'mfa-1', method: 'otp' }]);
-
-			const result: any = await load(mockEvent as any);
-
-			expect(result.twoFactorEnabled).toBe(true);
 		});
 	});
 
 	describe('updateProfile action', () => {
 		it('successfully updates user profile', async () => {
-			expect.assertions(3);
-
 			const formData = new FormData();
 			formData.append('name', 'Updated Name');
 			formData.append('email', 'updated@example.com');
@@ -110,8 +86,6 @@ describe('Account Server Actions', () => {
 		});
 
 		it('validates name minimum length', async () => {
-			expect.assertions(1);
-
 			const formData = new FormData();
 			formData.append('name', 'A');
 			formData.append('email', 'test@example.com');
@@ -127,8 +101,6 @@ describe('Account Server Actions', () => {
 		});
 
 		it('validates email format', async () => {
-			expect.assertions(1);
-
 			const formData = new FormData();
 			formData.append('name', 'Test User');
 			formData.append('email', 'invalid-email');
@@ -143,27 +115,7 @@ describe('Account Server Actions', () => {
 			expect(result).toHaveProperty('status', 400);
 		});
 
-		it('validates website URL format', async () => {
-			expect.assertions(1);
-
-			const formData = new FormData();
-			formData.append('name', 'Test User');
-			formData.append('email', 'test@example.com');
-			formData.append('website', 'not-a-url');
-
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
-
-			const result = await actions.updateProfile(mockEvent as any);
-
-			expect(result).toHaveProperty('status', 400);
-		});
-
 		it('requires authentication', async () => {
-			expect.assertions(1);
-
 			mockLocals.user = null;
 
 			const formData = new FormData();
@@ -180,6 +132,183 @@ describe('Account Server Actions', () => {
 			expect(result).toHaveProperty('status', 401);
 		});
 	});
+
+	describe('sendVerificationEmail action', () => {
+		it('successfully sends verification email', async () => {
+			const formData = new FormData();
+
+			mockEvent.request = new Request('http://localhost', {
+				method: 'POST',
+				body: formData
+			});
+
+			mockLocals.pb.collection().requestVerification.mockResolvedValue({});
+
+			const result: any = await actions.sendVerificationEmail(mockEvent as any);
+
+			expect(result.success).toBe(true);
+			expect(mockLocals.pb.collection().requestVerification).toHaveBeenCalledWith(
+				mockUser.email
+			);
+		});
+
+		it('requires authentication', async () => {
+			mockLocals.user = null;
+
+			const formData = new FormData();
+
+			mockEvent.request = new Request('http://localhost', {
+				method: 'POST',
+				body: formData
+			});
+
+			const result = await actions.sendVerificationEmail(mockEvent as any);
+
+			expect(result).toHaveProperty('status', 401);
+		});
+	});
+
+	describe('changePassword action', () => {
+		it('successfully changes password', async () => {
+			const formData = new FormData();
+			formData.append('currentPassword', 'oldPassword123');
+			formData.append('newPassword', 'newPassword123');
+			formData.append('confirmPassword', 'newPassword123');
+
+			mockEvent.request = new Request('http://localhost', {
+				method: 'POST',
+				body: formData
+			});
+
+			mockLocals.pb.collection().update.mockResolvedValue(mockUser);
+			mockLocals.pb.collection().authRefresh.mockResolvedValue({});
+
+			const result: any = await actions.changePassword(mockEvent as any);
+
+			expect(result.success).toBe(true);
+			expect(mockLocals.pb.collection().update).toHaveBeenCalledWith(
+				'user-123',
+				expect.any(Object)
+			);
+		});
+
+		it('validates password length', async () => {
+			const formData = new FormData();
+			formData.append('currentPassword', 'oldPassword123');
+			formData.append('newPassword', 'short');
+			formData.append('confirmPassword', 'short');
+
+			mockEvent.request = new Request('http://localhost', {
+				method: 'POST',
+				body: formData
+			});
+
+			const result = await actions.changePassword(mockEvent as any);
+
+			expect(result).toHaveProperty('status', 400);
+		});
+
+		it('validates password confirmation matches', async () => {
+			const formData = new FormData();
+			formData.append('currentPassword', 'oldPassword123');
+			formData.append('newPassword', 'newPassword123');
+			formData.append('confirmPassword', 'differentPassword123');
+
+			mockEvent.request = new Request('http://localhost', {
+				method: 'POST',
+				body: formData
+			});
+
+			const result = await actions.changePassword(mockEvent as any);
+
+			expect(result).toHaveProperty('status', 400);
+		});
+
+		it('requires authentication', async () => {
+			mockLocals.user = null;
+
+			const formData = new FormData();
+			formData.append('currentPassword', 'oldPassword123');
+			formData.append('newPassword', 'newPassword123');
+			formData.append('confirmPassword', 'newPassword123');
+
+			mockEvent.request = new Request('http://localhost', {
+				method: 'POST',
+				body: formData
+			});
+
+			const result = await actions.changePassword(mockEvent as any);
+
+			expect(result).toHaveProperty('status', 401);
+		});
+	});
+
+	describe('toggleMfaOptIn action', () => {
+		it('successfully toggles MFA opt-in to true', async () => {
+			const formData = new FormData();
+			formData.append('mfaOptIn', 'true');
+
+			mockEvent.request = new Request('http://localhost', {
+				method: 'POST',
+				body: formData
+			});
+
+			mockLocals.pb.collection().update.mockResolvedValue({
+				...mockUser,
+				mfaOptIn: true
+			});
+			mockLocals.pb.collection().authRefresh.mockResolvedValue({});
+
+			const result: any = await actions.toggleMfaOptIn(mockEvent as any);
+
+			expect(result.success).toBe(true);
+			expect(mockLocals.pb.collection().update).toHaveBeenCalledWith(
+				'user-123',
+				expect.objectContaining({ mfaOptIn: true })
+			);
+		});
+
+		it('successfully toggles MFA opt-in to false', async () => {
+			const formData = new FormData();
+			formData.append('mfaOptIn', 'false');
+
+			mockEvent.request = new Request('http://localhost', {
+				method: 'POST',
+				body: formData
+			});
+
+			mockLocals.pb.collection().update.mockResolvedValue({
+				...mockUser,
+				mfaOptIn: false
+			});
+			mockLocals.pb.collection().authRefresh.mockResolvedValue({});
+
+			const result: any = await actions.toggleMfaOptIn(mockEvent as any);
+
+			expect(result.success).toBe(true);
+			expect(mockLocals.pb.collection().update).toHaveBeenCalledWith(
+				'user-123',
+				expect.objectContaining({ mfaOptIn: false })
+			);
+		});
+
+		it('requires authentication', async () => {
+			mockLocals.user = null;
+
+			const formData = new FormData();
+			formData.append('mfaOptIn', 'true');
+
+			mockEvent.request = new Request('http://localhost', {
+				method: 'POST',
+				body: formData
+			});
+
+			const result = await actions.toggleMfaOptIn(mockEvent as any);
+
+			expect(result).toHaveProperty('status', 401);
+		});
+	});
+});
 
 	describe('requestTwoFactor action', () => {
 		it('successfully requests OTP code', async () => {

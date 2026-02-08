@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Card,
@@ -10,12 +12,13 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
-	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
+	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Switch } from '$lib/components/ui/switch';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as m from '$lib/paraglide/messages';
+	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -31,6 +34,17 @@
 		avatar: z.instanceof(File).optional()
 	});
 
+	const passwordSchema = z
+		.object({
+			oldPassword: z.string().min(8, m['validation.password_min_length']()),
+			password: z.string().min(8, m['validation.password_min_length']()),
+			passwordConfirm: z.string().min(8, m['validation.password_min_length']())
+		})
+		.refine((data) => data.password === data.passwordConfirm, {
+			message: m['validation.password_mismatch'](),
+			path: ['passwordConfirm']
+		});
+
 	let avatarPreview = $state<string | null>(null);
 
 	// svelte-ignore state_referenced_locally
@@ -40,21 +54,52 @@
 		onUpdated: ({ form }) => {
 			if (form.valid) {
 				avatarPreview = null;
+				toast.success(m['account.profile_updated']());
 			}
 		}
 	});
 
 	const { form, enhance: profileEnhance, message: profileMessage } = superFormObj;
 
+	// Password change form
+	// svelte-ignore state_referenced_locally
+	const passwordFormObj = superForm(data.passwordForm, {
+		validators: zod4Client(passwordSchema),
+		resetForm: true,
+		onUpdated: ({ form }) => {
+			if (form.valid && form.posted) {
+				toast.success(m['account.password_changed_success']());
+			}
+		}
+	});
+
+	const {
+		form: passwordForm,
+		enhance: passwordEnhance,
+		message: passwordMessage
+	} = passwordFormObj;
+
 	let savedMfaOptIn = $state(false);
 	let uiMfaOptIn = $state(false);
 	let mfaPending = $state(false);
 	let mfaMessage = $state<string | null>(null);
 	let mfaFormRef = $state<HTMLFormElement | null>(null);
+	let mfaInitialized = $state(false);
+	let verificationEmailSent = $state(false);
 
 	$effect(() => {
-		savedMfaOptIn = Boolean(data.mfaOptIn);
-		uiMfaOptIn = savedMfaOptIn;
+		if ($page.url.searchParams.get('verified') === 'true') {
+			toast.success(m['account.email_verified_success']());
+		}
+	});
+
+	$effect(() => {
+		if (mfaInitialized) return;
+		if (typeof data.mfaOptIn === 'boolean') {
+			savedMfaOptIn = data.mfaOptIn;
+			uiMfaOptIn = data.mfaOptIn;
+			mfaInitialized = true;
+		}
 	});
 
 	$effect(() => {
@@ -70,6 +115,7 @@
 		const input = e.target as HTMLInputElement;
 		const file = input.files?.[0];
 		if (file) {
+			$form.avatar = file;
 			const reader = new FileReader();
 			reader.onload = (e) => {
 				avatarPreview = e.target?.result as string;
@@ -83,6 +129,21 @@
 			return `${PUBLIC_POCKETBASE_URL || 'http://127.0.0.1:8090'}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`;
 		}
 		return null;
+	}
+
+	async function handleSendVerificationEmail() {
+		const formData = new FormData();
+		const response = await fetch('?/sendVerificationEmail', {
+			method: 'POST',
+			body: formData
+		});
+
+		if (response.ok) {
+			verificationEmailSent = true;
+			toast.success(m['account.email_verification_sent']());
+		} else {
+			toast.error('Failed to send verification email');
+		}
 	}
 </script>
 
@@ -105,86 +166,155 @@
 						</Alert>
 					{/if}
 					<!-- Avatar -->
-					<FormField form={superFormObj} name="avatar">
-						{#snippet children({ constraints, errors, tainted, value })}
-							<div class="space-y-2">
-								<FormLabel>{m['account.avatar_label']()}</FormLabel>
+					<div class="space-y-2">
+						<Label>{m['account.avatar_label']()}</Label>
+						<div class="flex items-start gap-4">
+							<div>
 								{#if avatarPreview}
-									<div class="mb-2">
-										<img
-											src={avatarPreview}
-											alt="Avatar preview"
-											class="h-24 w-24 rounded-full object-cover"
-										/>
-									</div>
+									<img
+										src={avatarPreview}
+										alt="Avatar preview"
+										class="h-24 w-24 rounded-lg object-cover"
+									/>
 								{:else if data.user.avatar}
-									<div class="mb-2">
-										<img
-											src={getAvatarUrl(data.user)}
-											alt="Current avatar"
-											class="h-24 w-24 rounded-full object-cover"
-										/>
+									<img
+										src={getAvatarUrl(data.user)}
+										alt="Current avatar"
+										class="h-24 w-24 rounded-lg object-cover"
+									/>
+								{:else}
+									<div
+										class="flex h-24 w-24 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground"
+									>
+										No image
 									</div>
 								{/if}
-								<FormControl>
-									{#snippet children({ props })}
-										<Input {...props} type="file" accept="image/*" onchange={handleAvatarChange} />
-									{/snippet}
-								</FormControl>
-								<FormFieldErrors />
 							</div>
-						{/snippet}
-					</FormField>
+							<div class="flex flex-col gap-2 pt-1">
+								<input
+									type="file"
+									accept="image/*"
+									name="avatar"
+									id="avatar-upload"
+									class="hidden"
+									onchange={handleAvatarChange}
+								/>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onclick={() => document.getElementById('avatar-upload')?.click()}
+								>
+									Upload Image
+								</Button>
+								{#if avatarPreview || data.user.avatar}
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										onclick={() => {
+											avatarPreview = null;
+											$form.avatar = undefined;
+										}}
+									>
+										Remove
+									</Button>
+								{/if}
+							</div>
+						</div>
+					</div>
 
 					<!-- Name -->
-					<FormField form={superFormObj} name="name">
-						<FormControl>
+					<Form.Field form={superFormObj} name="name">
+						<Form.Control>
 							{#snippet children({ props })}
-								<FormLabel>{m['account.name_label']()}</FormLabel>
-								<Input {...props} bind:value={$form.name} type="text" required />
+								<div class="flex items-center gap-2">
+									<Form.Label>{m['account.name_label']()}</Form.Label>
+									<Badge variant="secondary" class="capitalize">{data.user.role}</Badge>
+								</div>
 							{/snippet}
-						</FormControl>
-						<FormFieldErrors />
-					</FormField>
+						</Form.Control>
+					</Form.Field>
 
-					<!-- Email -->
-					<FormField form={superFormObj} name="email">
-						<FormControl>
-							{#snippet children({ props })}
-								<FormLabel>{m['account.email_label']()}</FormLabel>
-								<Input {...props} bind:value={$form.email} type="email" required />
-							{/snippet}
-						</FormControl>
-						<FormFieldErrors />
-					</FormField>
+					<!-- Email with Verification Indicator -->
+					<div>
+						<Form.Field form={superFormObj} name="email">
+							<Form.Control>
+								{#snippet children({ props })}
+									<div class="flex items-center gap-2">
+										<Form.Label>{m['account.email_label']()}</Form.Label>
+										{#if data.user.verified}
+											<span
+												class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-600"
+											>
+												<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+													<path
+														fill-rule="evenodd"
+														d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+														clip-rule="evenodd"
+													/>
+												</svg>
+											</span>
+										{/if}
+									</div>
+									<Input {...props} bind:value={$form.email} type="email" required />
+								{/snippet}
+							</Form.Control>
+							<Form.FieldErrors />
+						</Form.Field>
+						{#if !data.user.verified}
+							{#if verificationEmailSent}
+								<div class="mt-3 rounded-md bg-amber-50 p-3">
+									<p class="text-sm text-amber-800">
+										Please check your inbox for a verification email. The link will expire in 24
+										hours.
+									</p>
+								</div>
+							{:else}
+								<div class="mt-3 rounded-md bg-amber-50 p-3">
+									<p class="mb-2 text-sm text-amber-800">
+										{m['account.email_not_verified_description']()}
+									</p>
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onclick={() => handleSendVerificationEmail()}
+									>
+										{m['account.email_verification_button']()}
+									</Button>
+								</div>
+							{/if}
+						{/if}
+					</div>
 
 					<!-- Title -->
-					<FormField form={superFormObj} name="title">
-						<FormControl>
+					<Form.Field form={superFormObj} name="title">
+						<Form.Control>
 							{#snippet children({ props })}
-								<FormLabel>{m['account.title_label']()}</FormLabel>
+								<Form.Label>{m['account.title_label']()}</Form.Label>
 								<Input {...props} bind:value={$form.title} type="text" />
 							{/snippet}
-						</FormControl>
-						<FormFieldErrors />
-					</FormField>
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
 
 					<!-- Bio -->
-					<FormField form={superFormObj} name="bio">
-						<FormControl>
+					<Form.Field form={superFormObj} name="bio">
+						<Form.Control>
 							{#snippet children({ props })}
-								<FormLabel>{m['account.bio_label']()}</FormLabel>
+								<Form.Label>{m['account.bio_label']()}</Form.Label>
 								<Textarea {...props} bind:value={$form.bio} rows={4} />
 							{/snippet}
-						</FormControl>
-						<FormFieldErrors />
-					</FormField>
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
 
 					<!-- Website -->
-					<FormField form={superFormObj} name="website">
-						<FormControl>
+					<Form.Field form={superFormObj} name="website">
+						<Form.Control>
 							{#snippet children({ props })}
-								<FormLabel>{m['account.website_label']()}</FormLabel>
+								<Form.Label>{m['account.website_label']()}</Form.Label>
 								<Input
 									{...props}
 									bind:value={$form.website}
@@ -192,9 +322,9 @@
 									placeholder="https://example.com"
 								/>
 							{/snippet}
-						</FormControl>
-						<FormFieldErrors />
-					</FormField>
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
 
 					<div class="flex gap-4">
 						<Button type="submit">{m['account.save_button']()}</Button>
@@ -208,7 +338,7 @@
 	</Card>
 
 	<!-- Two-Factor Authentication -->
-	<Card>
+	<Card class="mb-8">
 		<CardHeader>
 			<CardTitle>{m['account.2fa_title']()}</CardTitle>
 			<CardDescription>{m['account.2fa_description']()}</CardDescription>
@@ -247,6 +377,11 @@
 								if (typeof nextOptIn === 'boolean') {
 									savedMfaOptIn = nextOptIn;
 									uiMfaOptIn = nextOptIn;
+									toast.success(
+										nextOptIn
+											? m['account.2fa_enabled_success']()
+											: m['account.2fa_disabled_success']()
+									);
 								} else {
 									savedMfaOptIn = uiMfaOptIn;
 								}
@@ -271,4 +406,61 @@
 			{/if}
 		</CardContent>
 	</Card>
+
+	<!-- Password Change -->
+	<Card>
+		<CardHeader>
+			<CardTitle>{m['account.password_section']()}</CardTitle>
+		</CardHeader>
+		<CardContent>
+			<form method="POST" action="?/changePassword" use:passwordEnhance>
+				<div class="space-y-4">
+					{#if $passwordMessage}
+						<Alert variant="destructive">
+							<AlertTitle>Error</AlertTitle>
+							<AlertDescription>{$passwordMessage}</AlertDescription>
+						</Alert>
+					{/if}
+
+					<Form.Field form={passwordFormObj} name="oldPassword">
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>{m['account.current_password_label']()}</Form.Label>
+								<Input {...props} bind:value={$passwordForm.oldPassword} type="password" required />
+							{/snippet}
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
+
+					<Form.Field form={passwordFormObj} name="password">
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>{m['account.new_password_label']()}</Form.Label>
+								<Input {...props} bind:value={$passwordForm.password} type="password" required />
+							{/snippet}
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
+
+					<Form.Field form={passwordFormObj} name="passwordConfirm">
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>{m['account.confirm_password_label']()}</Form.Label>
+								<Input
+									{...props}
+									bind:value={$passwordForm.passwordConfirm}
+									type="password"
+									required
+								/>
+							{/snippet}
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
+
+					<Button type="submit">{m['account.change_password_button']()}</Button>
+				</div>
+			</form>
+		</CardContent>
+	</Card>
 </div>
+<!-- Password Change (we already added mb-8 above) -->

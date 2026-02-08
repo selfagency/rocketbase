@@ -14,7 +14,19 @@ const profileSchema = z.object({
 	avatar: z.instanceof(File).optional()
 });
 
+const passwordSchema = z
+	.object({
+		oldPassword: z.string().min(8, m['validation.password_min_length']()),
+		password: z.string().min(8, m['validation.password_min_length']()),
+		passwordConfirm: z.string().min(8, m['validation.password_min_length']())
+	})
+	.refine((data) => data.password === data.passwordConfirm, {
+		message: m['validation.password_mismatch'](),
+		path: ['passwordConfirm']
+	});
+
 type ProfileSchema = z.infer<typeof profileSchema>;
+type PasswordSchema = z.infer<typeof passwordSchema>;
 
 // Roles that require MFA per PocketBase collection config
 const MFA_REQUIRED_ROLES = ['admin', 'editor', 'contributor'];
@@ -36,6 +48,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 		{ id: 'profileForm' }
 	);
 
+	const passwordForm = await superValidate<PasswordSchema>(zod4(passwordSchema), {
+		id: 'passwordForm'
+	});
+
 	// MFA is enforced automatically by PocketBase based on the user's role
 	const mfaRequired = MFA_REQUIRED_ROLES.includes(locals.user.role || '');
 	const mfaOptIn = Boolean((locals.user as { mfaOptIn?: boolean }).mfaOptIn);
@@ -43,6 +59,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	return {
 		profileForm,
+		passwordForm,
 		mfaRequired,
 		mfaOptIn,
 		mfaEnabled,
@@ -142,6 +159,57 @@ export const actions: Actions = {
 		} catch (err: any) {
 			console.error('MFA opt-in update error:', err);
 			return fail(400, { message: m['account.error_message']() });
+		}
+	},
+
+	sendVerificationEmail: async ({ locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: 'Unauthorized' });
+		}
+
+		try {
+			await locals.pb.collection('users').requestVerification(locals.user.email);
+			return {
+				success: true,
+				message: m['account.email_verification_sent']()
+			};
+		} catch (err: any) {
+			console.error('Email verification error:', err);
+			return fail(400, { message: m['account.error_message']() });
+		}
+	},
+
+	changePassword: async ({ request, locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: 'Unauthorized' });
+		}
+
+		const formData = await request.formData();
+		const form = await superValidate<PasswordSchema>(formData, zod4(passwordSchema), {
+			id: 'passwordForm'
+		});
+
+		if (!form.valid) {
+			return fail(400, { passwordForm: form });
+		}
+
+		try {
+			await locals.pb.collection('users').update(locals.user.id, {
+				oldPassword: form.data.oldPassword,
+				password: form.data.password,
+				passwordConfirm: form.data.passwordConfirm
+			});
+
+			return {
+				passwordForm: await superValidate<PasswordSchema>(zod4(passwordSchema), {
+					id: 'passwordForm'
+				}),
+				success: true
+			};
+		} catch (err: any) {
+			console.error('Password change error:', err);
+			form.message = err?.message || m['account.error_message']();
+			return fail(400, { passwordForm: form });
 		}
 	}
 };

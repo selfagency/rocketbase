@@ -18,4 +18,5 @@
   "vite.port": 5173,
   "vite.showTerminal": true,
   "sarif-viewer.connectToGithubCodeScanning": "off",
+  "vitest.rootConfig": "./template/vite.config.ts",
 }

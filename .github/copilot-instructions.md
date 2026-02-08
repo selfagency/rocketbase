@@ -589,7 +589,37 @@ build
 
 ---
 
+## ⚠️ CRITICAL: Always Check Documentation Before Implementing
+
+**You MUST check the official documentation for ANY library, framework, or tool BEFORE implementing code.**
+
+### Why This Matters
+
+- AI systems can hallucinate APIs, methods, and patterns that don't exist
+- Documentation is the source of truth - your knowledge will be outdated or incomplete
+- An extra 2 minutes reading docs saves 20 minutes debugging incorrect implementations
+
+### How To Do This
+
+1. **For Svelte/SvelteKit**: Always use `mcp_sveltekit_list-sections` and `mcp_sveltekit_get-documentation`
+2. **For shadcn-svelte**: Use `mcp_shadcn-svelte_shadcnSvelteSearchTool` to verify components exist
+3. **For PocketBase**: Use `mcp_pocketbaseser_*` tools or check official docs
+4. **For other libraries**: Use MCP servers if available, otherwise fetch docs with tools
+
+### Examples of Common Hallucinations
+
+- Assuming component props exist without checking shadcn-svelte docs
+- Using PocketBase API methods that aren't in the official API reference
+- Creating SvelteKit forms without checking superforms docs
+- Assuming email verification links have a specific format without checking the implementation
+
+**If you cannot find documentation for something, ask the user or try a simple test before assuming the pattern.**
+
+---
+
 ## MCP Server Preferences
+
+When working with this project, **always prefer using MCP servers** for documentation and implementation guidance:
 
 When working with this project, **always prefer using MCP servers** for documentation and implementation guidance:
 

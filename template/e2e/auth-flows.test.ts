@@ -14,7 +14,10 @@ async function getAllEmails() {
 	const data = await response.json();
 	console.log('Total messages in Mailpit:', data.messages?.length || 0);
 	if (data.messages && data.messages.length > 0) {
-		console.log('Recent 3 messages:', data.messages.slice(0, 3).map((m: any) => ({ ID: m.ID, To: m.To, Subject: m.Subject })));
+		console.log(
+			'Recent 3 messages:',
+			data.messages.slice(0, 3).map((m: any) => ({ ID: m.ID, To: m.To, Subject: m.Subject }))
+		);
 	}
 	return data.messages || [];
 }
@@ -28,7 +31,7 @@ async function getLatestEmailForRecipient(email: string, retries = 3) {
 		}
 		if (i < retries - 1) {
 			console.log(`No email for ${email} yet, waiting 1.5s... (attempt ${i + 1}/${retries})`);
-			await new Promise(resolve => setTimeout(resolve, 1500));
+			await new Promise((resolve) => setTimeout(resolve, 1500));
 		}
 	}
 	return null;
@@ -292,9 +295,9 @@ test.describe('Authentication Flows', () => {
 				// Should be on MFA verification page
 				await expect(page.locator('text=/enter the verification code/i')).toBeVisible();
 				// Get OTP from email - wait longer for email delivery
-			await page.waitForTimeout(3000);
-			const otp = await extractOTPFromEmail(email);
-			expect(otp).toBeTruthy();
+				await page.waitForTimeout(3000);
+				const otp = await extractOTPFromEmail(email);
+				expect(otp).toBeTruthy();
 				// Enter OTP
 				await page.getByLabel('Verification Code').fill(otp!);
 				await page.click('button[type="submit"]');
@@ -380,7 +383,7 @@ test.describe('Authentication Flows', () => {
 				).toBeVisible();
 
 				// Get verification link from email - wait longer for email delivery
-			await page.waitForTimeout(3000);
+				await page.waitForTimeout(3000);
 				const verificationLink = await extractVerificationLinkFromEmail(email);
 				expect(verificationLink).toBeTruthy();
 				// Navigate to verification link

@@ -153,8 +153,9 @@
 
 	<!-- Profile Form -->
 	<Card class="mb-8">
-		<CardHeader>
+		<CardHeader class="flex flex-row items-center justify-between">
 			<CardTitle>{m['account.profile_section']()}</CardTitle>
+			<Badge variant="secondary" class="capitalize">{data.user.role}</Badge>
 		</CardHeader>
 		<CardContent>
 			<form method="POST" action="?/updateProfile" use:profileEnhance enctype="multipart/form-data">
@@ -228,12 +229,11 @@
 					<Form.Field form={superFormObj} name="name">
 						<Form.Control>
 							{#snippet children({ props })}
-								<div class="flex items-center gap-2">
-									<Form.Label>{m['account.name_label']()}</Form.Label>
-									<Badge variant="secondary" class="capitalize">{data.user.role}</Badge>
-								</div>
+								<Form.Label>{m['account.name_label']()}</Form.Label>
+								<Input {...props} bind:value={$form.name} type="text" required />
 							{/snippet}
 						</Form.Control>
+						<Form.FieldErrors />
 					</Form.Field>
 
 					<!-- Email with Verification Indicator -->
@@ -413,6 +413,12 @@
 			<CardTitle>{m['account.password_section']()}</CardTitle>
 		</CardHeader>
 		<CardContent>
+			<Alert class="mb-4">
+				<AlertTitle>Warning</AlertTitle>
+				<AlertDescription>
+					Changing your password will require you to login again with your new password.
+				</AlertDescription>
+			</Alert>
 			<form method="POST" action="?/changePassword" use:passwordEnhance>
 				<div class="space-y-4">
 					{#if $passwordMessage}

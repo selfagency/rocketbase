@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { actions } from '../../../routes/forgot-password/+page.server';
 import type { RequestEvent } from '@sveltejs/kit';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { actions } from '../../../routes/forgot-password/+page.server';
 
 describe('Forgot Password Server Actions', () => {
 	let mockLocals: any;
@@ -75,9 +75,9 @@ describe('Forgot Password Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb.collection().requestPasswordReset.mockRejectedValue(
-				new Error('User not found')
-			);
+			mockLocals.pb
+				.collection()
+				.requestPasswordReset.mockRejectedValue(new Error('User not found'));
 
 			const result: any = await actions.default(mockEvent as any);
 

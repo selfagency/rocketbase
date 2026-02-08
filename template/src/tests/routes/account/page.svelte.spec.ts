@@ -1,8 +1,14 @@
+import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { describe, it, expect } from 'vitest';
 import AccountPage from '../../../routes/account/+page.svelte';
 
-type PageData = { profileForm: any; twoFactorRequestForm: any; twoFactorVerifyForm: any; twoFactorEnabled: boolean; user: any };
+type PageData = {
+	profileForm: any;
+	twoFactorRequestForm: any;
+	twoFactorVerifyForm: any;
+	twoFactorEnabled: boolean;
+	user: any;
+};
 
 describe('Account Page Component', () => {
 	const mockUser = {

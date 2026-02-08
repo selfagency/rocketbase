@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { actions, load } from '../../../routes/account/+page.server';
 import type { RequestEvent } from '@sveltejs/kit';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { actions, load } from '../../../routes/account/+page.server';
 
 describe('Account Server Actions', () => {
 	let mockLocals: any;
@@ -72,9 +72,7 @@ describe('Account Server Actions', () => {
 		it('detects when 2FA is enabled', async () => {
 			expect.assertions(1);
 
-			mockLocals.pb.collection().getFullList.mockResolvedValue([
-				{ id: 'mfa-1', method: 'otp' }
-			]);
+			mockLocals.pb.collection().getFullList.mockResolvedValue([{ id: 'mfa-1', method: 'otp' }]);
 
 			const result: any = await load(mockEvent as any);
 
@@ -104,7 +102,10 @@ describe('Account Server Actions', () => {
 			const result: any = await actions.updateProfile(mockEvent as any);
 
 			expect(result.success).toBe(true);
-			expect(mockLocals.pb.collection().update).toHaveBeenCalledWith('user-123', expect.any(Object));
+			expect(mockLocals.pb.collection().update).toHaveBeenCalledWith(
+				'user-123',
+				expect.any(Object)
+			);
 			expect(mockLocals.pb.collection().authRefresh).toHaveBeenCalled();
 		});
 
@@ -233,9 +234,9 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb.collection().getFullList.mockResolvedValue([
-				{ id: 'otp-123', recordRef: 'user-123' }
-			]);
+			mockLocals.pb
+				.collection()
+				.getFullList.mockResolvedValue([{ id: 'otp-123', recordRef: 'user-123' }]);
 			mockLocals.pb.collection().authWithOTP.mockResolvedValue({});
 			mockLocals.pb.collection().create.mockResolvedValue({ id: 'mfa-1' });
 
@@ -262,9 +263,9 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb.collection().getFullList.mockResolvedValue([
-				{ id: 'otp-123', recordRef: 'user-123' }
-			]);
+			mockLocals.pb
+				.collection()
+				.getFullList.mockResolvedValue([{ id: 'otp-123', recordRef: 'user-123' }]);
 			mockLocals.pb.collection().authWithOTP.mockRejectedValue(new Error('Invalid code'));
 
 			const result = await actions.verifyTwoFactor(mockEvent as any);
@@ -296,9 +297,9 @@ describe('Account Server Actions', () => {
 		it('successfully disables 2FA', async () => {
 			expect.assertions(3);
 
-			mockLocals.pb.collection().getFullList.mockResolvedValue([
-				{ id: 'mfa-1', recordRef: 'user-123', method: 'otp' }
-			]);
+			mockLocals.pb
+				.collection()
+				.getFullList.mockResolvedValue([{ id: 'mfa-1', recordRef: 'user-123', method: 'otp' }]);
 			mockLocals.pb.collection().delete.mockResolvedValue({});
 
 			const result: any = await actions.disableTwoFactor(mockEvent as any);

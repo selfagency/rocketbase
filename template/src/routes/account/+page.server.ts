@@ -106,8 +106,20 @@ export const actions: Actions = {
 			await locals.pb.collection('users').authRefresh();
 			locals.user = locals.pb.authStore.record as any;
 
+			// Re-validate with the latest data from the database
+			const updatedForm = await superValidate<ProfileSchema>(
+				{
+					name: locals.user?.name,
+					email: locals.user?.email,
+					title: locals.user?.title || '',
+					bio: locals.user?.bio || '',
+					website: locals.user?.website || ''
+				},
+				zod4(profileSchema)
+			);
+
 			return {
-				profileForm: form,
+				profileForm: updatedForm,
 				success: true,
 				message: m['account.success_message']()
 			};

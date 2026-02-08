@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { describe, it, expect } from 'vitest';
 import RegisterPage from '../../../routes/register/+page.svelte';
 
 type PageData = { form: any };

@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { actions } from '../../../routes/register/+page.server';
 import type { RequestEvent } from '@sveltejs/kit';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { actions } from '../../../routes/register/+page.server';
 
 describe('Register Server Actions', () => {
 	let mockLocals: any;

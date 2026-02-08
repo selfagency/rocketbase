@@ -30,6 +30,21 @@
 
 This project uses **bd** (beads) for issue tracking. All work should be tracked through beads.
 
+### Mandatory Beads + Commits Policy
+
+**Every feature, bug fix, chore, refactor, or documentation change MUST:**
+
+1. **Create a beads issue first** (or link to an existing one)
+2. **Move it to in_progress** before coding
+3. **Close it with a descriptive reason** when done
+4. **Create a commit** that includes the beads ID in the message
+
+**No exceptions.** If you cannot use beads or create a commit, stop and ask the user to decide how to proceed.
+
+### Instruction Sources
+
+Always consult the relevant task-specific instruction files in `.github/instructions/` before implementing changes. Choose the file(s) that match the task (Svelte, TypeScript, Playwright, GitHub Actions, etc.) and follow them.
+
 ### Quick Reference
 
 ```bash
@@ -51,6 +66,20 @@ bd sync               # Force sync with git
 6. **Commit**: `git commit -m "feat: add feature X (bd-XXX)"`
 7. **Sync**: `bd sync` (at end of session)
 
+### Example Sequence (Required)
+
+```bash
+bd create "Add 2FA opt-in toggle" -t task -p 2 --json
+bd update bd-123 --status in_progress --json
+bd show bd-123 --json
+
+# implement changes
+
+bd close bd-123 --reason "Added 2FA opt-in toggle to account page" --json
+git commit -m "feat: add 2FA opt-in toggle (bd-123)"
+bd sync
+```
+
 ### Landing the Plane (Session Completion)
 
 **When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
@@ -59,20 +88,24 @@ bd sync               # Force sync with git
 
 1. **File issues for remaining work** - Create beads issues for any follow-up tasks
 2. **Run quality gates** (if code changed):
+
    ```bash
    pnpm lint
    pnpm test
    cd cli && pnpm build
    cd template && pnpm build
    ```
+
 3. **Update issue status** - Close finished work, update in-progress items
 4. **PUSH TO REMOTE** - This is MANDATORY:
+
    ```bash
    git pull --rebase
    bd sync
    git push
    git status  # MUST show "up to date with origin"
    ```
+
 5. **Clean up** - Clear stashes, prune remote branches
 6. **Verify** - All changes committed AND pushed
 7. **Hand off** - Provide context for next session
@@ -140,26 +173,26 @@ pnpm test:watch
 **Example:**
 
 ```typescript
-import consola from 'consola';
-import { execa } from 'execa';
-import prompts from 'prompts';
-import ora from 'ora';
+import consola from "consola";
+import { execa } from "execa";
+import prompts from "prompts";
+import ora from "ora";
 
 // User input
 const response = await prompts({
-  type: 'text',
-  name: 'projectName',
-  message: 'What would you like to name your project?',
-  initial: 'my-app'
+  type: "text",
+  name: "projectName",
+  message: "What would you like to name your project?",
+  initial: "my-app",
 });
 
 // Long-running task
-const spinner = ora('Installing dependencies...').start();
+const spinner = ora("Installing dependencies...").start();
 try {
-  await execa('pnpm', ['install'], { cwd: projectPath });
-  spinner.succeed('Dependencies installed');
+  await execa("pnpm", ["install"], { cwd: projectPath });
+  spinner.succeed("Dependencies installed");
 } catch (error) {
-  spinner.fail('Failed to install dependencies');
+  spinner.fail("Failed to install dependencies");
   consola.error(error);
   process.exit(1);
 }
@@ -272,29 +305,26 @@ When rebuilding the template, use `pnpx sv create` with these choices:
 **1. Adapter Configuration** (`svelte.config.js`):
 
 ```javascript
-import adapter from '@sveltejs/adapter-node';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from "@sveltejs/adapter-node";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 export default {
   preprocess: vitePreprocess(),
   kit: {
-    adapter: adapter()
-  }
+    adapter: adapter(),
+  },
 };
 ```
 
 **2. SVG Plugin** (`vite.config.ts`):
 
 ```typescript
-import { sveltekit } from '@sveltejs/kit/vite';
-import svg from '@poppa/sveltekit-svg';
-import { defineConfig } from 'vite';
+import { sveltekit } from "@sveltejs/kit/vite";
+import svg from "@poppa/sveltekit-svg";
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [
-    sveltekit(),
-    svg()
-  ]
+  plugins: [sveltekit(), svg()],
 });
 ```
 
@@ -338,12 +368,12 @@ export default defineConfig({
 **1. Server-Only Client** (`src/lib/server/pocketbase.ts`):
 
 ```typescript
-import PocketBase from 'pocketbase';
+import PocketBase from "pocketbase";
 
-export const pb = new PocketBase('http://127.0.0.1:8090');
+export const pb = new PocketBase("http://127.0.0.1:8090");
 
 export function createPocketBaseClient(fetch?: typeof globalThis.fetch) {
-  return new PocketBase('http://127.0.0.1:8090', fetch);
+  return new PocketBase("http://127.0.0.1:8090", fetch);
 }
 ```
 
@@ -352,24 +382,24 @@ export function createPocketBaseClient(fetch?: typeof globalThis.fetch) {
 This enables client-side PocketBase access through SvelteKit, handling auth cookies and avoiding CORS:
 
 ```typescript
-import type { RequestHandler } from './$types';
+import type { RequestHandler } from "./$types";
 
-const POCKETBASE_URL = 'http://127.0.0.1:8090';
+const POCKETBASE_URL = "http://127.0.0.1:8090";
 
 export const GET: RequestHandler = async ({ params, request, cookies }) => {
-  return proxyRequest('GET', params.path, request, cookies);
+  return proxyRequest("GET", params.path, request, cookies);
 };
 
 export const POST: RequestHandler = async ({ params, request, cookies }) => {
-  return proxyRequest('POST', params.path, request, cookies);
+  return proxyRequest("POST", params.path, request, cookies);
 };
 
 export const PATCH: RequestHandler = async ({ params, request, cookies }) => {
-  return proxyRequest('PATCH', params.path, request, cookies);
+  return proxyRequest("PATCH", params.path, request, cookies);
 };
 
 export const DELETE: RequestHandler = async ({ params, request, cookies }) => {
-  return proxyRequest('DELETE', params.path, request, cookies);
+  return proxyRequest("DELETE", params.path, request, cookies);
 };
 
 async function proxyRequest(
@@ -380,21 +410,21 @@ async function proxyRequest(
 ): Promise<Response> {
   const url = `${POCKETBASE_URL}/api/${path}`;
   const headers = new Headers(request.headers);
-  
+
   // Forward auth cookie
-  const authCookie = cookies.get('pb_auth');
+  const authCookie = cookies.get("pb_auth");
   if (authCookie) {
-    headers.set('Authorization', authCookie);
+    headers.set("Authorization", authCookie);
   }
-  
-  const body = method !== 'GET' ? await request.text() : undefined;
-  
+
+  const body = method !== "GET" ? await request.text() : undefined;
+
   const response = await fetch(url, {
     method,
     headers,
-    body
+    body,
   });
-  
+
   return response;
 }
 ```
@@ -402,24 +432,24 @@ async function proxyRequest(
 **Client-side usage:**
 
 ```typescript
-import PocketBase from 'pocketbase';
+import PocketBase from "pocketbase";
 
-const pb = new PocketBase('/api/pb');
-const posts = await pb.collection('posts').getFullList();
+const pb = new PocketBase("/api/pb");
+const posts = await pb.collection("posts").getFullList();
 ```
 
 **3. Auth Handling** (`src/hooks.server.ts`):
 
 ```typescript
-import type { Handle } from '@sveltejs/kit';
-import { pb } from '$lib/server/pocketbase';
+import type { Handle } from "@sveltejs/kit";
+import { pb } from "$lib/server/pocketbase";
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const authCookie = event.cookies.get('pb_auth');
+  const authCookie = event.cookies.get("pb_auth");
   if (authCookie) {
     pb.authStore.loadFromCookie(authCookie);
   }
-  
+
   event.locals.user = pb.authStore.model;
   return resolve(event);
 };
@@ -430,12 +460,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 **Server Load Functions** (`+page.server.ts`):
 
 ```typescript
-import type { PageServerLoad } from './$types';
-import { pb } from '$lib/server/pocketbase';
+import type { PageServerLoad } from "./$types";
+import { pb } from "$lib/server/pocketbase";
 
 export const load: PageServerLoad = async () => {
-  const posts = await pb.collection('posts').getFullList({
-    sort: '-created'
+  const posts = await pb.collection("posts").getFullList({
+    sort: "-created",
   });
   return { posts };
 };
@@ -444,39 +474,39 @@ export const load: PageServerLoad = async () => {
 **Form Actions** (`+page.server.ts`):
 
 ```typescript
-import type { Actions } from './$types';
-import { pb } from '$lib/server/pocketbase';
-import { fail } from '@sveltejs/kit';
+import type { Actions } from "./$types";
+import { pb } from "$lib/server/pocketbase";
+import { fail } from "@sveltejs/kit";
 
 export const actions: Actions = {
   create: async ({ request }) => {
     const data = await request.formData();
-    const title = data.get('title')?.toString();
+    const title = data.get("title")?.toString();
 
     if (!title) return fail(400, { title, missing: true });
-    
+
     try {
-      const post = await pb.collection('posts').create({
+      const post = await pb.collection("posts").create({
         title,
-        content: data.get('content')?.toString()
+        content: data.get("content")?.toString(),
       });
       return { success: true, post };
     } catch (error) {
       return fail(400, { error: error.message });
     }
-  }
+  },
 };
 ```
 
 **Superforms with Validation**:
 
 ```typescript
-import { superValidate } from 'sveltekit-superforms/server';
-import { z } from 'zod';
+import { superValidate } from "sveltekit-superforms/server";
+import { z } from "zod";
 
 const schema = z.object({
   title: z.string().min(3),
-  content: z.string().min(10)
+  content: z.string().min(10),
 });
 
 export const load: PageServerLoad = async () => {
@@ -484,6 +514,13 @@ export const load: PageServerLoad = async () => {
   return { form };
 };
 ```
+
+**Superforms Guidance**:
+
+- Prefer `superValidate` on the server with the `zod4` adapter and `superForm` on the client.
+- Use stable `id` values when multiple forms exist on a page.
+- Avoid wrapping `superForm` initializations in `$derived` to prevent re-initialization loops.
+- Use `resetForm: false` when you need to keep user input after actions.
 
 **Using shadcn-svelte**:
 
@@ -559,16 +596,19 @@ When working with this project, **always prefer using MCP servers** for document
 ### Available MCP Servers
 
 1. **SvelteKit MCP Server** (`mcp_sveltekit_*`)
+
    - Use `mcp_sveltekit_list-sections` to discover documentation
    - Use `mcp_sveltekit_get-documentation` to fetch specific sections
    - Use `mcp_sveltekit_svelte-autofixer` to validate Svelte code before returning it
 
 2. **shadcn-svelte MCP Server** (`mcp_shadcn-svelte_*`)
+
    - Use `mcp_shadcn-svelte_shadcnSvelteGetTool` for component documentation
    - Use `mcp_shadcn-svelte_shadcnSvelteListTool` to list available components
    - Use `mcp_shadcn-svelte_shadcnSvelteSearchTool` to search for specific components
 
 3. **PocketBase MCP Server** (`mcp_pocketbaseser_*`)
+
    - Use for collection management, record operations, and auth workflows
    - Prefer this over generic documentation when working with PocketBase
 
@@ -652,7 +692,7 @@ git commit -m "chore: add pb_data to gitignore"
 - Prompt for admin email and password
 - Validate email format
 - Create superuser: `pocketbase superuser create <email> <password>`
-- Display admin URL: http://127.0.0.1:8090/_/
+- Display admin URL: <http://127.0.0.1:8090/_/>
 
 ### 7. Install Dependencies
 
@@ -822,12 +862,13 @@ Before closing any beads issue and pushing:
 
 ## Resources
 
-- **SvelteKit**: https://svelte.dev/docs/kit
-- **PocketBase**: https://pocketbase.io/docs/
-- **shadcn-svelte**: https://www.shadcn-svelte.com/
-- **Tailwind CSS**: https://tailwindcss.com/docs
-- **Vitest**: https://vitest.dev/
-- **Playwright**: https://playwright.dev/
+- **SvelteKit**: <https://svelte.dev/docs/kit>
+- **PocketBase**: <https://pocketbase.io/docs/>
+- **shadcn-svelte**: <https://www.shadcn-svelte.com/>
+- **sveltekit-superforms**: <https://superforms.rocks/>
+- **Tailwind CSS**: <https://tailwindcss.com/docs>
+- **Vitest**: <https://vitest.dev/>
+- **Playwright**: <https://playwright.dev/>
 - **beads**: Use `bd onboard` for introduction
 
 ---
@@ -846,4 +887,3 @@ For issues or questions:
    - **shadcn-svelte**: `mcp_shadcn-svelte_shadcnSvelteSearchTool`
    - **PocketBase**: Use `mcp_pocketbaseser_*` tools
    - **beads**: Use `mcp_beads_*` tools for programmatic access
-

@@ -10,8 +10,10 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
+	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { Switch } from '$lib/components/ui/switch';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as m from '$lib/paraglide/messages';
 	import { superForm } from 'sveltekit-superforms';
@@ -29,79 +31,39 @@
 		avatar: z.instanceof(File).optional()
 	});
 
-	const twoFactorRequestSchema = z.object({
-		// No fields needed
-	});
-
-	const twoFactorVerifySchema = z.object({
-		otpId: z.string(),
-		code: z.string().length(6, 'Code must be 6 digits')
-	});
-
 	let avatarPreview = $state<string | null>(null);
 
 	// svelte-ignore state_referenced_locally
-	const {
-		form: profileData,
-		enhance: profileEnhance,
-		errors: profileErrors
-	} = superForm(data.profileForm, {
+	const superFormObj = superForm(data.profileForm, {
 		validators: zod4Client(profileSchema),
-		onResult: ({ result }) => {
-			if (result.type === 'success') {
-				// Successfully updated - form will be updated with server response
-				avatarPreview = null; // Clear avatar preview after successful upload
+		resetForm: false,
+		onUpdated: ({ form }) => {
+			if (form.valid) {
+				avatarPreview = null;
 			}
 		}
 	});
 
-	// svelte-ignore state_referenced_locally
-	let twoFactorEnabled = $state(data.twoFactorEnabled);
-	let showTwoFactorSetup = $state(false);
-	let otpRequested = $state(false);
-	let currentOtpId = $state('');
+	const { form, enhance: profileEnhance, message: profileMessage } = superFormObj;
 
-	// svelte-ignore state_referenced_locally
-	const {
-		form: twoFactorVerifyData,
-		enhance: twoFactorVerifyEnhance,
-		errors: twoFactorVerifyErrors
-	} = superForm(data.twoFactorVerifyForm, {
-		validators: zod4Client(twoFactorVerifySchema),
-		onResult: ({ result }) => {
-			if (result.type === 'success' && result.data?.twoFactorEnabled) {
-				twoFactorEnabled = true;
-				showTwoFactorSetup = false;
-				otpRequested = false;
-			}
-		}
-	});
+	let savedMfaOptIn = $state(false);
+	let uiMfaOptIn = $state(false);
+	let mfaPending = $state(false);
+	let mfaMessage = $state<string | null>(null);
+	let mfaFormRef = $state<HTMLFormElement | null>(null);
 
-	// svelte-ignore state_referenced_locally
-	const {
-		form: twoFactorRequestData,
-		enhance: twoFactorRequestEnhance,
-		errors: twoFactorRequestErrors
-	} = superForm(data.twoFactorRequestForm, {
-		validators: zod4Client(twoFactorRequestSchema),
-		onResult: ({ result }) => {
-			if (result.type === 'success' && result.data?.otpId) {
-				currentOtpId = result.data.otpId;
-				otpRequested = true;
-				// Update the verify form's otpId
-				$twoFactorVerifyData.otpId = result.data.otpId;
-			}
-		},
-		resetForm: false
-	});
-
-	// Check if OTP was requested on page load (from form action return)
 	$effect(() => {
-		if ((data as any).otpRequested && (data as any).otpId) {
-			otpRequested = true;
-			currentOtpId = (data as any).otpId;
-			showTwoFactorSetup = true;
-		}
+		savedMfaOptIn = Boolean(data.mfaOptIn);
+		uiMfaOptIn = savedMfaOptIn;
+	});
+
+	$effect(() => {
+		if (!mfaFormRef) return;
+		if (uiMfaOptIn === savedMfaOptIn) return;
+		if (mfaPending) return;
+		mfaPending = true;
+		mfaMessage = null;
+		mfaFormRef.requestSubmit();
 	});
 
 	function handleAvatarChange(e: Event) {
@@ -136,100 +98,103 @@
 		<CardContent>
 			<form method="POST" action="?/updateProfile" use:profileEnhance enctype="multipart/form-data">
 				<div class="space-y-4">
+					{#if $profileMessage}
+						<Alert variant="destructive">
+							<AlertTitle>Error</AlertTitle>
+							<AlertDescription>{$profileMessage}</AlertDescription>
+						</Alert>
+					{/if}
 					<!-- Avatar -->
-					<div class="space-y-2">
-						<Label for="avatar">{m['account.avatar_label']()}</Label>
-						{#if avatarPreview}
-							<div class="mb-2">
-								<img
-									src={avatarPreview}
-									alt="Avatar preview"
-									class="h-24 w-24 rounded-full object-cover"
-								/>
+					<FormField form={superFormObj} name="avatar">
+						{#snippet children({ constraints, errors, tainted, value })}
+							<div class="space-y-2">
+								<FormLabel>{m['account.avatar_label']()}</FormLabel>
+								{#if avatarPreview}
+									<div class="mb-2">
+										<img
+											src={avatarPreview}
+											alt="Avatar preview"
+											class="h-24 w-24 rounded-full object-cover"
+										/>
+									</div>
+								{:else if data.user.avatar}
+									<div class="mb-2">
+										<img
+											src={getAvatarUrl(data.user)}
+											alt="Current avatar"
+											class="h-24 w-24 rounded-full object-cover"
+										/>
+									</div>
+								{/if}
+								<FormControl>
+									{#snippet children({ props })}
+										<Input {...props} type="file" accept="image/*" onchange={handleAvatarChange} />
+									{/snippet}
+								</FormControl>
+								<FormFieldErrors />
 							</div>
-						{:else if data.user.avatar}
-							<div class="mb-2">
-								<img
-									src={getAvatarUrl(data.user)}
-									alt="Current avatar"
-									class="h-24 w-24 rounded-full object-cover"
-								/>
-							</div>
-						{/if}
-						<Input
-							id="avatar"
-							name="avatar"
-							type="file"
-							accept="image/*"
-							onchange={handleAvatarChange}
-						/>
-						{#if $profileErrors.avatar}
-							<p class="text-sm text-destructive">
-								{$profileErrors.avatar}
-							</p>
-						{/if}
-					</div>
+						{/snippet}
+					</FormField>
 
 					<!-- Name -->
-					<div class="space-y-2">
-						<Label for="name">{m['account.name_label']()}</Label>
-						<Input id="name" name="name" type="text" bind:value={$profileData.name} required />
-						{#if $profileErrors.name}
-							<p class="text-sm text-destructive">
-								{$profileErrors.name}
-							</p>
-						{/if}
-					</div>
+					<FormField form={superFormObj} name="name">
+						<FormControl>
+							{#snippet children({ props })}
+								<FormLabel>{m['account.name_label']()}</FormLabel>
+								<Input {...props} bind:value={$form.name} type="text" required />
+							{/snippet}
+						</FormControl>
+						<FormFieldErrors />
+					</FormField>
 
 					<!-- Email -->
-					<div class="space-y-2">
-						<Label for="email">{m['account.email_label']()}</Label>
-						<Input id="email" name="email" type="email" bind:value={$profileData.email} required />
-						{#if $profileErrors.email}
-							<p class="text-sm text-destructive">
-								{$profileErrors.email}
-							</p>
-						{/if}
-					</div>
+					<FormField form={superFormObj} name="email">
+						<FormControl>
+							{#snippet children({ props })}
+								<FormLabel>{m['account.email_label']()}</FormLabel>
+								<Input {...props} bind:value={$form.email} type="email" required />
+							{/snippet}
+						</FormControl>
+						<FormFieldErrors />
+					</FormField>
 
 					<!-- Title -->
-					<div class="space-y-2">
-						<Label for="title">{m['account.title_label']()}</Label>
-						<Input id="title" name="title" type="text" bind:value={$profileData.title} />
-						{#if $profileErrors.title}
-							<p class="text-sm text-destructive">
-								{$profileErrors.title}
-							</p>
-						{/if}
-					</div>
+					<FormField form={superFormObj} name="title">
+						<FormControl>
+							{#snippet children({ props })}
+								<FormLabel>{m['account.title_label']()}</FormLabel>
+								<Input {...props} bind:value={$form.title} type="text" />
+							{/snippet}
+						</FormControl>
+						<FormFieldErrors />
+					</FormField>
 
 					<!-- Bio -->
-					<div class="space-y-2">
-						<Label for="bio">{m['account.bio_label']()}</Label>
-						<Textarea id="bio" name="bio" bind:value={$profileData.bio} rows={4} />
-						{#if $profileErrors.bio}
-							<p class="text-sm text-destructive">
-								{$profileErrors.bio}
-							</p>
-						{/if}
-					</div>
+					<FormField form={superFormObj} name="bio">
+						<FormControl>
+							{#snippet children({ props })}
+								<FormLabel>{m['account.bio_label']()}</FormLabel>
+								<Textarea {...props} bind:value={$form.bio} rows={4} />
+							{/snippet}
+						</FormControl>
+						<FormFieldErrors />
+					</FormField>
 
 					<!-- Website -->
-					<div class="space-y-2">
-						<Label for="website">{m['account.website_label']()}</Label>
-						<Input
-							id="website"
-							name="website"
-							type="url"
-							bind:value={$profileData.website}
-							placeholder="https://example.com"
-						/>
-						{#if $profileErrors.website}
-							<p class="text-sm text-destructive">
-								{$profileErrors.website}
-							</p>
-						{/if}
-					</div>
+					<FormField form={superFormObj} name="website">
+						<FormControl>
+							{#snippet children({ props })}
+								<FormLabel>{m['account.website_label']()}</FormLabel>
+								<Input
+									{...props}
+									bind:value={$form.website}
+									type="url"
+									placeholder="https://example.com"
+								/>
+							{/snippet}
+						</FormControl>
+						<FormFieldErrors />
+					</FormField>
 
 					<div class="flex gap-4">
 						<Button type="submit">{m['account.save_button']()}</Button>
@@ -249,79 +214,60 @@
 			<CardDescription>{m['account.2fa_description']()}</CardDescription>
 		</CardHeader>
 		<CardContent>
-			{#if twoFactorEnabled}
-				<Alert class="mb-4">
-					<AlertTitle>{m['account.2fa_enabled']()}</AlertTitle>
+			{#if data.mfaRequired}
+				<Alert>
+					<AlertTitle>{m['account.2fa_required_title']()}</AlertTitle>
 					<AlertDescription>
-						Your account is protected with two-factor authentication.
+						{m['account.2fa_required_info']()}
 					</AlertDescription>
 				</Alert>
+			{:else}
+				<Alert>
+					<AlertTitle>
+						{uiMfaOptIn ? m['account.2fa_enabled_title']() : m['account.2fa_not_required_title']()}
+					</AlertTitle>
+					<AlertDescription>
+						{uiMfaOptIn ? m['account.2fa_opted_in_info']() : m['account.2fa_opt_in_info']()}
+					</AlertDescription>
+				</Alert>
+				{#if mfaMessage}
+					<Alert class="mt-4" variant="destructive">
+						<AlertTitle>Error</AlertTitle>
+						<AlertDescription>{mfaMessage}</AlertDescription>
+					</Alert>
+				{/if}
 				<form
 					method="POST"
-					action="?/disableTwoFactor"
+					action="?/toggleMfaOptIn"
+					class="mt-4 flex items-center gap-3"
 					use:enhance={() => {
 						return async ({ result, update }) => {
 							if (result.type === 'success') {
-								twoFactorEnabled = false;
+								const nextOptIn = (result.data as { mfaOptIn?: boolean } | undefined)?.mfaOptIn;
+								if (typeof nextOptIn === 'boolean') {
+									savedMfaOptIn = nextOptIn;
+									uiMfaOptIn = nextOptIn;
+								} else {
+									savedMfaOptIn = uiMfaOptIn;
+								}
+							} else if (result.type === 'failure') {
+								uiMfaOptIn = savedMfaOptIn;
+								mfaMessage =
+									(result.data as { message?: string } | undefined)?.message ??
+									m['account.error_message']();
 							}
+							mfaPending = false;
 							await update();
 						};
 					}}
+					bind:this={mfaFormRef}
 				>
-					<Button type="submit" variant="destructive">{m['account.2fa_disable_button']()}</Button>
+					<input type="hidden" name="mfaOptIn" value={uiMfaOptIn ? 'true' : 'false'} />
+					<Switch id="mfa-opt-in" bind:checked={uiMfaOptIn} disabled={mfaPending} />
+					<Label for="mfa-opt-in">
+						{uiMfaOptIn ? m['account.2fa_disable_button']() : m['account.2fa_enable_button']()}
+					</Label>
 				</form>
-			{:else}
-				<Alert class="mb-4">
-					<AlertTitle>{m['account.2fa_disabled']()}</AlertTitle>
-					<AlertDescription>
-						Enable two-factor authentication to add an extra layer of security.
-					</AlertDescription>
-				</Alert>
-
-				{#if !showTwoFactorSetup}
-					<Button onclick={() => (showTwoFactorSetup = true)}>
-						{m['account.2fa_enable_button']()}
-					</Button>
-				{:else}
-					<div class="space-y-4">
-						<h3 class="text-lg font-semibold">
-							{m['account.2fa_setup_title']()}
-						</h3>
-						<p class="text-sm text-muted-foreground">
-							We'll send a 6-digit verification code to {data.user.email}
-						</p>
-
-						{#if !otpRequested}
-							<form method="POST" action="?/requestTwoFactor" use:twoFactorRequestEnhance>
-								<Button type="submit">{m['account.2fa_request_button']()}</Button>
-							</form>
-						{:else}
-							<form method="POST" action="?/verifyTwoFactor" use:twoFactorVerifyEnhance>
-								<input type="hidden" name="otpId" bind:value={$twoFactorVerifyData.otpId} />
-								<div class="space-y-4">
-									<div class="space-y-2">
-										<Label for="code">{m['account.2fa_code_label']()}</Label>
-										<Input
-											id="code"
-											name="code"
-											type="text"
-											bind:value={$twoFactorVerifyData.code}
-											placeholder={m['account.2fa_code_placeholder']()}
-											maxlength={6}
-											required
-										/>
-										{#if $twoFactorVerifyErrors.code}
-											<p class="text-sm text-destructive">
-												{$twoFactorVerifyErrors.code}
-											</p>
-										{/if}
-									</div>
-									<Button type="submit">{m['account.2fa_verify_button']()}</Button>
-								</div>
-							</form>
-						{/if}
-					</div>
-				{/if}
 			{/if}
 		</CardContent>
 	</Card>

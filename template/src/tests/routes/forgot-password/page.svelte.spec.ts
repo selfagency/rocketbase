@@ -2,7 +2,23 @@ import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import ForgotPasswordPage from '../../../routes/forgot-password/+page.svelte';
 
-type PageData = { form: any };
+type SuperValidated = {
+	valid: boolean;
+	posted: boolean;
+	errors: Record<string, string[]>;
+	data: { email: string };
+	constraints: Record<string, unknown>;
+	message?: string;
+	id: string;
+};
+
+type PageData = { form: SuperValidated };
+
+type ActionData = {
+	form: SuperValidated;
+	success: boolean;
+	message: string;
+};
 
 describe('Forgot Password Page Component', () => {
 	const mockFormData: PageData = {
@@ -17,13 +33,17 @@ describe('Forgot Password Page Component', () => {
 		}
 	};
 
-	it('renders forgot password form without errors', async () => {
+	it('renders forgot password form without errors', () => {
 		expect.assertions(1);
-		const { container } = await render(ForgotPasswordPage, { props: { data: mockFormData } });
+		const { container } = render(ForgotPasswordPage, {
+			props: {
+				data: mockFormData
+			} as any
+		});
 		expect(container).toBeTruthy();
 	});
 
-	it('renders with validation error', async () => {
+	it('renders with validation error', () => {
 		expect.assertions(1);
 		const dataWithErrors: PageData = {
 			form: {
@@ -34,20 +54,26 @@ describe('Forgot Password Page Component', () => {
 				}
 			}
 		};
-		const { container } = await render(ForgotPasswordPage, { props: { data: dataWithErrors } });
+		const { container } = render(ForgotPasswordPage, {
+			props: {
+				data: dataWithErrors
+			} as any
+		});
 		expect(container).toBeTruthy();
 	});
 
-	it('renders with success message', async () => {
+	it('renders with success message', () => {
 		expect.assertions(1);
-		const { container } = await render(ForgotPasswordPage, {
+		const actionData: ActionData = {
+			form: mockFormData.form,
+			success: true,
+			message: 'Password reset link sent'
+		};
+		const { container } = render(ForgotPasswordPage, {
 			props: {
 				data: mockFormData,
-				form: {
-					success: true,
-					message: 'Password reset link sent'
-				}
-			}
+				form: actionData
+			} as any
 		});
 		expect(container).toBeTruthy();
 	});

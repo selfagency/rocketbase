@@ -7,8 +7,8 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
+	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
 	import * as m from '$lib/paraglide/messages';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
@@ -29,13 +29,11 @@
 	let { data } = $props();
 
 	// svelte-ignore state_referenced_locally
-	const {
-		form: formData,
-		enhance,
-		errors
-	} = superForm(data.form, {
+	const superFormObj = superForm(data.form, {
 		validators: zod4Client(registerSchema)
 	});
+
+	const { form, enhance } = superFormObj;
 </script>
 
 <div class="flex min-h-screen items-center justify-center px-4">
@@ -46,65 +44,65 @@
 		</CardHeader>
 		<CardContent>
 			<form method="POST" use:enhance class="space-y-4">
-				<div class="space-y-2">
-					<Label for="name">{m['auth.register.name_label']()}</Label>
-					<Input
-						id="name"
-						name="name"
-						type="text"
-						placeholder={m['auth.register.name_placeholder']()}
-						bind:value={$formData.name}
-						aria-invalid={$errors.name ? 'true' : undefined}
-					/>
-					{#if $errors.name}
-						<p class="text-sm text-destructive">{$errors.name}</p>
-					{/if}
-				</div>
+				<FormField form={superFormObj} name="name">
+					<FormControl>
+						{#snippet children({ props })}
+							<FormLabel>{m['auth.register.name_label']()}</FormLabel>
+							<Input
+								{...props}
+								bind:value={$form.name}
+								type="text"
+								placeholder={m['auth.register.name_placeholder']()}
+							/>
+						{/snippet}
+					</FormControl>
+					<FormFieldErrors />
+				</FormField>
 
-				<div class="space-y-2">
-					<Label for="email">{m['auth.register.email_label']()}</Label>
-					<Input
-						id="email"
-						name="email"
-						type="email"
-						placeholder={m['auth.register.email_placeholder']()}
-						bind:value={$formData.email}
-						aria-invalid={$errors.email ? 'true' : undefined}
-					/>
-					{#if $errors.email}
-						<p class="text-sm text-destructive">{$errors.email}</p>
-					{/if}
-				</div>
+				<FormField form={superFormObj} name="email">
+					<FormControl>
+						{#snippet children({ props })}
+							<FormLabel>{m['auth.register.email_label']()}</FormLabel>
+							<Input
+								{...props}
+								bind:value={$form.email}
+								type="email"
+								placeholder={m['auth.register.email_placeholder']()}
+							/>
+						{/snippet}
+					</FormControl>
+					<FormFieldErrors />
+				</FormField>
 
-				<div class="space-y-2">
-					<Label for="password">{m['auth.register.password_label']()}</Label>
-					<Input
-						id="password"
-						name="password"
-						type="password"
-						placeholder={m['auth.register.password_placeholder']()}
-						bind:value={$formData.password}
-						aria-invalid={$errors.password ? 'true' : undefined}
-					/>
-					{#if $errors.password}
-						<p class="text-sm text-destructive">{$errors.password}</p>
-					{/if}
-				</div>
+				<FormField form={superFormObj} name="password">
+					<FormControl>
+						{#snippet children({ props })}
+							<FormLabel>{m['auth.register.password_label']()}</FormLabel>
+							<Input
+								{...props}
+								bind:value={$form.password}
+								type="password"
+								placeholder={m['auth.register.password_placeholder']()}
+							/>
+						{/snippet}
+					</FormControl>
+					<FormFieldErrors />
+				</FormField>
 
-				<div class="space-y-2">
-					<Label for="passwordConfirm">{m['auth.register.password_confirm_label']()}</Label>
-					<Input
-						id="passwordConfirm"
-						name="passwordConfirm"
-						type="password"
-						placeholder={m['auth.register.password_confirm_placeholder']()}
-						bind:value={$formData.passwordConfirm}
-						aria-invalid={$errors.passwordConfirm ? 'true' : undefined}
-					/>
-					{#if $errors.passwordConfirm}
-						<p class="text-sm text-destructive">{$errors.passwordConfirm}</p>
-					{/if}
-				</div>
+				<FormField form={superFormObj} name="passwordConfirm">
+					<FormControl>
+						{#snippet children({ props })}
+							<FormLabel>{m['auth.register.password_confirm_label']()}</FormLabel>
+							<Input
+								{...props}
+								bind:value={$form.passwordConfirm}
+								type="password"
+								placeholder={m['auth.register.password_confirm_placeholder']()}
+							/>
+						{/snippet}
+					</FormControl>
+					<FormFieldErrors />
+				</FormField>
 
 				<div class="text-sm">
 					{m['auth.register.login_link_text']()}

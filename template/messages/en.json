@@ -1,7 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"hello_world": "Hello, {name} from en!",
-
 	"auth.login.title": "Login",
 	"auth.login.description": "Enter your credentials to access your account",
 	"auth.login.email_label": "Email",
@@ -11,7 +10,6 @@
 	"auth.login.create_account_link": "Create an account",
 	"auth.login.forgot_password_link": "Forgot password?",
 	"auth.login.submit_button": "Login",
-
 	"auth.register.title": "Create an account",
 	"auth.register.description": "Enter your information to get started",
 	"auth.register.name_label": "Name",
@@ -25,7 +23,6 @@
 	"auth.register.login_link_text": "Already have an account?",
 	"auth.register.login_link": "Login",
 	"auth.register.submit_button": "Create Account",
-
 	"auth.forgot_password.title": "Reset Password",
 	"auth.forgot_password.description": "Enter your email address and we'll send you a link to reset your password",
 	"auth.forgot_password.email_label": "Email",
@@ -34,12 +31,10 @@
 	"auth.forgot_password.login_link": "Login",
 	"auth.forgot_password.submit_button": "Send Reset Link",
 	"auth.forgot_password.success_title": "Email Sent",
-
 	"validation.email_invalid": "Invalid email address",
 	"validation.password_min_length": "Password must be at least 8 characters",
 	"validation.name_min_length": "Name must be at least 2 characters",
 	"validation.passwords_no_match": "Passwords do not match",
-
 	"home.title": "Welcome to Rocketbase",
 	"home.description": "SvelteKit + PocketBase starter template",
 	"home.greeting": "Hello, {name}!",
@@ -51,7 +46,6 @@
 	"home.register_button": "Create Account",
 	"home.docs_link_text": "Visit {link} to read the SvelteKit documentation",
 	"home.docs_link": "svelte.dev/docs/kit",
-
 	"account.title": "Account Settings",
 	"account.description": "Manage your account information and security settings",
 	"account.profile_section": "Profile Information",
@@ -66,20 +60,15 @@
 	"account.cancel_button": "Cancel",
 	"account.success_message": "Account updated successfully",
 	"account.error_message": "Failed to update account",
-
 	"account.2fa_title": "Two-Factor Authentication",
-	"account.2fa_description": "Add an extra layer of security to your account",
-	"account.2fa_enabled": "2FA is enabled",
-	"account.2fa_disabled": "2FA is disabled",
+	"account.2fa_description": "Additional security for your account",
+	"account.2fa_required_title": "2FA Required",
+	"account.2fa_enabled_title": "2FA Enabled",
+	"account.2fa_not_required_title": "2FA Not Required",
+	"account.2fa_required_info": "Your role requires two-factor authentication. You will be prompted for an email verification code each time you log in.",
+	"account.2fa_opt_in_info": "You can enable two-factor authentication to add extra protection to your account.",
+	"account.2fa_opted_in_info": "Two-factor authentication is enabled for your account. You will be prompted for an email verification code each time you log in.",
 	"account.2fa_enable_button": "Enable 2FA",
 	"account.2fa_disable_button": "Disable 2FA",
-	"account.2fa_setup_title": "Set up Two-Factor Authentication",
-	"account.2fa_setup_description": "Enter your email to receive a verification code",
-	"account.2fa_code_label": "Verification Code",
-	"account.2fa_code_placeholder": "Enter 6-digit code",
-	"account.2fa_verify_button": "Verify Code",
-	"account.2fa_request_button": "Send Code",
-	"account.2fa_success": "2FA enabled successfully",
-	"account.2fa_error": "Failed to enable 2FA",
-	"account.2fa_disabled_success": "2FA disabled successfully"
+	"account.2fa_required_cannot_disable": "Two-factor authentication is required for your role and cannot be disabled."
 }

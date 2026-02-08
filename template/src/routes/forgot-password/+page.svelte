@@ -8,8 +8,8 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
+	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
 	import * as m from '$lib/paraglide/messages';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
@@ -22,14 +22,13 @@
 	let { data, form: actionData } = $props();
 
 	// svelte-ignore state_referenced_locally
-	const {
-		form: formData,
-		enhance,
-		errors
-	} = superForm(data.form, {
+	const superFormObj = superForm(data.form, {
 		validators: zod4Client(forgotPasswordSchema)
 	});
 
+	const { form, enhance } = superFormObj;
+
+	// svelte-ignore state_referenced_locally
 	let showSuccess = $state(actionData?.success);
 
 	$effect(() => {
@@ -54,20 +53,20 @@
 			{/if}
 
 			<form method="POST" use:enhance class="space-y-4">
-				<div class="space-y-2">
-					<Label for="email">{m['auth.forgot_password.email_label']()}</Label>
-					<Input
-						id="email"
-						name="email"
-						type="email"
-						placeholder={m['auth.forgot_password.email_placeholder']()}
-						bind:value={$formData.email}
-						aria-invalid={$errors.email ? 'true' : undefined}
-					/>
-					{#if $errors.email}
-						<p class="text-sm text-destructive">{$errors.email}</p>
-					{/if}
-				</div>
+				<FormField form={superFormObj} name="email">
+					<FormControl>
+						{#snippet children({ props })}
+							<FormLabel>{m['auth.forgot_password.email_label']()}</FormLabel>
+							<Input
+								{...props}
+								bind:value={$form.email}
+								type="email"
+								placeholder={m['auth.forgot_password.email_placeholder']()}
+							/>
+						{/snippet}
+					</FormControl>
+					<FormFieldErrors />
+				</FormField>
 
 				<div class="text-sm">
 					{m['auth.forgot_password.login_link_text']()}

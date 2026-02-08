@@ -8,6 +8,7 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
+	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as m from '$lib/paraglide/messages';
@@ -24,14 +25,11 @@
 	let { data } = $props();
 
 	// svelte-ignore state_referenced_locally
-	const {
-		form: formData,
-		enhance,
-		errors,
-		message
-	} = superForm(data.form, {
+	const superFormObj = superForm(data.form, {
 		validators: zod4Client(loginSchema)
 	});
+
+	const { form, enhance, message } = superFormObj;
 
 	let showMfaForm = $state(false);
 	let mfaData = $state({ mfaId: '', otpId: '', email: '' });
@@ -101,39 +99,35 @@
 							<AlertDescription>{$message}</AlertDescription>
 						</Alert>
 					{/if}
-					<div class="space-y-2">
-						<Label for="email">{m['auth.login.email_label']()}</Label>
-						<Input
-							id="email"
-							name="email"
-							type="email"
-							placeholder={m['auth.login.email_placeholder']()}
-							bind:value={$formData.email}
-							aria-invalid={$errors.email ? 'true' : undefined}
-						/>
-						{#if $errors.email}
-							<p class="text-sm text-destructive">
-								{$errors.email}
-							</p>
-						{/if}
-					</div>
+					<FormField form={superFormObj} name="email">
+						<FormControl>
+							{#snippet children({ props })}
+								<FormLabel>{m['auth.login.email_label']()}</FormLabel>
+								<Input
+									{...props}
+									bind:value={$form.email}
+									type="email"
+									placeholder={m['auth.login.email_placeholder']()}
+								/>
+							{/snippet}
+						</FormControl>
+						<FormFieldErrors />
+					</FormField>
 
-					<div class="space-y-2">
-						<Label for="password">{m['auth.login.password_label']()}</Label>
-						<Input
-							id="password"
-							name="password"
-							type="password"
-							placeholder={m['auth.login.password_placeholder']()}
-							bind:value={$formData.password}
-							aria-invalid={$errors.password ? 'true' : undefined}
-						/>
-						{#if $errors.password}
-							<p class="text-sm text-destructive">
-								{$errors.password}
-							</p>
-						{/if}
-					</div>
+					<FormField form={superFormObj} name="password">
+						<FormControl>
+							{#snippet children({ props })}
+								<FormLabel>{m['auth.login.password_label']()}</FormLabel>
+								<Input
+									{...props}
+									bind:value={$form.password}
+									type="password"
+									placeholder={m['auth.login.password_placeholder']()}
+								/>
+							{/snippet}
+						</FormControl>
+						<FormFieldErrors />
+					</FormField>
 
 					<div class="flex items-center justify-between text-sm">
 						<a href="/register" class="text-primary hover:underline"

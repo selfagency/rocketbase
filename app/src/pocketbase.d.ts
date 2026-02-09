@@ -11,17 +11,6 @@ export enum Collections {
 	Mfas = "_mfas",
 	Otps = "_otps",
 	Superusers = "_superusers",
-	Audit = "audit",
-	Logs = "logs",
-	Metadata = "metadata",
-	Pages = "pages",
-	Pageviews = "pageviews",
-	Posts = "posts",
-	QueueLocks = "queue_locks",
-	QueueStats = "queue_stats",
-	QueueTasks = "queue_tasks",
-	Redirects = "redirects",
-	Tags = "tags",
 	Users = "users",
 }
 
@@ -103,168 +92,17 @@ export type SuperusersRecord = {
 	verified?: boolean
 }
 
-export enum AuditCollectionOptions {
-	"metadata" = "metadata",
-	"pages" = "pages",
-	"posts" = "posts",
-	"redirects" = "redirects",
-	"tags" = "tags",
-	"users" = "users",
-}
-
-export enum AuditActionOptions {
-	"create" = "create",
-	"update" = "update",
-	"delete" = "delete",
-}
-export type AuditRecord = {
-	action: AuditActionOptions
-	collection: AuditCollectionOptions
-	date: IsoAutoDateString
-	diff?: string
-	entity: string
-	id: string
-	user: RecordIdString
-}
-
-export enum LogsLevelOptions {
-	"INFO" = "INFO",
-	"WARN" = "WARN",
-	"ERROR" = "ERROR",
-	"CRITICAL" = "CRITICAL",
-}
-export type LogsRecord<Tmetadata = unknown> = {
-	created: IsoAutoDateString
-	id: string
-	level: LogsLevelOptions
-	message: string
-	metadata?: null | Tmetadata
-	source: string
-}
-
-export enum MetadataTypeOptions {
-	"string" = "string",
-	"integer" = "integer",
-	"float" = "float",
-	"json" = "json",
-	"boolean" = "boolean",
-}
-export type MetadataRecord = {
-	id: string
-	key: string
-	type: MetadataTypeOptions
-	updated: IsoAutoDateString
-	value?: string
-}
-
-export type PagesRecord = {
-	content?: HTMLString
-	created: IsoAutoDateString
-	id: string
-	image?: FileNameString
-	media?: FileNameString[]
-	order?: number
-	parent?: RecordIdString
-	published?: boolean
-	slug: string
-	summary?: string
-	title?: string
-	updated: IsoAutoDateString
-	visible?: boolean
-}
-
-export enum PageviewsCollectionOptions {
-	"pages" = "pages",
-	"posts" = "posts",
-}
-export type PageviewsRecord = {
-	collection?: PageviewsCollectionOptions
-	created: IsoAutoDateString
-	entity?: string
-	id: string
-	ip: string
-	referer?: string
-	region?: string
-	url: string
-	userAgent?: string
-	utm?: string
-}
-
-export type PostsRecord = {
-	author: RecordIdString[]
-	content?: HTMLString
-	created: IsoAutoDateString
-	date: IsoDateString
-	id: string
-	image?: FileNameString
-	media?: FileNameString[]
-	published?: boolean
-	slug: string
-	summary?: string
-	tags?: RecordIdString[]
-	title: string
-	updated: IsoAutoDateString
-	visible?: boolean
-}
-
-export type QueueLocksRecord = {
-	id: string
-	task: RecordIdString
-	worker_id: string
-}
-
-export type QueueStatsRecord<Tfailed_tasks = unknown, Tpending_tasks = unknown> = {
-	failed_tasks?: null | Tfailed_tasks
-	id: string
-	pending_tasks?: null | Tpending_tasks
-}
-
-export type QueueTasksRecord<Ttask = unknown> = {
-	failed?: IsoDateString
-	failed_reason?: string
-	id: string
-	queue: string
-	task?: null | Ttask
-}
-
-export type RedirectsRecord = {
-	id: string
-	slug?: string
-	updated: IsoAutoDateString
-	url?: string
-}
-
-export type TagsRecord = {
-	id: string
-	slug?: string
-	tag?: string
-	updated: IsoAutoDateString
-}
-
-export enum UsersRoleOptions {
-	"admin" = "admin",
-	"editor" = "editor",
-	"contributor" = "contributor",
-	"user" = "user",
-}
 export type UsersRecord = {
 	avatar?: FileNameString
-	bio?: HTMLString
 	created: IsoAutoDateString
-	disabled?: boolean
 	email: string
 	emailVisibility?: boolean
 	id: string
-	mfaOptIn?: boolean
-	name: string
+	name?: string
 	password: string
-	role?: UsersRoleOptions
-	title?: string
 	tokenKey: string
 	updated: IsoAutoDateString
 	verified?: boolean
-	visible?: boolean
-	website?: string
 }
 
 // Response types include system fields and match responses from the PocketBase API
@@ -273,17 +111,6 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
-export type AuditResponse<Texpand = unknown> = Required<AuditRecord> & BaseSystemFields<Texpand>
-export type LogsResponse<Tmetadata = unknown, Texpand = unknown> = Required<LogsRecord<Tmetadata>> & BaseSystemFields<Texpand>
-export type MetadataResponse<Texpand = unknown> = Required<MetadataRecord> & BaseSystemFields<Texpand>
-export type PagesResponse<Texpand = unknown> = Required<PagesRecord> & BaseSystemFields<Texpand>
-export type PageviewsResponse<Texpand = unknown> = Required<PageviewsRecord> & BaseSystemFields<Texpand>
-export type PostsResponse<Texpand = unknown> = Required<PostsRecord> & BaseSystemFields<Texpand>
-export type QueueLocksResponse<Texpand = unknown> = Required<QueueLocksRecord> & BaseSystemFields<Texpand>
-export type QueueStatsResponse<Tfailed_tasks = unknown, Tpending_tasks = unknown, Texpand = unknown> = Required<QueueStatsRecord<Tfailed_tasks, Tpending_tasks>> & BaseSystemFields<Texpand>
-export type QueueTasksResponse<Ttask = unknown, Texpand = unknown> = Required<QueueTasksRecord<Ttask>> & BaseSystemFields<Texpand>
-export type RedirectsResponse<Texpand = unknown> = Required<RedirectsRecord> & BaseSystemFields<Texpand>
-export type TagsResponse<Texpand = unknown> = Required<TagsRecord> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -294,17 +121,6 @@ export type CollectionRecords = {
 	_mfas: MfasRecord
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
-	audit: AuditRecord
-	logs: LogsRecord
-	metadata: MetadataRecord
-	pages: PagesRecord
-	pageviews: PageviewsRecord
-	posts: PostsRecord
-	queue_locks: QueueLocksRecord
-	queue_stats: QueueStatsRecord
-	queue_tasks: QueueTasksRecord
-	redirects: RedirectsRecord
-	tags: TagsRecord
 	users: UsersRecord
 }
 
@@ -314,17 +130,6 @@ export type CollectionResponses = {
 	_mfas: MfasResponse
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
-	audit: AuditResponse
-	logs: LogsResponse
-	metadata: MetadataResponse
-	pages: PagesResponse
-	pageviews: PageviewsResponse
-	posts: PostsResponse
-	queue_locks: QueueLocksResponse
-	queue_stats: QueueStatsResponse
-	queue_tasks: QueueTasksResponse
-	redirects: RedirectsResponse
-	tags: TagsResponse
 	users: UsersResponse
 }
 

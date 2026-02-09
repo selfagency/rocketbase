@@ -73,13 +73,13 @@
 	});
 </script>
 
-<div class="flex min-h-screen items-center justify-center px-4">
+<div class="flex min-h-[80vh] items-center justify-center px-4">
 	<Card class="w-full max-w-md">
 		<CardHeader>
 			<CardTitle>{m['auth.login.title']()}</CardTitle>
 			<CardDescription>
 				{#if showMfaForm}
-					Enter the verification code sent to your email
+					{m['auth.login.mfa_description']()}
 				{:else}
 					{m['auth.login.description']()}
 				{/if}
@@ -106,12 +106,12 @@
 					<input type="hidden" name="email" value={mfaData.email} data-testid="mfa-email" />
 
 					<div class="space-y-2">
-						<Label for="code">Verification Code</Label>
+						<Label for="code">{m['auth.login.mfa_code_label']()}</Label>
 						<Input
 							id="code"
 							name="code"
 							type="text"
-							placeholder="Enter 8-digit code"
+							placeholder={m['auth.login.mfa_code_placeholder']()}
 							bind:value={mfaCode}
 							maxlength={8}
 							required
@@ -119,14 +119,16 @@
 						/>
 					</div>
 
-					<Button type="submit" class="w-full" data-testid="mfa-verify-button">Verify Code</Button>
+					<Button type="submit" class="w-full" data-testid="mfa-verify-button">
+						{m['auth.login.mfa_verify_button']()}
+					</Button>
 					<Button
 						type="button"
 						variant="outline"
 						class="w-full"
 						onclick={() => window.location.reload()}
 					>
-						Back to Login
+						{m['auth.login.mfa_back_button']()}
 					</Button>
 				</form>
 			{:else}

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -8,6 +10,7 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
+	import * as m from '$lib/paraglide/messages';
 	import { AlertCircle, CheckCircle } from '@lucide/svelte';
 
 	let { data } = $props();
@@ -16,27 +19,27 @@
 <div class="flex min-h-screen items-center justify-center px-4">
 	<Card class="w-full max-w-md">
 		<CardHeader>
-			<CardTitle>Email Verification</CardTitle>
-			<CardDescription>Verifying your email address</CardDescription>
+			<CardTitle>{m['verify.email_title']()}</CardTitle>
+			<CardDescription>{m['verify.email_description']()}</CardDescription>
 		</CardHeader>
 		<CardContent class="space-y-4">
 			{#if data.error}
 				<Alert variant="destructive">
 					<AlertCircle class="h-4 w-4" />
-					<AlertTitle>Verification Failed</AlertTitle>
+					<AlertTitle>{m['verify.email_failed_title']()}</AlertTitle>
 					<AlertDescription>{data.error}</AlertDescription>
 				</Alert>
-				<Button onclick={() => (window.location.href = '/account')} class="w-full">
-					Back to Account
+				<Button onclick={() => goto(resolve('/account'))} class="w-full">
+					{m['common.back_to_account']()}
 				</Button>
 			{:else}
 				<Alert>
 					<CheckCircle class="h-4 w-4" />
-					<AlertTitle>Email Verified</AlertTitle>
-					<AlertDescription>Your email address has been successfully verified!</AlertDescription>
+					<AlertTitle>{m['verify.email_success_title']()}</AlertTitle>
+					<AlertDescription>{m['verify.email_success_message']()}</AlertDescription>
 				</Alert>
-				<Button onclick={() => (window.location.href = '/account')} class="w-full">
-					Back to Account
+				<Button onclick={() => goto(resolve('/account'))} class="w-full">
+					{m['common.back_to_account']()}
 				</Button>
 			{/if}
 		</CardContent>

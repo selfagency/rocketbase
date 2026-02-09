@@ -134,7 +134,7 @@
 	}
 
 	const getDisplayName = (user?: { name?: string | null; email?: string | null }) => {
-		return user?.name || user?.email || 'User';
+		return user?.name || user?.email || m['common.user_fallback']();
 	};
 
 	const getInitials = (user?: { name?: string | null; email?: string | null }) => {
@@ -185,7 +185,7 @@
 				<div class="space-y-4">
 					{#if $profileMessage}
 						<Alert variant="destructive">
-							<AlertTitle>Error</AlertTitle>
+							<AlertTitle>{m['common.error_title']()}</AlertTitle>
 							<AlertDescription>{$profileMessage}</AlertDescription>
 						</Alert>
 					{/if}
@@ -194,9 +194,9 @@
 						<Label>{m['account.avatar_label']()}</Label>
 						<div class="flex items-start gap-4">
 							<div>
-								<Avatar.Root class="h-24 w-24 rounded-lg">
+								<Avatar.Root class="z-0 h-24 w-24 rounded-lg">
 									{#if avatarPreview}
-										<Avatar.Image src={avatarPreview} alt="Avatar preview" />
+										<Avatar.Image src={avatarPreview} alt={m['account.avatar_preview_alt']()} />
 									{:else if data.user.avatar}
 										<Avatar.Image
 											src={getAvatarUrl(data.user) || undefined}
@@ -221,7 +221,7 @@
 									size="sm"
 									onclick={() => document.getElementById('avatar-upload')?.click()}
 								>
-									Upload Image
+									{m['account.avatar_upload_button']()}
 								</Button>
 								{#if avatarPreview || data.user.avatar}
 									<Button
@@ -233,7 +233,7 @@
 											$form.avatar = undefined;
 										}}
 									>
-										Remove
+										{m['account.avatar_remove_button']()}
 									</Button>
 								{/if}
 							</div>
@@ -273,8 +273,7 @@
 							{#if verificationEmailSent}
 								<div class="mt-3 rounded-md bg-amber-50 p-3" data-testid="email-verification-sent">
 									<p class="text-sm text-amber-800">
-										Please check your inbox for a verification email. The link will expire in 24
-										hours.
+										{m['account.email_verification_sent_help']()}
 									</p>
 								</div>
 							{:else}
@@ -327,7 +326,7 @@
 									{...props}
 									bind:value={$form.website}
 									type="url"
-									placeholder="https://example.com"
+									placeholder={m['account.website_placeholder']()}
 								/>
 							{/snippet}
 						</Form.Control>
@@ -370,7 +369,7 @@
 				</Alert>
 				{#if mfaMessage}
 					<Alert class="mt-4" variant="destructive">
-						<AlertTitle>Error</AlertTitle>
+						<AlertTitle>{m['common.error_title']()}</AlertTitle>
 						<AlertDescription>{mfaMessage}</AlertDescription>
 					</Alert>
 				{/if}
@@ -423,16 +422,16 @@
 		</CardHeader>
 		<CardContent>
 			<Alert class="mb-4">
-				<AlertTitle>Warning</AlertTitle>
+				<AlertTitle>{m['common.warning_title']()}</AlertTitle>
 				<AlertDescription>
-					Changing your password will require you to login again with your new password.
+					{m['account.password_warning']()}
 				</AlertDescription>
 			</Alert>
 			<form method="POST" action="?/changePassword" use:passwordEnhance>
 				<div class="space-y-4">
 					{#if $passwordMessage}
 						<Alert variant="destructive">
-							<AlertTitle>Error</AlertTitle>
+							<AlertTitle>{m['common.error_title']()}</AlertTitle>
 							<AlertDescription>{$passwordMessage}</AlertDescription>
 						</Alert>
 					{/if}

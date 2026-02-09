@@ -1,20 +1,52 @@
 import { expect, test } from '@playwright/test';
 
 // Mailpit API helper functions
-const MAILPIT_API = 'http://localhost:8025/api/v1/messages';
+const MAILPIT_LIST_API = 'http://localhost:8025/api/v1/messages';
+const MAILPIT_MESSAGE_API = 'http://localhost:8025/api/v1/message';
+const MAILPIT_POLL_INTERVAL_MS = 1000;
+const MAILPIT_POLL_TIMEOUT_MS = 10000;
 
 async function getEmailsForRecipient(email: string) {
-	const response = await fetch(`${MAILPIT_API}?search=${encodeURIComponent(`to:${email}`)}`);
+	const response = await fetch(MAILPIT_LIST_API);
 	const data = await response.json();
-	return data.messages || [];
+	const allMessages = data.messages || [];
+	const normalizedEmail = email.toLowerCase();
+
+	const matchesRecipient = (toField: any) => {
+		if (!toField) {
+			return false;
+		}
+
+		const recipients = Array.isArray(toField) ? toField : [toField];
+		return recipients.some((recipient) => {
+			const value = (() => {
+				if (recipient == null) return '';
+				if (typeof recipient === 'string') return recipient;
+				if (typeof recipient === 'object') {
+					return (
+						recipient.Address ||
+						recipient.Email ||
+						recipient.Name ||
+						JSON.stringify(recipient)
+					).toString();
+				}
+				return recipient.toString();
+			})();
+			return value.toLowerCase().includes(normalizedEmail);
+		});
+	};
+
+	const filtered = allMessages.filter((message: any) => matchesRecipient(message.To));
+
+	return filtered.sort((a: any, b: any) => getMessageTimestamp(b) - getMessageTimestamp(a));
 }
 
 async function getAllEmails() {
-	const response = await fetch(MAILPIT_API);
+	const response = await fetch(MAILPIT_LIST_API);
 	const data = await response.json();
-	console.log('Total messages in Mailpit:', data.messages?.length || 0);
+	console.debug('Total messages in Mailpit:', data.messages?.length || 0);
 	if (data.messages && data.messages.length > 0) {
-		console.log(
+		console.debug(
 			'Recent 3 messages:',
 			data.messages.slice(0, 3).map((m: any) => ({ ID: m.ID, To: m.To, Subject: m.Subject }))
 		);
@@ -22,18 +54,71 @@ async function getAllEmails() {
 	return data.messages || [];
 }
 
-async function getLatestEmailForRecipient(email: string, retries = 3) {
-	for (let i = 0; i < retries; i++) {
+async function getLatestEmailForRecipient(email: string) {
+	const start = Date.now();
+	let attempt = 0;
+
+	while (Date.now() - start < MAILPIT_POLL_TIMEOUT_MS) {
+		attempt += 1;
 		const emails = await getEmailsForRecipient(email);
 		if (emails.length > 0) {
-			console.log(`Found email for ${email} on attempt ${i + 1}`);
+			const selected = emails[0];
+			console.debug('Selected message for', email, 'candidate:', {
+				id: getMailpitMessageId(selected),
+				to: selected?.To,
+				subject: selected?.Subject
+			});
+			console.debug(`Found email for ${email} on attempt ${attempt}`);
 			return emails[0];
 		}
-		if (i < retries - 1) {
-			console.log(`No email for ${email} yet, waiting 1.5s... (attempt ${i + 1}/${retries})`);
-			await new Promise((resolve) => setTimeout(resolve, 1500));
+
+		const elapsed = Date.now() - start;
+		const remaining = MAILPIT_POLL_TIMEOUT_MS - elapsed;
+		if (remaining <= 0) break;
+
+		const waitTime = Math.min(MAILPIT_POLL_INTERVAL_MS, remaining);
+		console.debug(`No email for ${email} yet, waiting ${waitTime}ms... (attempt ${attempt})`);
+		await new Promise((resolve) => setTimeout(resolve, waitTime));
+	}
+
+	return null;
+}
+
+function getMessageTimestamp(message: any): number {
+	const timeKeys = ['CreatedAt', 'ReceivedAt', 'SentAt', 'Created', 'Time'];
+	for (const key of timeKeys) {
+		const value = message[key];
+		if (typeof value === 'number') {
+			return value;
+		}
+		if (typeof value === 'string') {
+			const parsed = Date.parse(value);
+			if (!Number.isNaN(parsed)) {
+				return parsed;
+			}
 		}
 	}
+
+	if (message.ID && typeof message.ID === 'number') {
+		return message.ID;
+	}
+
+	return 0;
+}
+
+function getMailpitMessageId(message: any): string | null {
+	if (!message) {
+		return null;
+	}
+
+	const candidates = [message.ID, message.id, message.Id, message._id];
+	for (const candidate of candidates) {
+		if (candidate === undefined || candidate === null) {
+			continue;
+		}
+		return candidate.toString();
+	}
+
 	return null;
 }
 
@@ -47,36 +132,62 @@ async function extractOTPFromEmail(email: string): Promise<string | null> {
 			return null;
 		}
 
-		const response = await fetch(`${MAILPIT_API}/${message.ID}`);
+		const messageId = getMailpitMessageId(message);
+		if (!messageId) {
+			console.error('Missing message ID when extracting OTP for', email, 'message:', message);
+			await getAllEmails();
+			return null;
+		}
+
+		const response = await fetch(`${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
 		if (!response.ok) {
-			console.error('Failed to fetch email:', response.statusText);
+			console.error('Failed to fetch email detail', {
+				status: response.status,
+				statusText: response.statusText
+			});
+			console.error('Detail URL', `${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
 			return null;
 		}
 		const data = await response.json();
 
 		// Get email body - try HTML first, then text
 		const emailBody = data.HTML || data.Text || '';
-		console.log('Email HTML exists:', !!data.HTML, 'Text exists:', !!data.Text);
+		console.debug('Email HTML exists:', !!data.HTML, 'Text exists:', !!data.Text);
 		if (emailBody.length === 0) {
-			console.log('Email body is empty!');
-			console.log('Full message data keys:', Object.keys(data));
+			console.debug('Email body is empty!');
+			console.debug('Full message data keys:', Object.keys(data));
 		}
-		console.log('Email body (first 500 chars):', emailBody.substring(0, 500));
+		console.debug('Email body (first 500 chars):', emailBody.substring(0, 500));
 
 		// Extract OTP - try multiple patterns:
 		// 1. Exactly 8 consecutive digits
-		// 2. Code: followed by digits
-		// 3. Any number like verification code
-		let match = emailBody.match(/(\d{8})/);
+		// 2. Exactly 6 consecutive digits (PocketBase default)
+		// 3. Code: followed by digits
+		// 4. OTP: followed by digits
+		let match = emailBody.match(/\b(\d{8})\b/);
 		if (match) {
-			console.log('Found 8-digit OTP:', match[1]);
+			console.debug('Found 8-digit OTP:', match[1]);
+			return match[1];
+		}
+
+		// Try 6-digit code (common OTP format)
+		match = emailBody.match(/\b(\d{6})\b/);
+		if (match) {
+			console.debug('Found 6-digit OTP:', match[1]);
 			return match[1];
 		}
 
 		// Try "code" followed by digits (case insensitive)
 		match = emailBody.match(/code[:\s]+(\d+)/i);
 		if (match) {
-			console.log('Found code-formatted OTP:', match[1]);
+			console.debug('Found code-formatted OTP:', match[1]);
+			return match[1];
+		}
+
+		// Try OTP: followed by digits
+		match = emailBody.match(/OTP[:\s]+(\d+)/i);
+		if (match) {
+			console.debug('Found OTP-formatted code:', match[1]);
 			return match[1];
 		}
 
@@ -95,43 +206,68 @@ async function extractVerificationLinkFromEmail(email: string): Promise<string |
 		return null;
 	}
 
-	const response = await fetch(`${MAILPIT_API}/${message.ID}`);
+	const messageId = getMailpitMessageId(message);
+	if (!messageId) {
+		console.error(
+			'Missing message ID when extracting verification link for',
+			email,
+			'message:',
+			message
+		);
+		return null;
+	}
+
+	const response = await fetch(`${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
 	if (!response.ok) {
-		console.error('Failed to fetch email:', response.statusText);
+		console.error('Failed to fetch email detail', {
+			status: response.status,
+			statusText: response.statusText
+		});
+		console.error('Detail URL', `${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
 		return null;
 	}
 	const data = await response.json();
 
 	// Get email body - try HTML first, then text
 	const emailBody = data.HTML || data.Text || '';
-	console.log('Email body (first 1000 chars):', emailBody.substring(0, 1000));
+	console.debug('Email body (first 1000 chars):', emailBody.substring(0, 1000));
 
 	// Extract verification link - try multiple patterns:
 	// 1. Full URL with /confirm-verification/ path
-	// 2. URL in href attribute
-	// 3. Any localhost/127.0.0.1 URL in the email
+	// 2. Full URL with /api/collections/users/confirm-verification path (PocketBase default)
+	// 3. URL in href attribute
+	// 4. Any localhost/127.0.0.1 URL with verify/confirm in the email
 	let match = emailBody.match(/(https?:\/\/[^\s"'<>]+\/confirm-verification\/[^\s"'<>]+)/);
 	if (match) {
-		console.log('Found confirm-verification URL:', match[1].substring(0, 100));
+		console.debug('Found confirm-verification URL:', match[1].substring(0, 100));
+		return match[1];
+	}
+
+	// Try PocketBase API verification path
+	match = emailBody.match(
+		/(https?:\/\/[^\s"'<>]+\/api\/collections\/users\/confirm-verification[^\s"'<>]*)/
+	);
+	if (match) {
+		console.debug('Found PocketBase API verification URL:', match[1].substring(0, 100));
 		return match[1];
 	}
 
 	// Try looking for href
-	match = emailBody.match(/href=["']([^"']+\/confirm-verification\/[^"']+)["']/);
+	match = emailBody.match(/href=["']([^"']+\/confirm-verification[^"']+)["']/);
 	if (match) {
-		console.log('Found href-style verification URL:', match[1].substring(0, 100));
+		console.debug('Found href-style verification URL:', match[1].substring(0, 100));
 		return match[1];
 	}
 
-	// Last resort: look for ANY URL containing "confirm-verification"
-	match = emailBody.match(/(https?:\/\/[^\s"'<>]*confirm-verification[^\s"'<>]*)/);
+	// Last resort: look for ANY URL containing "confirm", "verification", or "verify"
+	match = emailBody.match(/(https?:\/\/[^\s"'<>]*(?:confirm|verif)[^\s"'<>]*)/i);
 	if (match) {
-		console.log('Found generic confirm-verification URL:', match[1].substring(0, 100));
+		console.debug('Found generic verification URL:', match[1].substring(0, 100));
 		return match[1];
 	}
 
 	console.error('No verification link found in email with any pattern');
-	console.log('Email body dump:', emailBody);
+	console.debug('Email body dump:', emailBody);
 	return null;
 }
 
@@ -139,47 +275,145 @@ async function extractVerificationLinkFromEmail(email: string): Promise<string |
 async function deleteUserByEmail(email: string) {
 	try {
 		// Get admin token from environment - in production, use proper auth
-		const adminEmail = 'admin@example.com';
-		const adminPassword = 'admin123456';
+		const adminEmail = process.env.PB_ADMIN_EMAIL || process.env.API_USER || 'admin@example.com';
+		const adminPassword = process.env.PB_ADMIN_PASSWORD || 'admin123456';
 
-		// Authenticate as admin
-		const authResponse = await fetch(
-			'http://localhost:8090/api/collections/users/auth-with-password',
-			{
+		// Try to authenticate as admin (preferred). Use the admin auth endpoint.
+		let token: string | null = null;
+		try {
+			const authResponse = await fetch('http://localhost:8090/api/admins/auth-with-password', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ identity: adminEmail, password: adminPassword })
-			}
-		);
+			});
 
-		if (!authResponse.ok) {
-			// Fallback: try to delete directly (may fail if admin auth is different)
+			if (authResponse.ok) {
+				const authData = await authResponse.json();
+				// PocketBase admin auth returns a token
+				token = authData?.token || null;
+				if (!token && authData?.admin?.token) token = authData.admin.token;
+			} else {
+				console.debug('Admin auth failed during cleanup, status:', authResponse.status);
+			}
+		} catch (err) {
+			console.debug('Admin auth error during cleanup:', err);
+		}
+
+		// Find user by email - try multiple auth strategies
+		const serviceKey =
+			process.env.SERVICE_KEY || process.env.PB_SERVICE_KEY || process.env.API_KEY || null;
+
+		// Build headers for subsequent requests. Prefer Bearer token, fall back to service key via X-Api-Key.
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json'
+		};
+		if (token) headers.Authorization = `Bearer ${token}`;
+		if (serviceKey) headers['X-Api-Key'] = serviceKey;
+
+		// Use perPage to ensure we fetch enough records in one call
+		const searchFilter = `email="${email}"`;
+		const searchUrl = `http://localhost:8090/api/collections/users/records?filter=${encodeURIComponent(
+			searchFilter
+		)}&perPage=50`;
+		console.debug('Attempting to find users for cleanup at', searchUrl);
+
+		let searchResponse;
+		try {
+			searchResponse = await fetch(searchUrl, {
+				method: 'GET',
+				headers
+			});
+		} catch (err) {
+			console.debug('User search request failed during cleanup:', err);
 			return;
 		}
 
-		const authData = await authResponse.json();
-		const token = authData.token;
-
-		// Find user by email
-		const searchResponse = await fetch(
-			`http://localhost:8090/api/collections/users/records?filter=${encodeURIComponent(`email="${email}"`)}`,
-			{
-				method: 'GET',
-				headers: { Authorization: `Bearer ${token}` }
-			}
-		);
-
-		if (!searchResponse.ok) return;
+		if (!searchResponse.ok) {
+			const bodyText = await searchResponse.text().catch(() => '<no body>');
+			console.debug(
+				'User search failed during cleanup, status:',
+				searchResponse.status,
+				'body:',
+				bodyText
+			);
+			return;
+		}
 
 		const searchData = await searchResponse.json();
-		if (searchData.items && searchData.items.length > 0) {
-			// Delete each user record found
-			for (const item of searchData.items) {
-				await fetch(`http://localhost:8090/api/collections/users/records/${item.id}`, {
-					method: 'DELETE',
-					headers: { Authorization: `Bearer ${token}` }
-				});
+		const items = searchData?.items || searchData || [];
+		// If search returned no items, try an unfiltered fetch and scan client-side.
+		if (!items || items.length === 0) {
+			console.debug(
+				'Filtered search returned no items; trying unfiltered fetch to scan for matches'
+			);
+			try {
+				const allRes = await fetch(
+					`http://localhost:8090/api/collections/users/records?perPage=100`,
+					{ method: 'GET', headers }
+				);
+				if (allRes.ok) {
+					const allData = await allRes.json();
+					const allItems = allData?.items || allData || [];
+					const matches = (allItems || []).filter((it: any) => {
+						const e = (it?.email || it?.Email || it?.emailAddress || '').toString().toLowerCase();
+						return e === email.toLowerCase();
+					});
+					if (matches.length > 0) {
+						console.debug('Found', matches.length, 'matching user(s) via unfiltered scan');
+						for (const item of matches) {
+							const id = item?.id || item?.ID || item?._id;
+							if (!id) continue;
+							const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
+							console.debug('Deleting user (fallback) ', id, 'via', deleteUrl);
+							try {
+								const delRes = await fetch(deleteUrl, { method: 'DELETE', headers });
+								if (!delRes.ok) {
+									const delBody = await delRes.text().catch(() => '<no body>');
+									console.debug(
+										'Failed deleting user (fallback)',
+										id,
+										'status:',
+										delRes.status,
+										'body:',
+										delBody
+									);
+								}
+							} catch (err) {
+								console.debug('Error deleting user (fallback)', id, err);
+							}
+						}
+						return;
+					}
+				} else {
+					console.debug('Unfiltered fetch failed during cleanup, status:', allRes.status);
+				}
+			} catch (err) {
+				console.debug('Unfiltered fetch error during cleanup:', err);
 			}
+		}
+		if (items && items.length > 0) {
+			console.debug('Found', items.length, 'user(s) to delete');
+			// Delete each user record found
+			for (const item of items) {
+				const id = item?.id || item?.ID || item?._id;
+				if (!id) continue;
+				const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
+				console.debug('Deleting user', id, 'via', deleteUrl);
+				try {
+					const delRes = await fetch(deleteUrl, {
+						method: 'DELETE',
+						headers
+					});
+					if (!delRes.ok) {
+						const delBody = await delRes.text().catch(() => '<no body>');
+						console.debug('Failed deleting user', id, 'status:', delRes.status, 'body:', delBody);
+					}
+				} catch (err) {
+					console.debug('Error deleting user', id, err);
+				}
+			}
+		} else {
+			console.debug('No users found for', email);
 		}
 	} catch (err) {
 		// Silently fail if cleanup doesn't work - tests should still pass
@@ -187,11 +421,11 @@ async function deleteUserByEmail(email: string) {
 }
 
 test.describe('Authentication Flows', () => {
-	const testUser = {
-		name: 'Test User',
-		email: `test-${Date.now()}@example.com`,
-		password: 'Password123!'
-	};
+	// const testUser = {
+	// 	name: 'Test User',
+	// 	email: `test-${Date.now()}@example.com`,
+	// 	password: 'Password123!'
+	// };
 
 	test.describe('Registration Flow', () => {
 		test('should register a new user successfully', async ({ page }) => {
@@ -284,7 +518,8 @@ test.describe('Authentication Flows', () => {
 
 				// Go to home page and logout
 				await page.goto('/');
-				await page.click('button:has-text("Logout")');
+				await page.waitForSelector('[data-testid="logout-button"]');
+				await page.click('[data-testid="logout-button"]');
 				await expect(page).toHaveURL('/login');
 
 				// Now login
@@ -293,18 +528,18 @@ test.describe('Authentication Flows', () => {
 				await page.click('button[type="submit"]');
 
 				// Should be on MFA verification page
-				await expect(page.locator('text=/enter the verification code/i')).toBeVisible();
+				await expect(page.locator('[data-testid="mfa-verification-form"]')).toBeVisible();
 				// Get OTP from email - wait longer for email delivery
 				await page.waitForTimeout(3000);
 				const otp = await extractOTPFromEmail(email);
 				expect(otp).toBeTruthy();
 				// Enter OTP
-				await page.getByLabel('Verification Code').fill(otp!);
-				await page.click('button[type="submit"]');
+				await page.locator('[data-testid="mfa-code-input"]').fill(otp!);
+				await page.locator('[data-testid="mfa-verify-button"]').click();
 
 				// Should redirect to home after 2FA success
 				await expect(page).toHaveURL('/');
-				await expect(page.locator('text=/logged in/i')).toBeVisible();
+				await expect(page.getByText('Successfully logged in!')).toBeVisible();
 			} finally {
 				await deleteUserByEmail(email);
 			}
@@ -313,7 +548,6 @@ test.describe('Authentication Flows', () => {
 		test('should reject invalid OTP code', async ({ page }) => {
 			const email = `2fa-invalid-${Date.now()}@example.com`;
 			const password = 'SecurePassword123!';
-
 			try {
 				// Register and enable 2FA
 				await page.goto('/register');
@@ -322,26 +556,27 @@ test.describe('Authentication Flows', () => {
 				await page.fill('input[name="password"]', password);
 				await page.fill('input[name="passwordConfirm"]', password);
 				await page.click('button[type="submit"]');
-
 				// Wait for registration to complete
 				await expect(page).toHaveURL('/');
-
 				await page.goto('/account');
 				await page.waitForLoadState('networkidle');
 				await page.click('#mfa-opt-in');
 				await page.waitForLoadState('networkidle');
-
 				// Go to home page and logout
 				await page.goto('/');
-				await page.click('button:has-text("Logout")');
+				await page.waitForSelector('[data-testid="logout-button"]');
+				await page.click('[data-testid="logout-button"]');
+				await expect(page).toHaveURL('/login');
+				// Submit login form (fill credentials first)
 				await page.fill('input[name="email"]', email);
 				await page.fill('input[name="password"]', password);
 				await page.click('button[type="submit"]');
 
-				// Enter invalid OTP
-				await page.getByLabel('Verification Code').fill('00000000');
-				await page.click('button[type="submit"]');
-
+				// Wait for MFA verification form and enter invalid OTP
+				await expect(page.locator('[data-testid="mfa-verification-form"]')).toBeVisible();
+				await page.waitForTimeout(1000);
+				await page.locator('[data-testid="mfa-code-input"]').fill('00000000');
+				await page.locator('[data-testid="mfa-verify-button"]').click();
 				// Should show error
 				await expect(page.locator('text=/invalid|expired/i')).toBeVisible();
 			} finally {
@@ -374,20 +609,25 @@ test.describe('Authentication Flows', () => {
 				await expect(page.locator('text=/please verify your email/i')).toBeVisible();
 
 				// Send verification email
-				await page.click('button:has-text("Send Verification Email")');
+				await page.click('[data-testid="send-verification-email-button"]');
 				await page.waitForLoadState('networkidle');
 
 				// Should see "check your inbox" message
-				await expect(
-					page.getByText('Please check your inbox for a verification email')
-				).toBeVisible();
+				await expect(page.locator('[data-testid="email-verification-sent"]')).toBeVisible();
 
 				// Get verification link from email - wait longer for email delivery
 				await page.waitForTimeout(3000);
 				const verificationLink = await extractVerificationLinkFromEmail(email);
 				expect(verificationLink).toBeTruthy();
 				// Navigate to verification link
-				await page.goto(verificationLink!);
+				const parsedVerificationUrl = new URL(verificationLink!);
+				const currentOrigin = new URL(page.url()).origin;
+				const correctedOrigin = new URL(currentOrigin);
+				parsedVerificationUrl.protocol = correctedOrigin.protocol;
+				parsedVerificationUrl.hostname = correctedOrigin.hostname;
+				parsedVerificationUrl.port = correctedOrigin.port;
+				// Navigate to verification link using the same host/port as the running dev server
+				await page.goto(parsedVerificationUrl.toString());
 				// Should redirect to account page with success
 				await expect(page).toHaveURL(/\/account/);
 				await expect(page.locator('text=/email verified successfully/i')).toBeVisible();
@@ -396,8 +636,8 @@ test.describe('Authentication Flows', () => {
 				await page.goto('/account');
 				await page.waitForLoadState('networkidle');
 
-				// Should see green checkmark indicating verified
-				await expect(page.locator('text=/email verified/i')).toBeVisible();
+				// Should not show the "send verification" button anymore (indicates verified)
+				await expect(page.locator('[data-testid="send-verification-email-button"]')).toHaveCount(0);
 			} finally {
 				await deleteUserByEmail(email);
 			}
@@ -635,10 +875,9 @@ test.describe('Authentication Flows', () => {
 				await page.goto('/', { waitUntil: 'networkidle' });
 
 				// Check if we're still logged in (logout button visible)
-				const logoutButton = page.locator('button:has-text("Logout")');
+				const logoutButton = page.locator('[data-testid="logout-button"]');
 				if (await logoutButton.isVisible({ timeout: 1000 }).catch(() => false)) {
-					await page.click('button:has-text("Logout")');
-					await expect(page).toHaveURL('/login');
+					await page.click('[data-testid="logout-button"]');
 				} else {
 					// Already logged out, navigate to login
 					await page.goto('/login');

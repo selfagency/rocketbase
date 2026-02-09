@@ -11,12 +11,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 		}
 
-		console.log('API: Confirming verification with token:', token);
+		console.debug('API: Confirming verification with token:', token);
 
 		// Forward to PocketBase to confirm verification
 		await locals.pb.collection('users').confirmVerification(token);
 
-		console.log('API: Email verified successfully');
+		console.debug('API: Email verified successfully');
 
 		return new Response(JSON.stringify({ success: true, message: 'Email verified successfully' }), {
 			status: 200,

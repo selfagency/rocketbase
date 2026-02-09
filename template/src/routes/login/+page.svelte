@@ -86,17 +86,22 @@
 		<CardContent>
 			{#if showMfaForm}
 				<!-- MFA Verification Form -->
-				<form method="POST" action="?/verifyMfa" class="space-y-4">
+				<form
+					method="POST"
+					action="?/verifyMfa"
+					class="space-y-4"
+					data-testid="mfa-verification-form"
+				>
 					{#if $page.form?.message}
-						<Alert variant="destructive">
+						<Alert variant="destructive" data-testid="mfa-error-alert">
 							<AlertCircle class="h-4 w-4" />
 							<AlertDescription>{$page.form.message}</AlertDescription>
 						</Alert>
 					{/if}
 
 					<input type="hidden" name="mfaId" value={mfaData.mfaId} />
-					<input type="hidden" name="otpId" value={mfaData.otpId} />
-					<input type="hidden" name="email" value={mfaData.email} />
+					<input type="hidden" name="otpId" value={mfaData.otpId} data-testid="mfa-otp-id" />
+					<input type="hidden" name="email" value={mfaData.email} data-testid="mfa-email" />
 
 					<div class="space-y-2">
 						<Label for="code">Verification Code</Label>
@@ -108,10 +113,11 @@
 							bind:value={mfaCode}
 							maxlength={8}
 							required
+							data-testid="mfa-code-input"
 						/>
 					</div>
 
-					<Button type="submit" class="w-full">Verify Code</Button>
+					<Button type="submit" class="w-full" data-testid="mfa-verify-button">Verify Code</Button>
 					<Button
 						type="button"
 						variant="outline"

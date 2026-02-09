@@ -30,7 +30,9 @@
 				<div class="flex gap-2">
 					<Button href="/account" variant="outline">Account Settings</Button>
 					<form method="POST" action="/logout">
-						<Button type="submit" variant="outline">{m['home.logout_button']()}</Button>
+						<Button type="submit" variant="outline" data-testid="logout-button"
+							>{m['home.logout_button']()}</Button
+						>
 					</form>
 				</div>
 			{:else}

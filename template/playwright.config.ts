@@ -3,6 +3,12 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
 	webServer: [
 		{
+			command: 'docker run --rm -p 1025:1025 -p 8025:8025 axllent/mailpit',
+			port: 8025,
+			reuseExistingServer: !process.env.CI,
+			timeout: 10000
+		},
+		{
 			command: 'pnpm run pb',
 			port: 8090,
 			reuseExistingServer: !process.env.CI

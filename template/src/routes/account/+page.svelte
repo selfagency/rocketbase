@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
@@ -88,7 +88,8 @@
 	let verificationEmailSent = $state(false);
 
 	$effect(() => {
-		if ($page.url.searchParams.get('verified') === 'true') {
+		const verifiedFlag = page?.url?.searchParams?.get('verified');
+		if (verifiedFlag === 'true') {
 			toast.success(m['account.email_verified_success']());
 		}
 	});
@@ -264,7 +265,7 @@
 						</Form.Field>
 						{#if !data.user.verified}
 							{#if verificationEmailSent}
-								<div class="mt-3 rounded-md bg-amber-50 p-3">
+								<div class="mt-3 rounded-md bg-amber-50 p-3" data-testid="email-verification-sent">
 									<p class="text-sm text-amber-800">
 										Please check your inbox for a verification email. The link will expire in 24
 										hours.
@@ -280,6 +281,7 @@
 										variant="outline"
 										size="sm"
 										onclick={() => handleSendVerificationEmail()}
+										data-testid="send-verification-email-button"
 									>
 										{m['account.email_verification_button']()}
 									</Button>

@@ -50,16 +50,16 @@ export const actions: Actions = {
 			if (mfaId) {
 				// MFA is required - request OTP and return to show OTP form
 				try {
-					console.log('MFA required, requesting OTP for:', form.data.email);
-					console.log('Using mfaId:', mfaId);
+					console.debug('MFA required, requesting OTP for:', form.data.email);
+					console.debug('Using mfaId:', mfaId);
 
 					// Request OTP with mfaId to link to MFA session
 					const otpResponse = await locals.pb
 						.collection('users')
 						.requestOTP(form.data.email, { mfaId } as any);
 
-					console.log('OTP request successful');
-					console.log('OTP Response:', { otpId: otpResponse.otpId });
+					console.debug('OTP request successful');
+					console.debug('OTP Response:', { otpId: otpResponse.otpId });
 
 					return {
 						form,
@@ -94,20 +94,20 @@ export const actions: Actions = {
 		}
 
 		try {
-			console.log('=== MFA Verification Debug ===');
-			console.log('Form data received:', { otpId, code: code?.substring(0, 3) + '***', email });
-			console.log('Code length:', code?.length);
+			console.debug('=== MFA Verification Debug ===');
+			console.debug('Form data received:', { otpId, code: code?.substring(0, 3) + '***', email });
+			console.debug('Code length:', code?.length);
 
 			// authWithOTP signature: authWithOTP(otpId: string, password: string, options?: CommonOptions)
 			// The 'password' parameter is actually the OTP code
-			console.log('Calling: pb.collection("users").authWithOTP(otpId, code, { mfaId })');
+			console.debug('Calling: pb.collection("users").authWithOTP(otpId, code, { mfaId })');
 
 			const authData = await locals.pb
 				.collection('users')
 				.authWithOTP(otpId, code, { mfaId } as any);
 
-			console.log('MFA verification succeeded!');
-			console.log('Auth data received:', {
+			console.debug('MFA verification succeeded!');
+			console.debug('Auth data received:', {
 				userId: authData.record?.id,
 				email: authData.record?.email
 			});
@@ -125,7 +125,7 @@ export const actions: Actions = {
 			}
 
 			// Return success - let client handle toast and redirect
-			console.log('MFA verification successful!');
+			console.debug('MFA verification successful!');
 			return { success: true };
 		} catch (err) {
 			console.error('=== MFA verification error ===');

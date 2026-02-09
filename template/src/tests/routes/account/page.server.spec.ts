@@ -21,7 +21,12 @@ describe('Account Server Actions', () => {
 				collection: vi.fn().mockReturnValue({
 					update: vi.fn(),
 					authRefresh: vi.fn(),
-					requestVerification: vi.fn()
+					requestVerification: vi.fn(),
+					requestOTP: vi.fn(),
+					getFullList: vi.fn(),
+					authWithOTP: vi.fn(),
+					create: vi.fn(),
+					delete: vi.fn()
 				}),
 				authStore: {
 					record: mockUser
@@ -147,9 +152,7 @@ describe('Account Server Actions', () => {
 			const result: any = await actions.sendVerificationEmail(mockEvent as any);
 
 			expect(result.success).toBe(true);
-			expect(mockLocals.pb.collection().requestVerification).toHaveBeenCalledWith(
-				mockUser.email
-			);
+			expect(mockLocals.pb.collection().requestVerification).toHaveBeenCalledWith(mockUser.email);
 		});
 
 		it('requires authentication', async () => {
@@ -171,9 +174,9 @@ describe('Account Server Actions', () => {
 	describe('changePassword action', () => {
 		it('successfully changes password', async () => {
 			const formData = new FormData();
-			formData.append('currentPassword', 'oldPassword123');
-			formData.append('newPassword', 'newPassword123');
-			formData.append('confirmPassword', 'newPassword123');
+			formData.append('oldPassword', 'oldPassword123');
+			formData.append('password', 'newPassword123');
+			formData.append('passwordConfirm', 'newPassword123');
 
 			mockEvent.request = new Request('http://localhost', {
 				method: 'POST',
@@ -181,7 +184,6 @@ describe('Account Server Actions', () => {
 			});
 
 			mockLocals.pb.collection().update.mockResolvedValue(mockUser);
-			mockLocals.pb.collection().authRefresh.mockResolvedValue({});
 
 			const result: any = await actions.changePassword(mockEvent as any);
 
@@ -194,9 +196,9 @@ describe('Account Server Actions', () => {
 
 		it('validates password length', async () => {
 			const formData = new FormData();
-			formData.append('currentPassword', 'oldPassword123');
-			formData.append('newPassword', 'short');
-			formData.append('confirmPassword', 'short');
+			formData.append('oldPassword', 'oldPassword123');
+			formData.append('password', 'short');
+			formData.append('passwordConfirm', 'short');
 
 			mockEvent.request = new Request('http://localhost', {
 				method: 'POST',
@@ -210,9 +212,9 @@ describe('Account Server Actions', () => {
 
 		it('validates password confirmation matches', async () => {
 			const formData = new FormData();
-			formData.append('currentPassword', 'oldPassword123');
-			formData.append('newPassword', 'newPassword123');
-			formData.append('confirmPassword', 'differentPassword123');
+			formData.append('oldPassword', 'oldPassword123');
+			formData.append('password', 'newPassword123');
+			formData.append('passwordConfirm', 'differentPassword123');
 
 			mockEvent.request = new Request('http://localhost', {
 				method: 'POST',
@@ -228,9 +230,9 @@ describe('Account Server Actions', () => {
 			mockLocals.user = null;
 
 			const formData = new FormData();
-			formData.append('currentPassword', 'oldPassword123');
-			formData.append('newPassword', 'newPassword123');
-			formData.append('confirmPassword', 'newPassword123');
+			formData.append('oldPassword', 'oldPassword123');
+			formData.append('password', 'newPassword123');
+			formData.append('passwordConfirm', 'newPassword123');
 
 			mockEvent.request = new Request('http://localhost', {
 				method: 'POST',
@@ -308,7 +310,6 @@ describe('Account Server Actions', () => {
 			expect(result).toHaveProperty('status', 401);
 		});
 	});
-});
 
 	describe('requestTwoFactor action', () => {
 		it('successfully requests OTP code', async () => {

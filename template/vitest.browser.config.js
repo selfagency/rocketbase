@@ -1,0 +1,20 @@
+// <reference types="@sveltejs/kit" />
+import { sveltekit } from '@sveltejs/kit/vite';
+import { playwright } from '@vitest/browser-playwright';
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+	plugins: [sveltekit()],
+	test: {
+		globals: true,
+		environment: 'jsdom',
+		browser: {
+			enabled: true,
+			provider: playwright(),
+			instances: [{ browser: 'chromium' }],
+			headless: true
+		},
+		include: ['src/tests/**/*.svelte.spec.{js,ts}', 'src/lib/components/**/*.spec.{js,ts}'],
+		exclude: ['src/tests/**/*.server.spec.{js,ts}', 'node_modules']
+	}
+});

@@ -211,5 +211,95 @@ export const actions: Actions = {
 			form.message = err?.message || m['account.error_message']();
 			return fail(400, { passwordForm: form });
 		}
+	},
+
+	requestTwoFactor: async ({ request, locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: 'Unauthorized' });
+		}
+
+		try {
+			const formData = await request.formData();
+			const email = formData.get('email')?.toString() || locals.user.email;
+
+			const response = await locals.pb.collection('users').requestOTP(email);
+
+			return {
+				otpId: response.otpId,
+				otpRequested: true
+			};
+		} catch (err: any) {
+			console.error('OTP request error:', err);
+			return fail(400, { message: err?.message || m['account.error_message']() });
+		}
+	},
+
+	verifyTwoFactor: async ({ request, locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: 'Unauthorized' });
+		}
+
+		try {
+			const formData = await request.formData();
+			const otpId = formData.get('otpId')?.toString();
+			const code = formData.get('code')?.toString();
+
+			if (!otpId || !code) {
+				return fail(400, { message: 'Missing OTP ID or code' });
+			}
+
+			// Verify the OTP code
+			const otps = await locals.pb
+				.collection('_otps')
+				.getFullList({ filter: `id = "${otpId}" && recordRef = "${locals.user.id}"` });
+
+			if (otps.length === 0) {
+				return fail(400, { message: 'Invalid OTP' });
+			}
+
+			// Authenticate with OTP to verify the code
+			await locals.pb.collection('users').authWithOTP(otpId, code);
+
+			// Create MFA record
+			await locals.pb.collection('_mfas').create({
+				collectionRef: 'users',
+				recordRef: locals.user.id,
+				method: 'otp'
+			});
+
+			return {
+				twoFactorEnabled: true,
+				success: true
+			};
+		} catch (err: any) {
+			console.error('2FA verification error:', err);
+			return fail(400, { message: err?.message || 'Invalid code' });
+		}
+	},
+
+	disableTwoFactor: async ({ locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: 'Unauthorized' });
+		}
+
+		try {
+			// Get all MFA records for this user
+			const mfas = await locals.pb
+				.collection('_mfas')
+				.getFullList({ filter: `recordRef = "${locals.user.id}"` });
+
+			// Delete all MFA records
+			for (const mfa of mfas) {
+				await locals.pb.collection('_mfas').delete(mfa.id);
+			}
+
+			return {
+				twoFactorEnabled: false,
+				success: true
+			};
+		} catch (err: any) {
+			console.error('2FA disable error:', err);
+			return fail(400, { message: err?.message || m['account.error_message']() });
+		}
 	}
 };

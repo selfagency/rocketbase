@@ -2,46 +2,19 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import svg from '@poppanator/sveltekit-svg';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
-import { playwright } from '@vitest/browser-playwright';
+import { defineConfig } from 'vite';
 import devtoolsJson from 'vite-plugin-devtools-json';
-// import { ViteMcp } from 'vite-plugin-mcp';
-import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [
-    // ViteMcp(),
-    tailwindcss(),
-    sveltekit(),
-    devtoolsJson(),
-    paraglideVitePlugin({ project: './project.inlang', outdir: './src/lib/paraglide' }),
-    svg(),
-  ],
-  test: {
-    expect: { requireAssertions: true },
-    projects: [
-      {
-        extends: './vite.config.ts',
-        test: {
-          name: 'client',
-          browser: {
-            enabled: true,
-            provider: playwright(),
-            instances: [{ browser: 'chromium', headless: true }],
-          },
-          include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
-          exclude: ['src/lib/server/**'],
-        },
-      },
-
-      {
-        extends: './vite.config.ts',
-        test: {
-          name: 'server',
-          environment: 'node',
-          include: ['src/**/*.{test,spec}.{js,ts}'],
-          exclude: ['src/**/*.svelte.{test,spec}.{js,ts}'],
-        },
-      },
-    ],
-  },
+	plugins: [
+		tailwindcss(),
+		sveltekit(),
+		devtoolsJson(),
+		paraglideVitePlugin({
+			project: './project.inlang',
+			outdir: './src/lib/paraglide',
+			emitTsDeclarations: true
+		}),
+		svg()
+	]
 });

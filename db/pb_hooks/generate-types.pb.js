@@ -2,7 +2,7 @@
 
 const generateTypes = e => {
   console.debug('Regenerating types');
-  const cmd = $os.cmd('pnpm', 'run', 'build:types');
+  const cmd = $os.cmd('pnpm', '--filter', 'rocketbase-app', 'run', 'build:types');
   const result = toString(cmd.output());
   console.debug(result);
 

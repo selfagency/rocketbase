@@ -13,9 +13,6 @@ importers:
       '@formkit/tempo':
         specifier: ^1.0.0
         version: 1.0.0
-      '@humanwhocodes/crosspost':
-        specifier: ^1.0.2
-        version: 1.0.2
       '@inlang/paraglide-js':
         specifier: ^2.10.0
         version: 2.10.0
@@ -52,6 +49,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0))
+      '@trpc/client':
+        specifier: ^11.9.0
+        version: 11.9.0(@trpc/server@11.9.0(typescript@5.9.3))(typescript@5.9.3)
       '@vitest/browser-playwright':
         specifier: ^4.0.18
         version: 4.0.18(playwright@1.58.2)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0))(vitest@4.0.18)
@@ -205,9 +205,24 @@ importers:
 
   sidecar:
     devDependencies:
+      '@humanwhocodes/crosspost':
+        specifier: ^1.0.2
+        version: 1.0.2
+      '@trpc/server':
+        specifier: ^11.9.0
+        version: 11.9.0(typescript@5.9.3)
       '@types/node':
         specifier: ^20.19.0
         version: 20.19.33
+      '@upyo/core':
+        specifier: ^0.4.0
+        version: 0.4.0
+      '@upyo/mock':
+        specifier: ^0.4.0
+        version: 0.4.0(@upyo/core@0.4.0)
+      '@upyo/smtp':
+        specifier: ^0.4.0
+        version: 0.4.0(@upyo/core@0.4.0)
       consola:
         specifier: ^3.4.2
         version: 3.4.2
@@ -223,6 +238,15 @@ importers:
       oxlint-tsgolint:
         specifier: ^0.11.5
         version: 0.11.5
+      pocketbase:
+        specifier: ^0.26.8
+        version: 0.26.8
+      pocketbase-queue:
+        specifier: ^0.0.5
+        version: 0.0.5(pocketbase@0.26.8)
+      radashi:
+        specifier: ^12.7.1
+        version: 12.7.1
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
@@ -1174,6 +1198,17 @@ packages:
     resolution: {integrity: sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==}
     engines: {node: '>= 6'}
 
+  '@trpc/client@11.9.0':
+    resolution: {integrity: sha512-3r4RT/GbR263QO+2gCPyrs5fEYaXua3/AzCs+GbWC09X0F+mVkyBpO3GRSDObiNU/N1YB597U7WGW3WA1d1TVw==}
+    peerDependencies:
+      '@trpc/server': 11.9.0
+      typescript: '>=5.7.2'
+
+  '@trpc/server@11.9.0':
+    resolution: {integrity: sha512-T8gC4NOCzx8tCsQEQ5sSjf24bN+9AEqXZRfpThG+YCEmcEwXfS7RP8VVrl5Vodt1S+zGEDyQSof4YVAj1zq/mg==}
+    peerDependencies:
+      typescript: '>=5.7.2'
+
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
 
@@ -1216,6 +1251,22 @@ packages:
     peerDependenciesMeta:
       '@types/json-schema':
         optional: true
+
+  '@upyo/core@0.4.0':
+    resolution: {integrity: sha512-JQtwxI095eTkfdJQCaZfRskpPuTUcU1FRbqEinf+sLhP8Z0MW+9UsPGmJvFV9uSjMxfl9hhCUe6I4W4R1TqUjA==}
+    engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
+
+  '@upyo/mock@0.4.0':
+    resolution: {integrity: sha512-oCh+U89bQps5jIjmyXK2OrhZgMX5AR0Z1ay69+Va49PDkbP94UAeFAsYLlTcqx0tfUniXbgYS/CpGHjb4WIBUA==}
+    engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
+    peerDependencies:
+      '@upyo/core': 0.4.0
+
+  '@upyo/smtp@0.4.0':
+    resolution: {integrity: sha512-YOlbWilM7j6gn3AW0dVIknS6RWmPIxnPc1g6iBCXLh3MylRVGrjXtmCJwS/ueCLXTQRoVv6TRd39a+kiImE6dw==}
+    engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
+    peerDependencies:
+      '@upyo/core': 0.4.0
 
   '@valibot/to-json-schema@1.5.0':
     resolution: {integrity: sha512-GE7DmSr1C2UCWPiV0upRH6mv0cCPsqYGs819fb6srCS1tWhyXrkGGe+zxUiwzn/L1BOfADH4sNjY/YHCuP8phQ==}
@@ -4134,6 +4185,15 @@ snapshots:
   '@tootallnate/once@1.1.2':
     optional: true
 
+  '@trpc/client@11.9.0(@trpc/server@11.9.0(typescript@5.9.3))(typescript@5.9.3)':
+    dependencies:
+      '@trpc/server': 11.9.0(typescript@5.9.3)
+      typescript: 5.9.3
+
+  '@trpc/server@11.9.0(typescript@5.9.3)':
+    dependencies:
+      typescript: 5.9.3
+
   '@tybys/wasm-util@0.10.1':
     dependencies:
       tslib: 2.8.1
@@ -4175,6 +4235,16 @@ snapshots:
 
   '@typeschema/core@0.14.0':
     optional: true
+
+  '@upyo/core@0.4.0': {}
+
+  '@upyo/mock@0.4.0(@upyo/core@0.4.0)':
+    dependencies:
+      '@upyo/core': 0.4.0
+
+  '@upyo/smtp@0.4.0(@upyo/core@0.4.0)':
+    dependencies:
+      '@upyo/core': 0.4.0
 
   '@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3))':
     dependencies:

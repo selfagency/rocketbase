@@ -1,6 +1,10 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["unicorn", "typescript", "oxc"],
+  "plugins": [
+    "unicorn",
+    "typescript",
+    "oxc"
+  ],
   "categories": {},
   "rules": {},
   "settings": {
@@ -17,5 +21,11 @@
     "builtin": true
   },
   "globals": {},
-  "ignorePatterns": ["node_modules/", "dist/", "build/"]
+  "ignorePatterns": [
+    "**/node_modules/",
+    "**/.svelte-kit/",
+    "**/build/",
+    "**/dist/",
+    "**/pb_data/"
+  ]
 }

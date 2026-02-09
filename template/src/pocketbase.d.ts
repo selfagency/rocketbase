@@ -17,6 +17,9 @@ export enum Collections {
 	Pages = "pages",
 	Pageviews = "pageviews",
 	Posts = "posts",
+	QueueLocks = "queue_locks",
+	QueueStats = "queue_stats",
+	QueueTasks = "queue_tasks",
 	Redirects = "redirects",
 	Tags = "tags",
 	Users = "users",
@@ -204,6 +207,26 @@ export type PostsRecord = {
 	visible?: boolean
 }
 
+export type QueueLocksRecord = {
+	id: string
+	task: RecordIdString
+	worker_id: string
+}
+
+export type QueueStatsRecord<Tfailed_tasks = unknown, Tpending_tasks = unknown> = {
+	failed_tasks?: null | Tfailed_tasks
+	id: string
+	pending_tasks?: null | Tpending_tasks
+}
+
+export type QueueTasksRecord<Ttask = unknown> = {
+	failed?: IsoDateString
+	failed_reason?: string
+	id: string
+	queue: string
+	task?: null | Ttask
+}
+
 export type RedirectsRecord = {
 	id: string
 	slug?: string
@@ -256,6 +279,9 @@ export type MetadataResponse<Texpand = unknown> = Required<MetadataRecord> & Bas
 export type PagesResponse<Texpand = unknown> = Required<PagesRecord> & BaseSystemFields<Texpand>
 export type PageviewsResponse<Texpand = unknown> = Required<PageviewsRecord> & BaseSystemFields<Texpand>
 export type PostsResponse<Texpand = unknown> = Required<PostsRecord> & BaseSystemFields<Texpand>
+export type QueueLocksResponse<Texpand = unknown> = Required<QueueLocksRecord> & BaseSystemFields<Texpand>
+export type QueueStatsResponse<Tfailed_tasks = unknown, Tpending_tasks = unknown, Texpand = unknown> = Required<QueueStatsRecord<Tfailed_tasks, Tpending_tasks>> & BaseSystemFields<Texpand>
+export type QueueTasksResponse<Ttask = unknown, Texpand = unknown> = Required<QueueTasksRecord<Ttask>> & BaseSystemFields<Texpand>
 export type RedirectsResponse<Texpand = unknown> = Required<RedirectsRecord> & BaseSystemFields<Texpand>
 export type TagsResponse<Texpand = unknown> = Required<TagsRecord> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
@@ -274,6 +300,9 @@ export type CollectionRecords = {
 	pages: PagesRecord
 	pageviews: PageviewsRecord
 	posts: PostsRecord
+	queue_locks: QueueLocksRecord
+	queue_stats: QueueStatsRecord
+	queue_tasks: QueueTasksRecord
 	redirects: RedirectsRecord
 	tags: TagsRecord
 	users: UsersRecord
@@ -291,6 +320,9 @@ export type CollectionResponses = {
 	pages: PagesResponse
 	pageviews: PageviewsResponse
 	posts: PostsResponse
+	queue_locks: QueueLocksResponse
+	queue_stats: QueueStatsResponse
+	queue_tasks: QueueTasksResponse
 	redirects: RedirectsResponse
 	tags: TagsResponse
 	users: UsersResponse

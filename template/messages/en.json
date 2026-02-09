@@ -55,6 +55,8 @@
 	"account.security_section": "Security",
 	"account.name_label": "Name",
 	"account.email_label": "Email",
+	"account.verified_badge": "Verified",
+	"account.unverified_badge": "Unverified",
 	"account.title_label": "Title",
 	"account.bio_label": "Bio",
 	"account.website_label": "Website",

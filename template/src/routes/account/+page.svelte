@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
+	import * as Avatar from '$lib/components/ui/avatar';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -132,6 +133,18 @@
 		return null;
 	}
 
+	const getDisplayName = (user?: { name?: string | null; email?: string | null }) => {
+		return user?.name || user?.email || 'User';
+	};
+
+	const getInitials = (user?: { name?: string | null; email?: string | null }) => {
+		const display = getDisplayName(user).trim();
+		const parts = display.split(/\s+/).filter(Boolean);
+		if (parts.length === 0) return 'U';
+		if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+		return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+	};
+
 	async function handleSendVerificationEmail() {
 		const formData = new FormData();
 		const response = await fetch('?/sendVerificationEmail', {
@@ -172,25 +185,17 @@
 						<Label>{m['account.avatar_label']()}</Label>
 						<div class="flex items-start gap-4">
 							<div>
-								{#if avatarPreview}
-									<img
-										src={avatarPreview}
-										alt="Avatar preview"
-										class="h-24 w-24 rounded-lg object-cover"
-									/>
-								{:else if data.user.avatar}
-									<img
-										src={getAvatarUrl(data.user)}
-										alt="Current avatar"
-										class="h-24 w-24 rounded-lg object-cover"
-									/>
-								{:else}
-									<div
-										class="flex h-24 w-24 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground"
-									>
-										No image
-									</div>
-								{/if}
+								<Avatar.Root class="h-24 w-24 rounded-lg">
+									{#if avatarPreview}
+										<Avatar.Image src={avatarPreview} alt="Avatar preview" />
+									{:else if data.user.avatar}
+										<Avatar.Image
+											src={getAvatarUrl(data.user) || undefined}
+											alt={getDisplayName(data.user)}
+										/>
+									{/if}
+									<Avatar.Fallback>{getInitials(data.user)}</Avatar.Fallback>
+								</Avatar.Root>
 							</div>
 							<div class="flex flex-col gap-2 pt-1">
 								<input
@@ -245,17 +250,9 @@
 									<div class="flex items-center gap-2">
 										<Form.Label>{m['account.email_label']()}</Form.Label>
 										{#if data.user.verified}
-											<span
-												class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-600"
-											>
-												<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-													<path
-														fill-rule="evenodd"
-														d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-														clip-rule="evenodd"
-													/>
-												</svg>
-											</span>
+											<Badge variant="default" class="bg-green-100 text-green-800">
+												{m['account.verified_badge']()}
+											</Badge>
 										{/if}
 									</div>
 									<Input {...props} bind:value={$form.email} type="email" required />

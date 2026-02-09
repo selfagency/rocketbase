@@ -2,7 +2,7 @@ import { paraglideMiddleware } from '$lib/paraglide/server';
 import { createPocketBaseClient } from '$lib/pocketbase';
 import type { Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
-import type { UsersResponse } from './pocketbase.d';
+import type { UsersResponse } from './pocketbase';
 
 const handleAuth: Handle = async ({ event, resolve }) => {
 	event.locals.pb = createPocketBaseClient();

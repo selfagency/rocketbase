@@ -1,5 +1,6 @@
 packages:
-  - 'cli'
-  - 'template'
+  - "app"
+  - "cli"
+  - "sidecar"
 onlyBuiltDependencies:
   - esbuild

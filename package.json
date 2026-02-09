@@ -11,5 +11,8 @@
       "esbuild",
       "sqlite3"
     ]
+  },
+  "engines": {
+    "node": "20.x"
   }
 }

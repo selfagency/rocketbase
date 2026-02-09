@@ -11,6 +11,7 @@ export enum Collections {
 	Mfas = "_mfas",
 	Otps = "_otps",
 	Superusers = "_superusers",
+	AuditLogs = "audit_logs",
 	Metadata = "metadata",
 	Pages = "pages",
 	Posts = "posts",
@@ -98,6 +99,32 @@ export type SuperusersRecord = {
 	tokenKey: string
 	updated: IsoAutoDateString
 	verified?: boolean
+}
+
+export enum AuditLogsEventTypeOptions {
+	"create_request" = "create_request",
+	"update_request" = "update_request",
+	"delete_request" = "delete_request",
+	"create" = "create",
+	"update" = "update",
+	"delete" = "delete",
+	"auth" = "auth",
+}
+export type AuditLogsRecord<Tafter_changes = unknown, Tbefore_changes = unknown> = {
+	after_changes?: null | Tafter_changes
+	auth_method?: string
+	before_changes?: null | Tbefore_changes
+	collection_name?: string
+	created: IsoAutoDateString
+	event_type: AuditLogsEventTypeOptions
+	id: string
+	record_id?: string
+	request_ip?: string
+	request_method?: string
+	request_url?: string
+	timestamp: IsoDateString
+	updated: IsoAutoDateString
+	user?: RecordIdString
 }
 
 export enum MetadataTypeOptions {
@@ -225,6 +252,7 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
+export type AuditLogsResponse<Tafter_changes = unknown, Tbefore_changes = unknown, Texpand = unknown> = Required<AuditLogsRecord<Tafter_changes, Tbefore_changes>> & BaseSystemFields<Texpand>
 export type MetadataResponse<Texpand = unknown> = Required<MetadataRecord> & BaseSystemFields<Texpand>
 export type PagesResponse<Texpand = unknown> = Required<PagesRecord> & BaseSystemFields<Texpand>
 export type PostsResponse<Texpand = unknown> = Required<PostsRecord> & BaseSystemFields<Texpand>
@@ -243,6 +271,7 @@ export type CollectionRecords = {
 	_mfas: MfasRecord
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
+	audit_logs: AuditLogsRecord
 	metadata: MetadataRecord
 	pages: PagesRecord
 	posts: PostsRecord
@@ -260,6 +289,7 @@ export type CollectionResponses = {
 	_mfas: MfasResponse
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
+	audit_logs: AuditLogsResponse
 	metadata: MetadataResponse
 	pages: PagesResponse
 	posts: PostsResponse

@@ -19,6 +19,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as m from '$lib/paraglide/messages';
+	import { toastQueue } from '$lib/stores/toast';
 	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
@@ -55,7 +56,7 @@
 		onUpdated: ({ form }) => {
 			if (form.valid) {
 				avatarPreview = null;
-				toast.success(m['account.profile_updated']());
+				toastQueue.success(m['account.profile_updated']());
 			}
 		}
 	});
@@ -69,7 +70,7 @@
 		resetForm: true,
 		onUpdated: ({ form }) => {
 			if (form.valid) {
-				toast.success(m['account.password_changed_success']());
+				toastQueue.success(m['account.password_changed_success']());
 			}
 		}
 	});

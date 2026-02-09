@@ -14,8 +14,8 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as m from '$lib/paraglide/messages';
+	import { toastQueue } from '$lib/stores/toast';
 	import { AlertCircle } from '@lucide/svelte';
-	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -38,6 +38,15 @@
 	let mfaData = $state({ mfaId: '', otpId: '', email: '' });
 	let mfaCode = $state('');
 
+	// Show success toast if coming from registration
+	$effect(() => {
+		if (page.url.searchParams.get('registered') === 'true') {
+			toastQueue.success(m['auth.register.success']());
+			// Clean up URL without reload
+			window.history.replaceState({}, '', '/login');
+		}
+	});
+
 	// Watch for MFA data from action result
 	$effect(() => {
 		const actionResult = page.form as any;
@@ -55,7 +64,7 @@
 	$effect(() => {
 		const actionResult = page.form as any;
 		if (actionResult?.success) {
-			toast.success(m['auth.login.success']());
+			toastQueue.success(m['auth.login.success']());
 			// Redirect to home after showing toast
 			setTimeout(() => {
 				goto('/');

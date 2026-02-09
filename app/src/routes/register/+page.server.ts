@@ -54,7 +54,7 @@ export const actions: Actions = {
       });
     }
 
-    // Redirect to login after successful registration
-    redirect(303, '/login');
+    // Redirect to login after successful registration with success flag
+    redirect(303, '/login?registered=true');
   },
 };

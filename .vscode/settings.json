@@ -17,4 +17,7 @@
   "vite.port": 5173,
   "vite.showTerminal": true,
   "sarif-viewer.connectToGithubCodeScanning": "off",
+  "[shellscript]": {
+    "editor.defaultFormatter": "mkhl.shfmt"
+  },
 }

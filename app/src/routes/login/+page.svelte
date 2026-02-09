@@ -14,7 +14,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as m from '$lib/paraglide/messages';
-	import { toastQueue } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toast';
 	import { AlertCircle } from '@lucide/svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
@@ -41,7 +41,7 @@
 	// Show success toast if coming from registration
 	$effect(() => {
 		if (page.url.searchParams.get('registered') === 'true') {
-			toastQueue.success(m['auth.register.success']());
+			toast(m['auth.register.success'](), 'success');
 			// Clean up URL without reload
 			window.history.replaceState({}, '', '/login');
 		}
@@ -64,7 +64,7 @@
 	$effect(() => {
 		const actionResult = page.form as any;
 		if (actionResult?.success) {
-			toastQueue.success(m['auth.login.success']());
+			toast(m['auth.login.success'](), 'success');
 			// Redirect to home after showing toast
 			setTimeout(() => {
 				goto('/');

@@ -1,54 +1,10 @@
-import { toast } from 'svelte-sonner';
+import { PersistedState } from 'runed';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export const toasts = new PersistedState<
+  { timestamp: Date; message: string; type: 'success' | 'error' | 'info' | 'warning' }[]
+>('toasts', [], { storage: 'session' });
 
-function createToastStore() {
-  return {
-    /**
-     * Add a toast message
-     */
-    add: (message: string, type: ToastType = 'info') => {
-      switch (type) {
-        case 'success':
-          toast.success(message);
-          break;
-        case 'error':
-          toast.error(message);
-          break;
-        case 'warning':
-          toast.warning(message);
-          break;
-        case 'info':
-        default:
-          toast.info(message);
-          break;
-      }
-    },
-    /**
-     * Add a success toast
-     */
-    success: (message: string) => {
-      toast.success(message);
-    },
-    /**
-     * Add an error toast
-     */
-    error: (message: string) => {
-      toast.error(message);
-    },
-    /**
-     * Add a warning toast
-     */
-    warning: (message: string) => {
-      toast.warning(message);
-    },
-    /**
-     * Add an info toast
-     */
-    info: (message: string) => {
-      toast.info(message);
-    },
-  };
+// function to add a toast message to the queue
+export function toast(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') {
+  toasts.current.push({ timestamp: new Date(), message, type });
 }
-
-export const toastQueue = createToastStore();

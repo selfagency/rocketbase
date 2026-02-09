@@ -1,0 +1,39 @@
+<script lang="ts">
+	import { Toaster } from '$lib/components/ui/sonner';
+	import { toasts } from '$lib/stores/toast.js';
+	import { toast } from 'svelte-sonner';
+	import { SvelteSet } from 'svelte/reactivity';
+
+	const shownKeys = new SvelteSet<string>();
+	const getToastKey = (toastData: {
+		timestamp: Date | string | number;
+		message: string;
+		type: string;
+	}) => {
+		const timestamp =
+			toastData.timestamp instanceof Date
+				? toastData.timestamp.getTime()
+				: new Date(toastData.timestamp).getTime();
+
+		return `${toastData.type}:${toastData.message}:${Number.isNaN(timestamp) ? 0 : timestamp}`;
+	};
+
+	$effect(() => {
+		if (toasts.current.length === 0) {
+			shownKeys.clear();
+			return;
+		}
+
+		for (const toastData of toasts.current) {
+			const key = getToastKey(toastData);
+			if (shownKeys.has(key)) {
+				continue;
+			}
+
+			shownKeys.add(key);
+			toast[toastData.type](toastData.message);
+		}
+	});
+</script>
+
+<Toaster />

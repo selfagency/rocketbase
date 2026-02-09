@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Nav from '$lib/components/global/Nav.svelte';
-	import { Toaster } from '$lib/components/ui/sonner';
+	import Toaster from '$lib/components/global/Toaster.svelte';
 	import '../app.css';
 
 	let { children } = $props();

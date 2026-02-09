@@ -19,8 +19,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as m from '$lib/paraglide/messages';
-	import { toastQueue } from '$lib/stores/toast';
-	import { toast } from 'svelte-sonner';
+	import { toast } from '$lib/stores/toast';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -56,7 +55,7 @@
 		onUpdated: ({ form }) => {
 			if (form.valid) {
 				avatarPreview = null;
-				toastQueue.success(m['account.profile_updated']());
+				toast(m['account.profile_updated'](), 'success');
 			}
 		}
 	});
@@ -70,7 +69,7 @@
 		resetForm: true,
 		onUpdated: ({ form }) => {
 			if (form.valid) {
-				toastQueue.success(m['account.password_changed_success']());
+				toast(m['account.password_changed_success'](), 'success');
 			}
 		}
 	});
@@ -92,7 +91,7 @@
 	$effect(() => {
 		const verifiedFlag = page?.url?.searchParams?.get('verified');
 		if (verifiedFlag === 'true') {
-			toast.success(m['account.email_verified_success']());
+			toast(m['account.email_verified_success'](), 'success');
 		}
 	});
 
@@ -155,9 +154,18 @@
 
 		if (response.ok) {
 			verificationEmailSent = true;
-			toast.success(m['account.email_verification_sent']());
+			toast(m['account.email_verification_sent'](), 'success');
 		} else {
-			toast.error('Failed to send verification email');
+			let errorMessage = m['account.email_verification_failed']();
+			try {
+				const data = (await response.json()) as { message?: string } | null;
+				if (data?.message) {
+					errorMessage = data.message;
+				}
+			} catch {
+				// Ignore JSON parsing failures.
+			}
+			toast(errorMessage, 'error');
 		}
 	}
 </script>
@@ -377,10 +385,11 @@
 								if (typeof nextOptIn === 'boolean') {
 									savedMfaOptIn = nextOptIn;
 									uiMfaOptIn = nextOptIn;
-									toast.success(
+									toast(
 										nextOptIn
 											? m['account.2fa_enabled_success']()
-											: m['account.2fa_disabled_success']()
+											: m['account.2fa_disabled_success'](),
+										nextOptIn ? 'success' : 'info'
 									);
 								} else {
 									savedMfaOptIn = uiMfaOptIn;

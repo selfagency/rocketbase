@@ -12,6 +12,9 @@
       "sqlite3"
     ]
   },
+  "scripts": {
+    "db": "pocketbase serve --dev --dir db/pb_data --hooksDir db/pb_hooks --migrationsDir db/pb_migrations"
+  },
   "engines": {
     "node": "20.x"
   }

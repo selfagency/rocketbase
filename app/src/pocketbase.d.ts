@@ -115,9 +115,15 @@ export type MetadataRecord = {
 	value?: string
 }
 
+export enum PagesCollectionOptions {
+	"posts" = "posts",
+	"tags" = "tags",
+}
 export type PagesRecord = {
+	collection?: PagesCollectionOptions
 	content?: HTMLString
 	created: IsoAutoDateString
+	custom_css?: string
 	id: string
 	image?: FileNameString
 	media?: FileNameString[]
@@ -136,6 +142,7 @@ export type PostsRecord = {
 	content?: HTMLString
 	created: IsoAutoDateString
 	date: IsoDateString
+	enclosure?: string
 	id: string
 	image?: FileNameString
 	media?: FileNameString[]
@@ -197,6 +204,7 @@ export type UsersRecord = {
 	created: IsoAutoDateString
 	disabled?: boolean
 	email: string
+	emailOptIn?: boolean
 	emailVisibility?: boolean
 	id: string
 	mfaOptIn?: boolean

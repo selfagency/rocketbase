@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -29,14 +29,7 @@
 
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.form, {
-		validators: zod4Client(loginSchema),
-		onUpdated: ({ form }) => {
-			// Don't show success toast if MFA is required
-			const actionResult = $page.form as any;
-			if (form.valid && form.posted && !actionResult?.mfaRequired) {
-				toast.success(m['auth.login.success']());
-			}
-		}
+		validators: zod4Client(loginSchema)
 	});
 
 	const { form, enhance, message } = superFormObj;
@@ -47,7 +40,7 @@
 
 	// Watch for MFA data from action result
 	$effect(() => {
-		const actionResult = $page.form as any;
+		const actionResult = page.form as any;
 		if (actionResult?.mfaRequired) {
 			showMfaForm = true;
 			mfaData = {
@@ -60,7 +53,7 @@
 
 	// Watch for MFA success
 	$effect(() => {
-		const actionResult = $page.form as any;
+		const actionResult = page.form as any;
 		if (actionResult?.success) {
 			toast.success(m['auth.login.success']());
 			// Redirect to home after showing toast
@@ -92,10 +85,10 @@
 					class="space-y-4"
 					data-testid="mfa-verification-form"
 				>
-					{#if $page.form?.message}
+					{#if page.form?.message}
 						<Alert variant="destructive" data-testid="mfa-error-alert">
 							<AlertCircle class="h-4 w-4" />
-							<AlertDescription>{$page.form.message}</AlertDescription>
+							<AlertDescription>{page.form.message}</AlertDescription>
 						</Alert>
 					{/if}
 

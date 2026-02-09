@@ -10,7 +10,6 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import * as m from '$lib/paraglide/messages';
-	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -31,12 +30,7 @@
 
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.form, {
-		validators: zod4Client(registerSchema),
-		onUpdated: ({ form }) => {
-			if (form.valid && form.posted) {
-				toast.success(m['auth.register.success']());
-			}
-		}
+		validators: zod4Client(registerSchema)
 	});
 
 	const { form, enhance } = superFormObj;

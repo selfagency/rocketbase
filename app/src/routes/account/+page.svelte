@@ -68,7 +68,7 @@
 		validators: zod4Client(passwordSchema),
 		resetForm: true,
 		onUpdated: ({ form }) => {
-			if (form.valid && form.posted) {
+			if (form.valid) {
 				toast.success(m['account.password_changed_success']());
 			}
 		}

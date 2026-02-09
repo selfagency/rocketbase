@@ -11,7 +11,6 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import * as m from '$lib/paraglide/messages';
-	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -25,9 +24,12 @@
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.form, {
 		validators: zod4Client(forgotPasswordSchema),
-		onUpdated: ({ form }) => {
-			if (form.valid && form.posted) {
-				toast.success(m['auth.forgot_password.success']());
+		onUpdate({ form, result }) {
+			if (form.valid) {
+				const actionData = result.data as any;
+				if (actionData?.success) {
+					// Success message is already displayed in the alert
+				}
 			}
 		}
 	});

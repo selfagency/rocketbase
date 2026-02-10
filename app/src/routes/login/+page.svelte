@@ -31,13 +31,10 @@
 		validators: zod4Client(loginSchema)
 	});
 
-	const { form, enhance, message } = superFormObj;
+	const { form, enhance, message, capture, restore } = superFormObj;
 
-	/** @type {import('./$types').Snapshot<string>} */
-	export const snapshot = {
-		capture: () => $form.email,
-		restore: (value) => ($form.email = value)
-	};
+	// Use Superforms snapshot support for browser navigation state preservation
+	export const snapshot = { capture, restore };
 
 	let showMfaForm = $state(false);
 	let mfaData = $state({ mfaId: '', otpId: '', email: '' });

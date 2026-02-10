@@ -34,13 +34,10 @@
 		}
 	});
 
-	const { form, enhance } = superFormObj;
+	const { form, enhance, capture, restore } = superFormObj;
 
-	/** @type {import('./$types').Snapshot<string>} */
-	export const snapshot = {
-		capture: () => $form.email,
-		restore: (value) => ($form.email = value)
-	};
+	// Use Superforms snapshot support for browser navigation state preservation
+	export const snapshot = { capture, restore };
 
 	// svelte-ignore state_referenced_locally
 	let showSuccess = $state(actionData?.success);

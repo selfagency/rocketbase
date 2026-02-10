@@ -35,16 +35,10 @@
 		validators: zod4Client(registerSchema)
 	});
 
-	const { form, enhance, message } = superFormObj;
+	const { form, enhance, message, capture, restore } = superFormObj;
 
-	/** @type {import('./$types').Snapshot<{name: string, email: string}>} */
-	export const snapshot = {
-		capture: () => ({ name: $form.name, email: $form.email }),
-		restore: (value) => {
-			$form.name = value.name;
-			$form.email = value.email;
-		}
-	};
+	// Use Superforms snapshot support for browser navigation state preservation
+	export const snapshot = { capture, restore };
 </script>
 
 <div class="flex min-h-screen items-center justify-center px-4">

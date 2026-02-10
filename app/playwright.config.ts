@@ -1,4 +1,8 @@
 import { defineConfig } from '@playwright/test';
+import { config } from 'dotenv';
+
+// Load .env file for API_KEY and other environment variables
+config();
 
 export default defineConfig({
 	webServer: [

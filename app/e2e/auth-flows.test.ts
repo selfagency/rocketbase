@@ -272,10 +272,10 @@ async function deleteUserByEmail(email: string) {
 
     const token = apiKey;
 
-    // Build headers with API_KEY
+    // Build headers with API_KEY using User impersonation format
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `User ${token}`
     };
 
     // Use perPage to ensure we fetch enough records in one call

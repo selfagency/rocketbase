@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Card,
@@ -10,6 +11,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import * as m from '$lib/paraglide/messages';
+	import { CircleAlert } from '@lucide/svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -33,7 +35,7 @@
 		validators: zod4Client(registerSchema)
 	});
 
-	const { form, enhance } = superFormObj;
+	const { form, enhance, message } = superFormObj;
 </script>
 
 <div class="flex min-h-screen items-center justify-center px-4">
@@ -44,6 +46,13 @@
 		</CardHeader>
 		<CardContent>
 			<form method="POST" use:enhance class="space-y-4">
+				{#if $message}
+					<Alert variant="destructive">
+						<CircleAlert class="h-4 w-4" />
+						<AlertDescription>{$message}</AlertDescription>
+					</Alert>
+				{/if}
+
 				<Form.Field form={superFormObj} name="name">
 					<Form.Control>
 						{#snippet children({ props })}

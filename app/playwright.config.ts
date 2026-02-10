@@ -1,8 +1,14 @@
 import { defineConfig } from '@playwright/test';
 import { config } from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 
-// Load .env file for API_KEY and other environment variables
-config();
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load .env file from app directory for API_KEY and other environment variables
+config({ path: resolve(__dirname, '.env') });
 
 export default defineConfig({
 	webServer: [

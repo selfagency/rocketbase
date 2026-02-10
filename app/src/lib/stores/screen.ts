@@ -10,9 +10,9 @@ export const screenWidth = writable(0);
 export const screenHeight = writable(0);
 
 export function setScreenSize(width: number, height: number) {
-  screenWidth.set(width);
-  screenHeight.set(height);
-  isMobile.set(width < MOBILE_BREAKPOINT);
-  isTablet.set(width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT);
-  isDesktop.set(width >= TABLET_BREAKPOINT);
+	screenWidth.set(width);
+	screenHeight.set(height);
+	isMobile.set(width < MOBILE_BREAKPOINT);
+	isTablet.set(width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT);
+	isDesktop.set(width >= TABLET_BREAKPOINT);
 }

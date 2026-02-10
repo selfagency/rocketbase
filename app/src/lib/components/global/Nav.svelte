@@ -9,7 +9,7 @@
 	import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { isMobile } from '$lib/stores/screen';
-	import type { NavItem } from '../../../types';
+	import type { NavItem } from '../../types';
 
 	let { navItems = [] }: { navItems?: NavItem[] } = $props();
 

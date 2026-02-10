@@ -13,6 +13,7 @@
 	let { navItems = [] }: { navItems?: NavItem[] } = $props();
 
 	let logoutFormRef = $state<HTMLFormElement | null>(null);
+	let dropdownOpen = $state(false);
 
 	const getDisplayName = (user?: { name?: string | null; email?: string | null }) => {
 		return user?.name || user?.email || m['common.user_fallback']();
@@ -38,51 +39,45 @@
 	class="fixed top-0 left-0 z-40 w-screen border border-border/60 bg-background/80 shadow-md backdrop-blur-md"
 >
 	<div class="flex items-center justify-between gap-4 px-4 py-2">
-		<NavigationMenu.Root>
-			<NavigationMenu.List>
+		<NavigationMenu.Root viewport={false}>
+			<NavigationMenu.List class="flex items-center">
 				<NavigationMenu.Item>
-					<NavigationMenu.Link>
-						{#snippet child()}
-							<a href="/" class={navigationMenuTriggerStyle()}>{m['nav.brand']()}</a>
-						{/snippet}
+					<NavigationMenu.Link href="/" class={navigationMenuTriggerStyle()}>
+						{m['nav.brand']()}
 					</NavigationMenu.Link>
 				</NavigationMenu.Item>
 
-				{#each navItems as item}
+				{#each navItems as item (item.id)}
 					{#if item.children && item.children.length > 0}
 						<!-- Menu with children -->
 						<NavigationMenu.Item>
-							<NavigationMenu.Trigger>{item.title || item.slug}</NavigationMenu.Trigger>
+							<NavigationMenu.Trigger>
+								{item.title || item.slug}
+							</NavigationMenu.Trigger>
 							<NavigationMenu.Content>
-								<ul class="grid w-100 gap-3 p-4 md:w-125 md:grid-cols-2 lg:w-150">
-									{#each item.children as childItem}
-										<li>
-											<NavigationMenu.Link>
-												{#snippet child()}
-													<a
-														href="/{childItem?.slug}"
-														class="block space-y-1 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-													>
-														<div class="text-sm leading-none font-medium">
-															{childItem?.title || childItem?.slug}
-														</div>
-													</a>
-												{/snippet}
+								<ul class="grid w-75 gap-4 p-2">
+									<li>
+										{#each item.children as childItem (childItem.id)}
+											<NavigationMenu.Link href="/{childItem?.slug}">
+												<div class="font-medium">
+													{childItem?.title || childItem?.slug}
+												</div>
+												{#if childItem?.summary}
+													<div class="text-muted-foreground">
+														{childItem.summary}
+													</div>
+												{/if}
 											</NavigationMenu.Link>
-										</li>
-									{/each}
+										{/each}
+									</li>
 								</ul>
 							</NavigationMenu.Content>
 						</NavigationMenu.Item>
 					{:else}
 						<!-- Simple link without children -->
 						<NavigationMenu.Item>
-							<NavigationMenu.Link>
-								{#snippet child()}
-									<a href="/{item.slug}" class={navigationMenuTriggerStyle()}>
-										{item.title || item.slug}
-									</a>
-								{/snippet}
+							<NavigationMenu.Link href="/{item.slug}" class={navigationMenuTriggerStyle()}>
+								{item.title || item.slug}
 							</NavigationMenu.Link>
 						</NavigationMenu.Item>
 					{/if}
@@ -93,7 +88,7 @@
 		<div class="flex items-center gap-3">
 			{#if page?.data?.user}
 				<form method="POST" action="/logout" bind:this={logoutFormRef} class="hidden"></form>
-				<DropdownMenu.Root>
+				<DropdownMenu.Root bind:open={dropdownOpen}>
 					<DropdownMenu.Trigger
 						aria-label={m['nav.user_menu']()}
 						class="rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
@@ -110,13 +105,21 @@
 					<DropdownMenu.Content align="end" class="w-48">
 						<DropdownMenu.Label>{m['nav.account_label']()}</DropdownMenu.Label>
 						<DropdownMenu.Separator />
-						<DropdownMenu.Item onSelect={() => goto('/account')}>
+						<DropdownMenu.Item
+							onSelect={() => {
+								dropdownOpen = false;
+								goto('/account');
+							}}
+						>
 							{m['nav.account_settings']()}
 						</DropdownMenu.Item>
 						<DropdownMenu.Separator />
 						<DropdownMenu.Item
 							variant="destructive"
-							onSelect={() => logoutFormRef?.requestSubmit()}
+							onSelect={() => {
+								dropdownOpen = false;
+								logoutFormRef?.requestSubmit();
+							}}
 						>
 							{m['nav.logout']()}
 						</DropdownMenu.Item>

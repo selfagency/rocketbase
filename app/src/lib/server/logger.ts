@@ -1,12 +1,13 @@
 import { ConsolaTransport } from '@loglayer/transport-consola';
 import { createConsola } from 'consola';
 import { ConsoleTransport, LogLayer } from 'loglayer';
+import path from 'node:path';
 
 import errsole from 'errsole';
 import ErrsoleSQLite from 'errsole-sqlite';
 
 errsole.initialize({
-  storage: new ErrsoleSQLite('../../db/pb_data/data.db'),
+  storage: new ErrsoleSQLite(path.resolve(process.cwd(), '../db/logs.db')),
   appName: 'rocketbase-app',
   enableDashboard: false,
 });

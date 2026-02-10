@@ -3,5 +3,6 @@ export interface NavItem {
   title?: string;
   slug: string;
   order?: number;
+  summary?: string;
   children?: NavItem[];
 }

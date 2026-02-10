@@ -262,40 +262,21 @@ async function extractVerificationLinkFromEmail(email: string): Promise<string |
 // PocketBase Admin API cleanup helper
 async function deleteUserByEmail(email: string) {
   try {
-    // Get admin token from environment - in production, use proper auth
-    const adminEmail = process.env.PB_ADMIN_EMAIL || process.env.API_USER || 'admin@example.com';
-    const adminPassword = process.env.PB_ADMIN_PASSWORD || 'admin123456';
-
-    // Try to authenticate as admin (preferred). Use the admin auth endpoint.
-    let token: string | null = null;
-    try {
-      const authResponse = await fetch('http://localhost:8090/api/admins/auth-with-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identity: adminEmail, password: adminPassword }),
-      });
-
-      if (authResponse.ok) {
-        const authData = await authResponse.json();
-        // PocketBase admin auth returns a token
-        token = authData?.token || null;
-        if (!token && authData?.admin?.token) token = authData.admin.token;
-      } else {
-        console.debug('Admin auth failed during cleanup, status:', authResponse.status);
-      }
-    } catch (err) {
-      console.debug('Admin auth error during cleanup:', err);
+    // Use API_KEY with impersonation token for cleanup
+    const apiKey = process.env.API_KEY;
+    
+    if (!apiKey) {
+      console.debug('No API_KEY set, skipping cleanup for:', email);
+      return;
     }
 
-    // Find user by email - try multiple auth strategies
-    const serviceKey = process.env.SERVICE_KEY || process.env.PB_SERVICE_KEY || process.env.API_KEY || null;
+    const token = apiKey;
 
-    // Build headers for subsequent requests. Prefer Bearer token, fall back to service key via X-Api-Key.
+    // Build headers with API_KEY
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     };
-    if (token) headers.Authorization = `Bearer ${token}`;
-    if (serviceKey) headers['X-Api-Key'] = serviceKey;
 
     // Use perPage to ensure we fetch enough records in one call
     const searchFilter = `email="${email}"`;
@@ -393,12 +374,15 @@ async function deleteUserByEmail(email: string) {
   }
 }
 
+test.beforeAll(async () => {
+  console.log('\n⚠️  E2E TEST REQUIREMENTS:');
+  console.log('   • Mailpit must be running (docker run --rm -p 1025:1025 -p 8025:8025 axllent/mailpit)');
+  console.log('   • PocketBase must be running with migrations applied');
+  console.log('   • API_KEY environment variable must be set with a superuser impersonation token');
+  console.log('   • Without API_KEY, test cleanup will be skipped\n');
+});
+
 test.describe('Authentication Flows', () => {
-  test.beforeAll(async () => {
-    console.log('\n⚠️  WARNING: E2E tests require a valid PocketBase superuser for test cleanup');
-    console.log('   Set PB_ADMIN_EMAIL and PB_ADMIN_PASSWORD environment variables');
-    console.log('   Default: admin@example.com / admin123456\n');
-  });
 
   // const testUser = {
   // 	name: 'Test User',

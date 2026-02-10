@@ -7,15 +7,26 @@ describe('Register Server Actions', () => {
 	let mockEvent: Partial<RequestEvent>;
 
 	beforeEach(() => {
+		const mockCollection = {
+			create: vi.fn(),
+			authWithPassword: vi.fn()
+		};
+
 		mockLocals = {
 			pb: {
-				collection: vi.fn().mockReturnValue({
-					create: vi.fn(),
-					authWithPassword: vi.fn()
-				})
+				collection: vi.fn(() => mockCollection)
+			},
+			logger: {
+				withMetadata: vi.fn().mockReturnThis(),
+				error: vi.fn(),
+				info: vi.fn(),
+				warn: vi.fn()
 			},
 			user: null
 		};
+
+		// Reset mocks
+		vi.clearAllMocks();
 
 		mockEvent = {
 			locals: mockLocals,
@@ -43,7 +54,7 @@ it('successfully creates user and redirects to login', async () => {
 		mockLocals.pb.collection().create.mockResolvedValue(mockUser);
 
 		try {
-			await actions.default(mockEvent as any);
+			await actions.register(mockEvent as any);
 		} catch (error: any) {
 			// Expecting a redirect to login page
 			expect(error.status).toBe(303);
@@ -71,7 +82,7 @@ it('successfully creates user and redirects to login', async () => {
 				body: formData
 			});
 
-			const result = await actions.default(mockEvent as any);
+			const result = await actions.register(mockEvent as any);
 
 			expect(result).toHaveProperty('status', 400);
 		});
@@ -88,7 +99,7 @@ it('successfully creates user and redirects to login', async () => {
 				body: formData
 			});
 
-			const result = await actions.default(mockEvent as any);
+			const result = await actions.register(mockEvent as any);
 
 			expect(result).toHaveProperty('status', 400);
 		});
@@ -105,7 +116,7 @@ it('successfully creates user and redirects to login', async () => {
 				body: formData
 			});
 
-			const result = await actions.default(mockEvent as any);
+			const result = await actions.register(mockEvent as any);
 
 			expect(result).toHaveProperty('status', 400);
 		});
@@ -122,7 +133,7 @@ it('successfully creates user and redirects to login', async () => {
 				body: formData
 			});
 
-			const result = await actions.default(mockEvent as any);
+			const result = await actions.register(mockEvent as any);
 
 			expect(result).toHaveProperty('status', 400);
 		});
@@ -143,7 +154,7 @@ it('successfully creates user and redirects to login', async () => {
 			duplicateError.message = 'Email already exists';
 			mockLocals.pb.collection().create.mockRejectedValue(duplicateError);
 
-			const result: any = await actions.default(mockEvent as any);
+			const result: any = await actions.register(mockEvent as any);
 
 			expect(result).toHaveProperty('status', 400);
 			expect(result.data.message).toContain('Email already exists');

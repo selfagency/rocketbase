@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       post,
     };
   } catch (err) {
-    console.error('Error loading post:', err);
+    locals.logger.withMetadata(err as Error).error('Unable to fetch post');
     throw error(404, m['error.post_not_found']());
   }
 };

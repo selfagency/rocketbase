@@ -27,6 +27,7 @@
 				toast[toastData.type](toastData.message);
 			}
 		}
+		shownKeys.clear();
 	});
 </script>
 

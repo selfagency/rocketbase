@@ -17,5 +17,8 @@
   },
   "files.associations": {
     "*.css": "tailwindcss"
+  },
+  "chat.tools.terminal.autoApprove": {
+    "pnpm": true
   }
 }

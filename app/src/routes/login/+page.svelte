@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -11,157 +10,116 @@
 	} from '$lib/components/ui/card';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
 	import * as m from '$lib/paraglide/messages';
-	import { toast } from '$lib/stores/toast';
 	import { CircleAlert } from '@lucide/svelte';
-	import { onMount } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 
 	const loginSchema = z.object({
-		email: z.email(m['validation.email_invalid']()),
-		password: z.string().min(8, m['validation.password_min_length']())
+		email: z.string().optional(),
+		password: z.string().optional(),
+		code: z.string().optional(),
+		mfaId: z.string().optional(),
+		otpId: z.string().optional()
 	});
 
-	let { data } = $props();
-
-	let showMfaForm = $state(false);
-	let mfaData = $state({ mfaId: '', otpId: '', email: '' });
-	let mfaCode = $state('');
+	const { data } = $props();
 
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.form, {
-		validators: zod4Client(loginSchema),
-		onUpdate({ result }) {
-			const actionResult = result.data as any;
-			if (actionResult?.mfaRequired) {
-				showMfaForm = true;
-				mfaData = {
-					mfaId: actionResult.mfaId || '',
-					otpId: actionResult.otpId || '',
-					email: actionResult.email || ''
-				};
-				mfaCode = '';
-			}
-		}
+		validators: zod4Client(loginSchema)
 	});
 
-	const { form, enhance, message, capture, restore } = superFormObj;
+	const { form, enhance, message } = superFormObj;
 
-	// Use Superforms snapshot support for browser navigation state preservation
-	export const snapshot = { capture, restore };
-
-	// Show success toast if coming from registration - check once on mount
-	onMount(() => {
-		if (page.url.searchParams.get('registered') === 'true') {
-			toast(m['auth.register.success'](), 'success');
-		}
+	// Show MFA code input if both mfaId and otpId are present in form data
+	const showMfaInput = $derived.by(() => {
+		return Boolean($form.mfaId && $form.otpId);
 	});
 </script>
 
-<div class="flex h-[80vh] items-center justify-center px-4">
+<div class="flex min-h-[86vh] items-center justify-center bg-muted/50">
 	<Card class="w-full max-w-md">
-		<CardHeader>
-			<CardTitle>{m['auth.login.title']()}</CardTitle>
-			<CardDescription>
-				{#if showMfaForm}
-					{m['auth.login.mfa_description']()}
-				{:else}
-					{m['auth.login.description']()}
-				{/if}
-			</CardDescription>
+		<CardHeader class="space-y-1">
+			<CardTitle class="text-2xl">{m['auth.login.title']()}</CardTitle>
+			<CardDescription>{m['auth.login.description']()}</CardDescription>
 		</CardHeader>
 		<CardContent>
-			{#if showMfaForm}
-				<!-- MFA Verification Form -->
-				<form
-					method="POST"
-					action="?/verifyMfa"
-					class="space-y-4"
-					data-testid="mfa-verification-form"
-				>
-					{#if page.form?.message}
-						<Alert variant="destructive" data-testid="mfa-error-alert">
-							<CircleAlert class="h-4 w-4" />
-							<AlertDescription>{page.form.message}</AlertDescription>
-						</Alert>
-					{/if}
+			<form method="POST" action="?/login" use:enhance class="space-y-4">
+				{#if $message}
+					<Alert variant="destructive" role="alert">
+						<CircleAlert class="h-4 w-4" />
+						<AlertDescription>{$message}</AlertDescription>
+					</Alert>
+				{/if}
 
-					<input type="hidden" name="mfaId" value={mfaData.mfaId} />
-					<input type="hidden" name="otpId" value={mfaData.otpId} data-testid="mfa-otp-id" />
-					<input type="hidden" name="email" value={mfaData.email} data-testid="mfa-email" />
+				<Form.Field form={superFormObj} name="email">
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label>{m['auth.login.email_label']()}</Form.Label>
+							<Input
+								{...props}
+								bind:value={$form.email}
+								type="email"
+								placeholder={m['auth.login.email_placeholder']()}
+								class={showMfaInput ? 'pointer-events-none opacity-80' : ''}
+							/>
+						{/snippet}
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
 
-					<div class="space-y-2">
-						<Label for="code">{m['auth.login.mfa_code_label']()}</Label>
-						<Input
-							id="code"
-							name="code"
-							type="text"
-							placeholder={m['auth.login.mfa_code_placeholder']()}
-							bind:value={mfaCode}
-							maxlength={8}
-							required
-							data-testid="mfa-code-input"
-						/>
+				<Form.Field form={superFormObj} name="password">
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label>{m['auth.login.password_label']()}</Form.Label>
+							<Input
+								{...props}
+								bind:value={$form.password}
+								type="password"
+								placeholder={m['auth.login.password_placeholder']()}
+								class={showMfaInput ? 'pointer-events-none opacity-80' : ''}
+							/>
+						{/snippet}
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+
+				<!-- MFA Code Input - conditionally shown -->
+				{#if showMfaInput}
+					<div class="rounded-md bg-blue-50 p-3">
+						<p class="mb-3 text-sm text-blue-800">
+							{m['auth.mfa_code_hint']?.() || 'Check your email for a verification code'}
+						</p>
+
+						<Form.Field form={superFormObj} name="code">
+							<Form.Control>
+								{#snippet children({ props })}
+									<Form.Label>{m['auth.login.mfa_code_label']()}</Form.Label>
+									<Input
+										{...props}
+										bind:value={$form.code}
+										type="text"
+										placeholder={m['auth.login.mfa_code_placeholder']()}
+										maxlength={8}
+										data-testid="mfa-code-input"
+									/>
+								{/snippet}
+							</Form.Control>
+							<Form.FieldErrors />
+						</Form.Field>
 					</div>
+				{/if}
 
+				{#if showMfaInput}
 					<Button type="submit" class="w-full" data-testid="mfa-verify-button">
-						{m['auth.login.mfa_verify_button']()}
+						{m['auth.login.mfa_verify_button']?.() || 'Verify Code'}
 					</Button>
-					<Button
-						type="button"
-						variant="outline"
-						class="w-full"
-						onclick={() => {
-							showMfaForm = false;
-							mfaCode = '';
-							mfaData = { mfaId: '', otpId: '', email: '' };
-						}}
-					>
-						{m['auth.login.mfa_back_button']()}
-					</Button>
-				</form>
-			{:else}
-				<!-- Standard Login Form -->
-				<form method="POST" action="?/login" use:enhance class="space-y-4">
-					{#if $message}
-						<Alert variant="destructive">
-							<CircleAlert class="h-4 w-4" />
-							<AlertDescription>{$message}</AlertDescription>
-						</Alert>
-					{/if}
-					<Form.Field form={superFormObj} name="email">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>{m['auth.login.email_label']()}</Form.Label>
-								<Input
-									{...props}
-									bind:value={$form.email}
-									type="email"
-									placeholder={m['auth.login.email_placeholder']()}
-								/>
-							{/snippet}
-						</Form.Control>
-						<Form.FieldErrors />
-					</Form.Field>
-
-					<Form.Field form={superFormObj} name="password">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>{m['auth.login.password_label']()}</Form.Label>
-								<Input
-									{...props}
-									bind:value={$form.password}
-									type="password"
-									placeholder={m['auth.login.password_placeholder']()}
-								/>
-							{/snippet}
-						</Form.Control>
-						<Form.FieldErrors />
-					</Form.Field>
-
+					<!-- Hidden fields for MFA session data -->
+					<input type="hidden" name="mfaId" value={$form.mfaId || ''} />
+					<input type="hidden" name="otpId" value={$form.otpId || ''} />
+				{:else}
 					<div class="flex items-center justify-between text-sm">
 						<a href="/register" class="text-primary hover:underline"
 							>{m['auth.login.create_account_link']()}</a
@@ -172,8 +130,8 @@
 					</div>
 
 					<Button type="submit" class="w-full">{m['auth.login.submit_button']()}</Button>
-				</form>
-			{/if}
+				{/if}
+			</form>
 		</CardContent>
 	</Card>
 </div>

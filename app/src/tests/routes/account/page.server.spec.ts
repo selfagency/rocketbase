@@ -5,6 +5,7 @@ import { actions, load } from '../../../routes/account/+page.server';
 describe('Account Server Actions', () => {
 	let mockLocals: any;
 	let mockEvent: Partial<RequestEvent>;
+	let mockCollection: any;
 	const mockUser = {
 		id: 'user-123',
 		email: 'test@example.com',
@@ -16,24 +17,35 @@ describe('Account Server Actions', () => {
 	};
 
 	beforeEach(() => {
+		mockCollection = {
+			update: vi.fn(),
+			authRefresh: vi.fn(),
+			requestVerification: vi.fn(),
+			requestOTP: vi.fn(),
+			getFullList: vi.fn(),
+			authWithOTP: vi.fn(),
+			create: vi.fn(),
+			delete: vi.fn()
+		};
+
 		mockLocals = {
 			pb: {
-				collection: vi.fn().mockReturnValue({
-					update: vi.fn(),
-					authRefresh: vi.fn(),
-					requestVerification: vi.fn(),
-					requestOTP: vi.fn(),
-					getFullList: vi.fn(),
-					authWithOTP: vi.fn(),
-					create: vi.fn(),
-					delete: vi.fn()
-				}),
+				collection: vi.fn(() => mockCollection),
 				authStore: {
 					record: mockUser
 				}
 			},
+			logger: {
+				withMetadata: vi.fn().mockReturnThis(),
+				error: vi.fn(),
+				info: vi.fn(),
+				warn: vi.fn()
+			},
 			user: mockUser
 		};
+
+		// Reset mocks
+		vi.clearAllMocks();
 
 		mockEvent = {
 			locals: mockLocals,
@@ -77,17 +89,17 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb.collection().update.mockResolvedValue({ ...mockUser, name: 'Updated Name' });
-			mockLocals.pb.collection().authRefresh.mockResolvedValue({});
+			mockCollection.update.mockResolvedValue({ ...mockUser, name: 'Updated Name' });
+			mockCollection.authRefresh.mockResolvedValue({});
 
 			const result: any = await actions.updateProfile(mockEvent as any);
 
 			expect(result.success).toBe(true);
-			expect(mockLocals.pb.collection().update).toHaveBeenCalledWith(
+			expect(mockCollection.update).toHaveBeenCalledWith(
 				'user-123',
 				expect.any(Object)
 			);
-			expect(mockLocals.pb.collection().authRefresh).toHaveBeenCalled();
+			expect(mockCollection.authRefresh).toHaveBeenCalled();
 		});
 
 		it('validates name minimum length', async () => {
@@ -147,12 +159,12 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb.collection().requestVerification.mockResolvedValue({});
+			mockCollection.requestVerification.mockResolvedValue({});
 
 			const result: any = await actions.sendVerificationEmail(mockEvent as any);
 
 			expect(result.success).toBe(true);
-			expect(mockLocals.pb.collection().requestVerification).toHaveBeenCalledWith(mockUser.email);
+			expect(mockCollection.requestVerification).toHaveBeenCalledWith(mockUser.email);
 		});
 
 		it('requires authentication', async () => {
@@ -183,12 +195,12 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb.collection().update.mockResolvedValue(mockUser);
+			mockCollection.update.mockResolvedValue(mockUser);
 
 			const result: any = await actions.changePassword(mockEvent as any);
 
 			expect(result.success).toBe(true);
-			expect(mockLocals.pb.collection().update).toHaveBeenCalledWith(
+			expect(mockCollection.update).toHaveBeenCalledWith(
 				'user-123',
 				expect.any(Object)
 			);
@@ -255,16 +267,16 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb.collection().update.mockResolvedValue({
+			mockCollection.update.mockResolvedValue({
 				...mockUser,
 				mfaOptIn: true
 			});
-			mockLocals.pb.collection().authRefresh.mockResolvedValue({});
+			mockCollection.authRefresh.mockResolvedValue({});
 
 			const result: any = await actions.toggleMfaOptIn(mockEvent as any);
 
 			expect(result.success).toBe(true);
-			expect(mockLocals.pb.collection().update).toHaveBeenCalledWith(
+			expect(mockCollection.update).toHaveBeenCalledWith(
 				'user-123',
 				expect.objectContaining({ mfaOptIn: true })
 			);
@@ -279,16 +291,16 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb.collection().update.mockResolvedValue({
+			mockCollection.update.mockResolvedValue({
 				...mockUser,
 				mfaOptIn: false
 			});
-			mockLocals.pb.collection().authRefresh.mockResolvedValue({});
+			mockCollection.authRefresh.mockResolvedValue({});
 
 			const result: any = await actions.toggleMfaOptIn(mockEvent as any);
 
 			expect(result.success).toBe(true);
-			expect(mockLocals.pb.collection().update).toHaveBeenCalledWith(
+			expect(mockCollection.update).toHaveBeenCalledWith(
 				'user-123',
 				expect.objectContaining({ mfaOptIn: false })
 			);
@@ -323,13 +335,13 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb.collection().requestOTP.mockResolvedValue({ otpId: 'otp-123' });
+			mockCollection.requestOTP.mockResolvedValue({ otpId: 'otp-123' });
 
 			const result: any = await actions.requestTwoFactor(mockEvent as any);
 
 			expect(result.otpId).toBe('otp-123');
 			expect(result.otpRequested).toBe(true);
-			expect(mockLocals.pb.collection().requestOTP).toHaveBeenCalledWith('test@example.com');
+			expect(mockCollection.requestOTP).toHaveBeenCalledWith('test@example.com');
 		});
 
 		it('requires authentication', async () => {
@@ -364,17 +376,16 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb
-				.collection()
+			mockCollection
 				.getFullList.mockResolvedValue([{ id: 'otp-123', recordRef: 'user-123' }]);
-			mockLocals.pb.collection().authWithOTP.mockResolvedValue({});
-			mockLocals.pb.collection().create.mockResolvedValue({ id: 'mfa-1' });
+			mockCollection.authWithOTP.mockResolvedValue({});
+			mockCollection.create.mockResolvedValue({ id: 'mfa-1' });
 
 			const result: any = await actions.verifyTwoFactor(mockEvent as any);
 
 			expect(result.twoFactorEnabled).toBe(true);
 			expect(result.success).toBe(true);
-			expect(mockLocals.pb.collection().create).toHaveBeenCalledWith({
+			expect(mockCollection.create).toHaveBeenCalledWith({
 				collectionRef: 'users',
 				recordRef: 'user-123',
 				method: 'otp'
@@ -393,10 +404,9 @@ describe('Account Server Actions', () => {
 				body: formData
 			});
 
-			mockLocals.pb
-				.collection()
+			mockCollection
 				.getFullList.mockResolvedValue([{ id: 'otp-123', recordRef: 'user-123' }]);
-			mockLocals.pb.collection().authWithOTP.mockRejectedValue(new Error('Invalid code'));
+			mockCollection.authWithOTP.mockRejectedValue(new Error('Invalid code'));
 
 			const result = await actions.verifyTwoFactor(mockEvent as any);
 
@@ -427,16 +437,15 @@ describe('Account Server Actions', () => {
 		it('successfully disables 2FA', async () => {
 			expect.assertions(3);
 
-			mockLocals.pb
-				.collection()
+			mockCollection
 				.getFullList.mockResolvedValue([{ id: 'mfa-1', recordRef: 'user-123', method: 'otp' }]);
-			mockLocals.pb.collection().delete.mockResolvedValue({});
+			mockCollection.delete.mockResolvedValue({});
 
 			const result: any = await actions.disableTwoFactor(mockEvent as any);
 
 			expect(result.twoFactorEnabled).toBe(false);
 			expect(result.success).toBe(true);
-			expect(mockLocals.pb.collection().delete).toHaveBeenCalledWith('mfa-1');
+			expect(mockCollection.delete).toHaveBeenCalledWith('mfa-1');
 		});
 
 		it('requires authentication', async () => {

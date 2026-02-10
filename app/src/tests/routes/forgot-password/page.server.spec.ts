@@ -7,14 +7,25 @@ describe('Forgot Password Server Actions', () => {
 	let mockEvent: Partial<RequestEvent>;
 
 	beforeEach(() => {
+		const mockCollection = {
+			requestPasswordReset: vi.fn()
+		};
+
 		mockLocals = {
 			pb: {
-				collection: vi.fn().mockReturnValue({
-					requestPasswordReset: vi.fn()
-				})
+				collection: vi.fn(() => mockCollection)
+			},
+			logger: {
+				withMetadata: vi.fn().mockReturnThis(),
+				error: vi.fn(),
+				info: vi.fn(),
+				warn: vi.fn()
 			},
 			user: null
 		};
+
+		// Reset mocks
+		vi.clearAllMocks();
 
 		mockEvent = {
 			locals: mockLocals,

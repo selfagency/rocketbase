@@ -6,8 +6,11 @@ import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 
 const loginSchema = z.object({
-  email: z.email(m['validation.email_invalid']()),
-  password: z.string().min(8, m['validation.password_min_length']()),
+  email: z.string().optional(),
+  password: z.string().optional(),
+  code: z.string().optional(),
+  mfaId: z.string().optional(),
+  otpId: z.string().optional(),
 });
 
 type LoginSchema = z.infer<typeof loginSchema>;
@@ -24,46 +27,113 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
   login: async ({ request, locals }) => {
-    const form = await superValidate<LoginSchema>(request, zod4(loginSchema));
+    const form = await superValidate(request, zod4(loginSchema));
 
     if (!form.valid) {
       return fail(400, { form });
     }
 
+    const { email, password, code, mfaId, otpId } = form.data;
+    const usersCollection = locals.pb.collection('users');
+
+    // If code is provided, user is completing MFA
+    if (code) {
+      if (!email || !password || !otpId || !mfaId) {
+        form.message = m['auth.missing_fields']();
+        return fail(400, { form });
+      }
+
+      try {
+        locals.logger.debug('=== MFA Verification ===');
+        locals.logger.withMetadata({ email, codeLength: code.length }).debug('Verifying OTP');
+
+        const authData = await usersCollection.authWithOTP(otpId, code, { mfaId } as any);
+
+        // Check if account is disabled
+        if (authData.record.disabled) {
+          locals.pb.authStore.clear();
+          form.message = m['auth.login.account_disabled']();
+          return fail(403, { form });
+        }
+
+        // Successful MFA verification
+        locals.logger.debug('MFA verification successful');
+        redirect(303, '/?login=success');
+      } catch (err: any) {
+        // Re-throw SvelteKit redirects
+        if (err?.status && err?.location) {
+          throw err;
+        }
+
+        locals.logger.withMetadata(err).error('MFA verification error');
+        const errorMsg = err?.response?.message || err?.message;
+        form.message = `${m['auth.mfa_invalid_code']()} - ${errorMsg || 'Unknown error'}`;
+        // Keep all form data so user can retry
+        form.data.email = email;
+        form.data.password = password;
+        form.data.mfaId = mfaId;
+        form.data.otpId = otpId;
+        return fail(400, { form });
+      }
+    }
+
+    // No code provided, attempt password authentication
+    if (!email || !password) {
+      form.message = m['auth.missing_fields']();
+      return fail(400, { form });
+    }
+
+    // Validate email format
+    if (!z.string().email().safeParse(email).success) {
+      form.message = m['validation.email_invalid']();
+      return fail(400, { form });
+    }
+
+    // Validate password minimum length
+    if (password.length < 8) {
+      form.message = m['validation.password_min_length']();
+      return fail(400, { form });
+    }
+
     try {
-      const authData = await locals.pb.collection('users').authWithPassword(form.data.email, form.data.password);
+      const authData = await usersCollection.authWithPassword(email, password);
 
       // Check if account is disabled
       if (authData.record.disabled) {
-        // Clear auth and show error
         locals.pb.authStore.clear();
         form.message = m['auth.login.account_disabled']();
         return fail(403, { form });
       }
+
+      // Successful login without MFA
+      redirect(303, '/?login=success');
     } catch (err: any) {
-      locals.logger.withMetadata(err).error('Login error:');
+      // Re-throw SvelteKit redirects
+      if (err?.status && err?.location) {
+        throw err;
+      }
+
+      locals.logger.withMetadata(err).error('Login error');
 
       // Check if MFA is required
-      const mfaId = err?.response?.mfaId;
-      if (mfaId) {
-        // MFA is required - request OTP and return to show OTP form
+      const mfaIdFromError = err?.response?.mfaId;
+      if (mfaIdFromError) {
+        // MFA is required - request OTP
         try {
-          locals.logger.withMetadata({ email: form.data.email }).debug('MFA required, requesting OTP for');
-          locals.logger.withMetadata({ mfaId }).debug('Using mfaId');
+          locals.logger.withMetadata({ email }).debug('MFA required, requesting OTP');
 
-          // Request OTP with mfaId to link to MFA session
-          const otpResponse = await locals.pb.collection('users').requestOTP(form.data.email, { mfaId } as any);
+          const otpResponse = await usersCollection.requestOTP(email, { mfaId: mfaIdFromError } as any);
 
           locals.logger.debug('OTP request successful');
-          locals.logger.withMetadata({ otpId: otpResponse.otpId }).debug('OTP Response');
+          locals.logger.withMetadata({ otpId: otpResponse.otpId }).debug('OTP sent');
 
-          return {
-            form,
-            mfaRequired: true,
-            mfaId: mfaId,
-            otpId: otpResponse.otpId,
-            email: form.data.email,
-          };
+          // Store MFA data and credentials in form for next submission
+          form.data.email = email;
+          form.data.password = password;
+          form.data.mfaId = mfaIdFromError;
+          form.data.otpId = otpResponse.otpId;
+          form.message = m['auth.mfa_code_required']();
+          return fail(400, { form });
         } catch (otpErr) {
           locals.logger.withMetadata({ error: otpErr }).error('OTP request error');
           form.message = m['auth.mfa_send_failed']();
@@ -71,81 +141,9 @@ export const actions: Actions = {
         }
       }
 
+      // Regular login error
       form.message = m['auth.login.invalid_credentials']();
       return fail(400, { form });
-    }
-
-    redirect(303, '/?login=success');
-  },
-
-  verifyMfa: async ({ request, locals }) => {
-    const formData = await request.formData();
-    const otpId = formData.get('otpId') as string;
-    const code = formData.get('code') as string;
-    const mfaId = formData.get('mfaId') as string;
-    const email = formData.get('email') as string;
-
-    if (!otpId || !code || !mfaId) {
-      return fail(400, { message: m['auth.missing_fields']() });
-    }
-
-    try {
-      locals.logger.debug('=== MFA Verification Debug ===');
-      locals.logger.withMetadata({ otpId, code: code?.substring(0, 3) + '***', email }).debug('Form data received');
-      locals.logger.withMetadata({ codeLength: code?.length }).debug('Code length');
-
-      // authWithOTP signature: authWithOTP(otpId: string, password: string, options?: CommonOptions)
-      // The 'password' parameter is actually the OTP code
-      locals.logger.debug('Calling: pb.collection("users").authWithOTP(otpId, code, { mfaId })');
-
-      const authData = await locals.pb.collection('users').authWithOTP(otpId, code, { mfaId } as any);
-
-      locals.logger.debug('MFA verification succeeded!');
-      locals.logger
-        .withMetadata({
-          userId: authData.record?.id,
-          email: authData.record?.email,
-        })
-        .debug('MFA verification succeeded!');
-
-      // Check if account is disabled after MFA
-      if (authData.record.disabled) {
-        locals.pb.authStore.clear();
-        return fail(403, {
-          mfaRequired: true,
-          mfaId: mfaId,
-          otpId: otpId,
-          email: email,
-          message: m['auth.login.account_disabled'](),
-        });
-      }
-
-      // Redirect on success - let the auth hook pick up the new auth state
-      locals.logger.debug('MFA verification successful!');
-      redirect(303, '/?login=success');
-    } catch (err: any) {
-      // Re-throw SvelteKit redirects (they shouldn't be caught as errors)
-      if (err?.status && err?.location) {
-        throw err;
-      }
-
-      locals.logger.withMetadata(err).error('=== MFA verification error ===');
-      locals.logger
-        .withMetadata({
-          status: err?.status,
-          response: err?.response,
-          message: err?.message,
-          data: err?.data,
-        })
-        .error('Error details');
-
-      return fail(400, {
-        mfaRequired: true,
-        mfaId: mfaId,
-        otpId: otpId,
-        email: email,
-        message: `${m['auth.mfa_invalid_code']()} - ${err?.message || 'Unknown error'}`,
-      });
     }
   },
 };

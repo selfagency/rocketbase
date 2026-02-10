@@ -3,190 +3,220 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { actions } from '../../../routes/login/+page.server';
 
 describe('Login Server Actions', () => {
-	let mockLocals: any;
-	let mockEvent: Partial<RequestEvent>;
+  let mockLocals: any;
+  let mockEvent: Partial<RequestEvent>;
+  let mockCollection: any;
 
-	beforeEach(() => {
-		mockLocals = {
-			pb: {
-				collection: vi.fn().mockReturnValue({
-					authWithPassword: vi.fn(),
-					requestOTP: vi.fn(),
-					authWithOTP: vi.fn()
-				})
-			},
-			user: null
-		};
+  beforeEach(() => {
+    mockCollection = {
+      authWithPassword: vi.fn(),
+      requestOTP: vi.fn(),
+      authWithOTP: vi.fn(),
+    };
 
-		mockEvent = {
-			locals: mockLocals,
-			request: new Request('http://localhost', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-			})
-		};
-	});
+    mockLocals = {
+      pb: {
+        collection: vi.fn(() => mockCollection),
+      },
+      logger: {
+        withMetadata: vi.fn().mockReturnThis(),
+        error: vi.fn(),
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+      },
+      user: null,
+    };
 
-	describe('default action (login)', () => {
-		it('successfully authenticates user with valid credentials', async () => {
-			const formData = new FormData();
-			formData.append('email', 'test@example.com');
-			formData.append('password', 'password123');
+    // Reset mocks
+    vi.clearAllMocks();
 
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
+    mockEvent = {
+      locals: mockLocals,
+      request: new Request('http://localhost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      }),
+    };
+  });
 
-			mockLocals.pb.collection().authWithPassword.mockResolvedValue({
-				token: 'test-token',
-				record: { id: '123', email: 'test@example.com' }
-			});
+  describe('default action (login)', () => {
+    it('successfully authenticates user with valid credentials', async () => {
+      const formData = new FormData();
+      formData.append('email', 'test@example.com');
+      formData.append('password', 'password123');
 
-			try {
-				await actions.login(mockEvent as any);
-			} catch (error: any) {
-				// Expecting a redirect
-				expect(error.status).toBe(303);
-				expect(error.location).toBe('/?login=success');
-			}
-		});
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
 
-		it('returns error for invalid credentials', async () => {
-			const formData = new FormData();
-			formData.append('email', 'test@example.com');
-			formData.append('password', 'wrongpassword');
+      mockCollection.authWithPassword.mockResolvedValue({
+        token: 'test-token',
+        record: { id: '123', email: 'test@example.com' },
+      });
 
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
+      try {
+        await actions.login(mockEvent as any);
+      } catch (error: any) {
+        // Expecting a redirect
+        expect(error.status).toBe(303);
+        expect(error.location).toBe('/?login=success');
+      }
+    });
 
-			mockLocals.pb
-				.collection()
-				.authWithPassword.mockRejectedValue(new Error('Invalid credentials'));
+    it('returns error for invalid credentials', async () => {
+      const formData = new FormData();
+      formData.append('email', 'test@example.com');
+      formData.append('password', 'wrongpassword');
 
-			const result = await actions.login(mockEvent as any);
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
 
-			expect(result).toHaveProperty('status', 400);
-			expect((result as any).data.form.message).toBe('Invalid email or password');
-		});
+      mockLocals.pb.collection().authWithPassword.mockRejectedValue(new Error('Invalid credentials'));
 
-		it('handles MFA requirement and requests OTP', async () => {
-			const formData = new FormData();
-			formData.append('email', 'test@example.com');
-			formData.append('password', 'password123');
+      const result = await actions.login(mockEvent as any);
 
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
+      expect(result).toHaveProperty('status', 400);
+      expect((result as any).data.form.message).toBe('Invalid email or password');
+    });
 
-			const mfaError: any = new Error('MFA required');
-			mfaError.response = { mfaId: 'mfa-123' };
+    it('handles MFA requirement and requests OTP', async () => {
+      const formData = new FormData();
+      formData.append('email', 'test@example.com');
+      formData.append('password', 'password123');
 
-			mockLocals.pb.collection().authWithPassword.mockRejectedValue(mfaError);
-			mockLocals.pb.collection().requestOTP.mockResolvedValue({ otpId: 'otp-456' });
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
 
-			const result: any = await actions.login(mockEvent as any);
+      const mfaError: any = new Error('MFA required');
+      mfaError.response = { mfaId: 'mfa-123' };
 
-			expect(result.mfaRequired).toBe(true);
-			expect(result.mfaId).toBe('mfa-123');
-			expect(result.otpId).toBe('otp-456');
-			expect(result.email).toBe('test@example.com');
-		});
+      console.log('mfaError:', mfaError);
+      console.log('mfaError.response:', mfaError.response);
+      console.log('mfaError.response.mfaId:', mfaError.response?.mfaId);
 
-		it('validates email format', async () => {
-			const formData = new FormData();
-			formData.append('email', 'invalid-email');
-			formData.append('password', 'password123');
+      mockCollection.authWithPassword.mockRejectedValue(mfaError);
 
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
+      const requestOTPSpy = vi.fn(() => Promise.resolve({ otpId: 'otp-456' }));
+      mockCollection.requestOTP = requestOTPSpy;
 
-			const result = await actions.login(mockEvent as any);
+      let result: any;
+      let threw = false;
+      try {
+        result = await actions.login(mockEvent as any);
+      } catch (error) {
+        threw = true;
+        result = error;
+      }
 
-			expect(result).toHaveProperty('status', 400);
-		});
+      console.log('Result:', result);
+      console.log('Threw:', threw);
+      console.log('authWithPassword called:', mockCollection.authWithPassword.mock.calls);
+      console.log('requestOTP called:', requestOTPSpy.mock.calls);
 
-		it('validates password length', async () => {
-			const formData = new FormData();
-			formData.append('email', 'test@example.com');
-			formData.append('password', 'short');
+      expect(threw).toBe(false);
+      expect(result.mfaRequired).toBe(true);
+      expect(result.mfaId).toBe('mfa-123');
+      expect(result.otpId).toBe('otp-456');
+      expect(result.email).toBe('test@example.com');
+    });
 
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
+    it('validates email format', async () => {
+      const formData = new FormData();
+      formData.append('email', 'invalid-email');
+      formData.append('password', 'password123');
 
-			const result = await actions.login(mockEvent as any);
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
 
-			expect(result).toHaveProperty('status', 400);
-		});
-	});
+      const result = await actions.login(mockEvent as any);
 
-	describe('verifyMfa action', () => {
-		it('successfully verifies MFA with valid OTP code', async () => {
-			const formData = new FormData();
-			formData.append('otpId', 'otp-123');
-			formData.append('code', '123456');
-			formData.append('mfaId', 'mfa-456');
-			formData.append('email', 'test@example.com');
+      expect(result).toHaveProperty('status', 400);
+    });
 
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
+    it('validates password length', async () => {
+      const formData = new FormData();
+      formData.append('email', 'test@example.com');
+      formData.append('password', 'short');
 
-			mockLocals.pb.collection().authWithOTP.mockResolvedValue({
-				token: 'test-token',
-				record: { id: '123', email: 'test@example.com', disabled: false }
-			});
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
 
-			try {
-				await actions.verifyMfa(mockEvent as any);
-			} catch (error: any) {
-				// Expecting a redirect
-				expect(error.status).toBe(303);
-				expect(error.location).toBe('/?login=success');
-			}
-		});
+      const result = await actions.login(mockEvent as any);
 
-		it('returns error for invalid OTP code', async () => {
-			const formData = new FormData();
-			formData.append('otpId', 'otp-123');
-			formData.append('code', '000000');
-			formData.append('mfaId', 'mfa-456');
-			formData.append('email', 'test@example.com');
+      expect(result).toHaveProperty('status', 400);
+    });
+  });
 
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
+  describe('verifyMfa action', () => {
+    it('successfully verifies MFA with valid OTP code', async () => {
+      const formData = new FormData();
+      formData.append('otpId', 'otp-123');
+      formData.append('code', '123456');
+      formData.append('mfaId', 'mfa-456');
+      formData.append('email', 'test@example.com');
 
-			mockLocals.pb.collection().authWithOTP.mockRejectedValue(new Error('Invalid code'));
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
 
-			const result: any = await actions.verifyMfa(mockEvent as any);
+      mockCollection.authWithOTP.mockResolvedValue({
+        token: 'test-token',
+        record: { id: '123', email: 'test@example.com', disabled: false },
+      });
 
-			expect(result).toHaveProperty('status', 400);
-			expect(result.data.message).toContain('Invalid verification code');
-		});
+      try {
+        await actions.verifyMfa(mockEvent as any);
+      } catch (error: any) {
+        // Expecting a redirect
+        expect(error.status).toBe(303);
+        expect(error.location).toBe('/?login=success');
+      }
+    });
 
-		it('returns error when required fields are missing', async () => {
-			const formData = new FormData();
-			formData.append('code', '123456');
-			// Missing otpId and mfaId
+    it('returns error for invalid OTP code', async () => {
+      const formData = new FormData();
+      formData.append('otpId', 'otp-123');
+      formData.append('code', '000000');
+      formData.append('mfaId', 'mfa-456');
+      formData.append('email', 'test@example.com');
 
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
 
-			const result = await actions.verifyMfa(mockEvent as any);
+      mockCollection.authWithOTP.mockRejectedValue(new Error('Invalid code'));
 
-			expect(result).toHaveProperty('status', 400);
-		});
-	});
+      const result: any = await actions.verifyMfa(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+      expect(result.data.message).toContain('Invalid verification code');
+    });
+
+    it('returns error when required fields are missing', async () => {
+      const formData = new FormData();
+      formData.append('code', '123456');
+      // Missing otpId and mfaId
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await actions.verifyMfa(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+    });
+  });
 });

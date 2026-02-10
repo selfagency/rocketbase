@@ -195,11 +195,23 @@ export const actions: Actions = {
     }
 
     try {
+      // First, verify the old password by attempting to re-authenticate
+      try {
+        await locals.pb.collection('users').authWithPassword(locals.user.email, form.data.oldPassword);
+      } catch (authErr: any) {
+        form.message = m['validation.password_incorrect']?.() || 'Invalid current password';
+        return fail(400, { passwordForm: form });
+      }
+
+      // If old password is valid, update to new password
       await locals.pb.collection('users').update(locals.user.id, {
-        oldPassword: form.data.oldPassword,
         password: form.data.password,
         passwordConfirm: form.data.passwordConfirm,
       });
+
+      // Refresh auth to maintain session
+      await locals.pb.collection('users').authRefresh();
+      locals.user = locals.pb.authStore.record as any;
 
       return {
         passwordForm: await superValidate<PasswordSchema>(zod4(passwordSchema), {

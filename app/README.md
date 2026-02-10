@@ -8,14 +8,14 @@ If you're seeing this, you've probably already done this step. Congrats!
 
 ```sh
 # create a new project
-npx sv create my-app
+pnpx sv create my-app
 ```
 
 To recreate this project with the same configuration:
 
 ```sh
 # recreate this project
-pnpm dlx sv create --template minimal --types ts --add playwright vitest="usages:unit,component" --install pnpm .
+pnpx sv create --template minimal --types ts --add playwright vitest="usages:unit,component" --install pnpm .
 ```
 
 ## Developing

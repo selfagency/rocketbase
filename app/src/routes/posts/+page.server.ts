@@ -1,5 +1,5 @@
-import type { PageServerLoad } from './$types';
 import type { PostsResponse } from '../../lib/types/pocketbase';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
   const { pb } = locals;
@@ -10,13 +10,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
   try {
     // Fetch paginated posts
-    const result = await pb.collection('posts').getList<PostsResponse<{
-      author: { id: string; name?: string; email: string; avatar?: string }[];
-      tags: { id: string; tag: string; slug: string }[];
-    }>>(page, perPage, {
+    const result = await pb.collection('posts').getList<
+      PostsResponse<{
+        author: { id: string; name?: string; email: string; avatar?: string }[];
+        tags: { id: string; tag: string; slug: string }[];
+      }>
+    >(page, perPage, {
       filter: 'published = true',
       sort: '-created',
-      expand: 'author,tags'
+      expand: 'author,tags',
     });
 
     return {
@@ -25,19 +27,19 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         page: result.page,
         perPage: result.perPage,
         totalItems: result.totalItems,
-        totalPages: result.totalPages
-      }
+        totalPages: result.totalPages,
+      },
     };
   } catch (err) {
-    console.error('Error loading posts:', err);
+    locals.logger.withContext(err as Error).error('Error loading posts');
     return {
       posts: [],
       pagination: {
         page: 1,
         perPage,
         totalItems: 0,
-        totalPages: 0
-      }
+        totalPages: 0,
+      },
     };
   }
 };

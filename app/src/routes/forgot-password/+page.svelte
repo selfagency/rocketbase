@@ -21,14 +21,16 @@
 
 	let { data, form: actionData } = $props();
 
+	let showSuccess = $state(false);
+
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.form, {
 		validators: zod4Client(forgotPasswordSchema),
 		onUpdate({ form, result }) {
 			if (form.valid) {
-				const actionData = result.data as any;
-				if (actionData?.success) {
-					// Success message is already displayed in the alert
+				const resultData = result.data as any;
+				if (resultData?.success) {
+					showSuccess = true;
 				}
 			}
 		}
@@ -38,13 +40,6 @@
 
 	// Use Superforms snapshot support for browser navigation state preservation
 	export const snapshot = { capture, restore };
-
-	// svelte-ignore state_referenced_locally
-	let showSuccess = $state(actionData?.success);
-
-	$effect(() => {
-		showSuccess = actionData?.success;
-	});
 </script>
 
 <div class="flex min-h-screen items-center justify-center px-4">

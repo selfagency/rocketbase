@@ -15,6 +15,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import { toast } from '$lib/stores/toast';
 	import { CircleAlert } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -26,9 +27,25 @@
 
 	let { data } = $props();
 
+	let showMfaForm = $state(false);
+	let mfaData = $state({ mfaId: '', otpId: '', email: '' });
+	let mfaCode = $state('');
+
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.form, {
-		validators: zod4Client(loginSchema)
+		validators: zod4Client(loginSchema),
+		onUpdate({ result }) {
+			const actionResult = result.data as any;
+			if (actionResult?.mfaRequired) {
+				showMfaForm = true;
+				mfaData = {
+					mfaId: actionResult.mfaId || '',
+					otpId: actionResult.otpId || '',
+					email: actionResult.email || ''
+				};
+				mfaCode = '';
+			}
+		}
 	});
 
 	const { form, enhance, message, capture, restore } = superFormObj;
@@ -36,30 +53,10 @@
 	// Use Superforms snapshot support for browser navigation state preservation
 	export const snapshot = { capture, restore };
 
-	let showMfaForm = $state(false);
-	let mfaData = $state({ mfaId: '', otpId: '', email: '' });
-	let mfaCode = $state('');
-
-	// Show success toast if coming from registration
-	$effect(() => {
+	// Show success toast if coming from registration - check once on mount
+	onMount(() => {
 		if (page.url.searchParams.get('registered') === 'true') {
 			toast(m['auth.register.success'](), 'success');
-			// Clean up URL without reload
-			window.history.replaceState({}, '', '/login');
-		}
-	});
-
-	// Watch for MFA data from action result
-	$effect(() => {
-		const actionResult = page.form as any;
-		if (actionResult?.mfaRequired && !showMfaForm) {
-			showMfaForm = true;
-			mfaData = {
-				mfaId: actionResult.mfaId || '',
-				otpId: actionResult.otpId || '',
-				email: actionResult.email || ''
-			};
-			mfaCode = ''; // Clear code field
 		}
 	});
 </script>

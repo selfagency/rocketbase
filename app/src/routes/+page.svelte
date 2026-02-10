@@ -4,15 +4,14 @@
 	import { Card, CardContent, CardDescription, CardHeader } from '$lib/components/ui/card';
 	import * as m from '$lib/paraglide/messages';
 	import { toast } from '$lib/stores/toast';
+	import { onMount } from 'svelte';
 
 	let { data } = $props();
 
-	// Show success toast if user just logged in via MFA
-	$effect(() => {
+	// Show success toast if user just logged in
+	onMount(() => {
 		if (page.url.searchParams.get('login') === 'success') {
 			toast(m['auth.login.success'](), 'success');
-			// Clean up URL without reload
-			window.history.replaceState({}, '', '/');
 		}
 	});
 </script>

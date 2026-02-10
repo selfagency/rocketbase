@@ -20,6 +20,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as m from '$lib/paraglide/messages';
 	import { toast } from '$lib/stores/toast';
+	import { onMount } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -88,15 +89,14 @@
 	let mfaInitialized = $state(false);
 	let verificationEmailSent = $state(false);
 
-	$effect(() => {
+	// Check for email verification success on mount
+	onMount(() => {
 		const verifiedFlag = page?.url?.searchParams?.get('verified');
 		if (verifiedFlag === 'true') {
 			toast(m['account.email_verified_success'](), 'success');
 		}
-	});
 
-	$effect(() => {
-		if (mfaInitialized) return;
+		// Initialize MFA state from server data
 		if (typeof data.mfaOptIn === 'boolean') {
 			savedMfaOptIn = data.mfaOptIn;
 			uiMfaOptIn = data.mfaOptIn;

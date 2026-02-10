@@ -373,6 +373,62 @@ async function deleteUserByEmail(email: string) {
     // Silently fail if cleanup doesn't work - tests should still pass
   }
 }
+
+/**
+ * Bulk delete all test users from @example.com domain
+ */
+async function deleteAllTestUsers() {
+  try {
+    const authTokenUrl = `http://localhost:8090/api/admins/auth-with-password?adminUsername=admin&adminPassword=admin`;
+    const authRes = await fetch(authTokenUrl, { method: 'POST' });
+    if (!authRes.ok) return;
+
+    const authData = (await authRes.json()) as any;
+    const adminToken = authData?.token;
+    if (!adminToken) return;
+
+    const headers = {
+      Authorization: `Bearer ${adminToken}`,
+      'Content-Type': 'application/json',
+    };
+
+    // Get all users from @example.com
+    const searchUrl = `http://localhost:8090/api/collections/users/records?filter=email~"@example.com"&perPage=500`;
+    const searchResponse = await fetch(searchUrl, { method: 'GET', headers });
+
+    if (!searchResponse.ok) return;
+
+    const searchData = (await searchResponse.json()) as any;
+    const items = searchData?.items || searchData || [];
+
+    if (items && items.length > 0) {
+      console.debug('Bulk cleanup: Found', items.length, 'test user(s) to delete');
+      // Delete each user record found
+      for (const item of items) {
+        const id = item?.id || item?.ID || item?._id;
+        if (!id) continue;
+        const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
+        try {
+          const delRes = await fetch(deleteUrl, {
+            method: 'DELETE',
+            headers,
+          });
+          if (!delRes.ok) {
+            console.debug('Failed deleting test user', id, 'status:', delRes.status);
+          }
+        } catch (err) {
+          console.debug('Error deleting test user', id, err);
+        }
+      }
+    } else {
+      console.debug('Bulk cleanup: No test users found for @example.com');
+    }
+  } catch (err) {
+    // Silently fail if cleanup doesn't work
+    console.debug('Error during bulk test user cleanup:', err);
+  }
+}
+
 test.describe('Authentication Flows', () => {
   // const testUser = {
   // 	name: 'Test User',
@@ -434,7 +490,7 @@ test.describe('Authentication Flows', () => {
         // Should redirect to login page after successful registration
         await expect(page).toHaveURL('/login?registered=true');
       } finally {
-        await deleteUserByEmail(email);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
 
@@ -453,7 +509,7 @@ test.describe('Authentication Flows', () => {
         // Should show validation error
         await expect(page.locator('text=/passwords do not match/i')).toBeVisible();
       } finally {
-        await deleteUserByEmail(email);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
 
@@ -542,7 +598,7 @@ test.describe('Authentication Flows', () => {
         await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
         await expect(page.getByText('Successfully logged in!')).toBeVisible();
       } finally {
-        await deleteUserByEmail(email);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
 
@@ -595,7 +651,7 @@ test.describe('Authentication Flows', () => {
         // Should show error in an alert
         await expect(page.locator('[role="alert"]')).toBeVisible({ timeout: 3000 });
       } finally {
-        await deleteUserByEmail(email);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
   });
@@ -662,7 +718,7 @@ test.describe('Authentication Flows', () => {
         // Should not show the "send verification" button anymore (indicates verified)
         await expect(page.locator('[data-testid="send-verification-email-button"]')).toHaveCount(0);
       } finally {
-        await deleteUserByEmail(email);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
 
@@ -703,7 +759,7 @@ test.describe('Authentication Flows', () => {
           await expect(page.getByRole('button', { name: /logout/i })).toBeVisible();
         });
       } finally {
-        await deleteUserByEmail(uniqueEmail);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
 
@@ -827,7 +883,7 @@ test.describe('Authentication Flows', () => {
         // Wait for form to update with new values
         await expect(page.locator('input[name="title"]')).toHaveValue('Software Engineer');
       } finally {
-        await deleteUserByEmail(uniqueEmail);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
 
@@ -877,7 +933,7 @@ test.describe('Authentication Flows', () => {
         // Should show toggle is unchecked
         await expect(page.locator('#mfa-opt-in')).not.toHaveAttribute('data-state', 'checked');
       } finally {
-        await deleteUserByEmail(uniqueEmail);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
 
@@ -961,7 +1017,7 @@ test.describe('Authentication Flows', () => {
 
         await expect(page).toHaveURL('/?login=success');
       } finally {
-        await deleteUserByEmail(uniqueEmail);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
 
@@ -999,7 +1055,7 @@ test.describe('Authentication Flows', () => {
         await expect(page.getByText('2FA Not Required')).toBeVisible();
         await expect(page.locator('#mfa-opt-in')).toBeVisible();
       } finally {
-        await deleteUserByEmail(uniqueEmail);
+        // Cleanup handled in bulk via test.afterAll
       }
     });
 
@@ -1055,9 +1111,14 @@ test.describe('Authentication Flows', () => {
           await page.goto('/login');
           await expect(page).toHaveURL('/login');
         } finally {
-          await deleteUserByEmail(uniqueEmail);
+          // Cleanup handled in bulk via test.afterAll
         }
       });
     });
+  });
+
+  test.afterAll('Delete all test users from @example.com', async () => {
+    // Bulk delete all test users at the end of all tests
+    await deleteAllTestUsers();
   });
 });

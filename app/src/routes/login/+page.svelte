@@ -61,7 +61,7 @@
 	});
 </script>
 
-<div class="flex min-h-[80vh] items-center justify-center px-4">
+<div class="flex h-[80vh] items-center justify-center px-4">
 	<Card class="w-full max-w-md">
 		<CardHeader>
 			<CardTitle>{m['auth.login.title']()}</CardTitle>

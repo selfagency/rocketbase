@@ -48,15 +48,24 @@
 		});
 
 	let avatarPreview = $state<string | null>(null);
+	let avatarUploaded = $state(false);
 
 	// svelte-ignore state_referenced_locally
 	const superFormObj = superForm(data.profileForm, {
 		validators: zod4Client(profileSchema),
 		resetForm: false,
-		onUpdated: ({ form }) => {
-			if (form.valid) {
+		onResult: ({ result }) => {
+			if (result.type === 'success') {
 				avatarPreview = null;
 				toast(m['account.profile_updated'](), 'success');
+				// Check if avatar was uploaded
+				if (avatarUploaded) {
+					toast(m['account.avatar_upload_success'](), 'success');
+					avatarUploaded = false;
+				}
+			} else if (result.type === 'failure') {
+				toast(m['account.profile_update_failed'](), 'error');
+				avatarUploaded = false;
 			}
 		}
 	});
@@ -68,8 +77,8 @@
 	const passwordFormObj = superForm(data.passwordForm, {
 		validators: zod4Client(passwordSchema),
 		resetForm: true,
-		onUpdated: ({ form }) => {
-			if (form.valid) {
+		onResult: ({ result }) => {
+			if (result.type === 'success') {
 				toast(m['account.password_changed_success'](), 'success');
 			}
 		}
@@ -118,6 +127,7 @@
 		const file = input.files?.[0];
 		if (file) {
 			$form.avatar = file;
+			avatarUploaded = true;
 			const reader = new FileReader();
 			reader.onload = (e) => {
 				avatarPreview = e.target?.result as string;

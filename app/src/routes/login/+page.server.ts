@@ -66,7 +66,7 @@ export const actions: Actions = {
           };
         } catch (otpErr) {
           locals.logger.withMetadata({ error: otpErr }).error('OTP request error');
-          form.message = 'Failed to send verification code';
+          form.message = m['auth.mfa_send_failed']();
           return fail(400, { form });
         }
       }
@@ -86,7 +86,7 @@ export const actions: Actions = {
     const email = formData.get('email') as string;
 
     if (!otpId || !code || !mfaId) {
-      return fail(400, { message: 'Missing required fields' });
+      return fail(400, { message: m['auth.missing_fields']() });
     }
 
     try {
@@ -144,7 +144,7 @@ export const actions: Actions = {
         mfaId: mfaId,
         otpId: otpId,
         email: email,
-        message: `Invalid verification code - ${err?.message || 'Unknown error'}`,
+        message: `${m['auth.mfa_invalid_code']()} - ${err?.message || 'Unknown error'}`,
       });
     }
   },

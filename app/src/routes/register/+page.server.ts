@@ -50,7 +50,7 @@ export const actions: Actions = {
       locals.logger.withMetadata(err).error('Registration error');
       return fail(400, {
         form,
-        message: err?.message || 'Registration failed. Please try again.',
+        message: err?.message || m['auth.register_failed'](),
       });
     }
 

@@ -1,3 +1,4 @@
+import * as m from '$lib/paraglide/messages';
 import { error, redirect } from '@sveltejs/kit';
 import type { PagesResponse } from '../../lib/types/pocketbase';
 import type { PageServerLoad } from './$types';
@@ -23,7 +24,7 @@ export const load: PageServerLoad = async ({ params, locals, parent, url }) => {
   const firstSegment = slug.split('/')[0];
   if (RESERVED_ROUTES.has(firstSegment)) {
     logger.withMetadata({ slug }).debug('Slug matches reserved route, skipping fallthrough');
-    throw error(404, 'Page not found');
+    throw error(404, m['error.page_not_found']());
   }
 
   // Get layout data which contains navItems
@@ -80,7 +81,7 @@ export const load: PageServerLoad = async ({ params, locals, parent, url }) => {
 
   if (!navItem) {
     logger.withMetadata({ slug }).debug('Page not found in navigation');
-    throw error(404, 'Page not found');
+    throw error(404, m['error.page_not_found']());
   }
 
   // Check if this page has a parent and construct the correct URL path
@@ -134,7 +135,7 @@ export const load: PageServerLoad = async ({ params, locals, parent, url }) => {
 
   // Check if page requires login
   if (page.require_login && !locals.user) {
-    throw error(403, 'Authentication required');
+    throw error(403, m['error.authentication_required']());
   }
 
   // Check if page is subscriber-only (you might want to implement subscription logic here)
@@ -142,7 +143,7 @@ export const load: PageServerLoad = async ({ params, locals, parent, url }) => {
     // TODO: Implement subscriber check
     // For now, just check if user exists (basic auth check)
     if (!locals.user) {
-      throw error(403, 'Subscriber access required');
+      throw error(403, m['error.subscriber_access_required']());
     }
   }
 

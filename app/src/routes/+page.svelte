@@ -8,10 +8,13 @@
 
 	let { data } = $props();
 
-	// Show success toast if user just logged in
+	// Show success toast if user just logged in or logged out
 	onMount(() => {
 		if (page.url.searchParams.get('login') === 'success') {
 			toast(m['auth.login.success'](), 'success');
+		}
+		if (page.url.searchParams.get('logout') === 'success') {
+			toast(m['auth.logout.success'](), 'success');
 		}
 	});
 </script>

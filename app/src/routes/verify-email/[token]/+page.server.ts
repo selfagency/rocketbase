@@ -1,3 +1,4 @@
+import * as m from '$lib/paraglide/messages';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -6,7 +7,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
   if (!token) {
     return {
-      error: 'Invalid verification link',
+      error: m['verify.invalid_verification_link'](),
     };
   }
 
@@ -19,7 +20,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   } catch (err: any) {
     locals.logger.withMetadata(err).error('Email verification error');
     return {
-      error: err?.message || 'Failed to verify email. The link may have expired.',
+      error: err?.message || m['verify.email_verification_failed'](),
     };
   }
 };

@@ -70,7 +70,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions: Actions = {
   updateProfile: async ({ request, locals }) => {
     if (!locals.user) {
-      return fail(401, { message: 'Unauthorized' });
+      return fail(401, { message: m['auth.unauthorized']() });
     }
 
     const formData = await request.formData();
@@ -132,7 +132,7 @@ export const actions: Actions = {
 
   toggleMfaOptIn: async ({ request, locals }) => {
     if (!locals.user) {
-      return fail(401, { message: 'Unauthorized' });
+      return fail(401, { message: m['auth.unauthorized']() });
     }
 
     const formData = await request.formData();
@@ -164,7 +164,7 @@ export const actions: Actions = {
 
   sendVerificationEmail: async ({ locals }) => {
     if (!locals.user) {
-      return fail(401, { message: 'Unauthorized' });
+      return fail(401, { message: m['auth.unauthorized']() });
     }
 
     try {
@@ -182,7 +182,7 @@ export const actions: Actions = {
 
   changePassword: async ({ request, locals }) => {
     if (!locals.user) {
-      return fail(401, { message: 'Unauthorized' });
+      return fail(401, { message: m['auth.unauthorized']() });
     }
 
     const formData = await request.formData();
@@ -216,7 +216,7 @@ export const actions: Actions = {
 
   requestTwoFactor: async ({ request, locals }) => {
     if (!locals.user) {
-      return fail(401, { message: 'Unauthorized' });
+      return fail(401, { message: m['auth.unauthorized']() });
     }
 
     try {
@@ -237,7 +237,7 @@ export const actions: Actions = {
 
   verifyTwoFactor: async ({ request, locals }) => {
     if (!locals.user) {
-      return fail(401, { message: 'Unauthorized' });
+      return fail(401, { message: m['auth.unauthorized']() });
     }
 
     try {
@@ -246,7 +246,7 @@ export const actions: Actions = {
       const code = formData.get('code')?.toString();
 
       if (!otpId || !code) {
-        return fail(400, { message: 'Missing OTP ID or code' });
+        return fail(400, { message: m['auth.missing_otp']() });
       }
 
       // Verify the OTP code
@@ -255,7 +255,7 @@ export const actions: Actions = {
         .getFullList({ filter: `id = "${otpId}" && recordRef = "${locals.user.id}"` });
 
       if (otps.length === 0) {
-        return fail(400, { message: 'Invalid OTP' });
+        return fail(400, { message: m['auth.invalid_otp']() });
       }
 
       // Authenticate with OTP to verify the code
@@ -274,13 +274,13 @@ export const actions: Actions = {
       };
     } catch (err: any) {
       locals.logger.withMetadata(err).error('2FA verification error:');
-      return fail(400, { message: err?.message || 'Invalid code' });
+      return fail(400, { message: err?.message || m['auth.invalid_code']() });
     }
   },
 
   disableTwoFactor: async ({ locals }) => {
     if (!locals.user) {
-      return fail(401, { message: 'Unauthorized' });
+      return fail(401, { message: m['auth.unauthorized']() });
     }
 
     try {

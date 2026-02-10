@@ -19,19 +19,13 @@
 	};
 
 	$effect(() => {
-		if (toasts.current.length === 0) {
-			shownKeys.clear();
-			return;
-		}
-
-		for (const toastData of toasts.current) {
+		while (toasts.current.length > 0) {
+			const toastData = toasts.current.shift()!;
 			const key = getToastKey(toastData);
-			if (shownKeys.has(key)) {
-				continue;
+			if (!shownKeys.has(key)) {
+				shownKeys.add(key);
+				toast[toastData.type](toastData.message);
 			}
-
-			shownKeys.add(key);
-			toast[toastData.type](toastData.message);
 		}
 	});
 </script>

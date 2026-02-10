@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import PageContent from '$lib/components/PageContent.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardDescription, CardHeader } from '$lib/components/ui/card';
 	import * as m from '$lib/paraglide/messages';
@@ -18,6 +19,10 @@
 		}
 	});
 </script>
+
+{#if data.page}
+	<PageContent page={data.page} />
+{/if}
 
 <div class="container mx-auto max-w-2xl px-4 py-16">
 	<Card>

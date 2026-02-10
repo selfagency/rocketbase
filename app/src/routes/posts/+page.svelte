@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
-	import * as Card from '$lib/components/ui/card/index.js';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
-	import type { PageData } from './$types';
-	import { format } from '@formkit/tempo';
+	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Pagination from '$lib/components/ui/pagination/index.js';
 	import * as m from '$lib/paraglide/messages.js';
+	import { format } from '@formkit/tempo';
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
@@ -19,7 +19,12 @@
 
 	function getAuthorInitials(name?: string, email?: string): string {
 		if (name) {
-			return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+			return name
+				.split(' ')
+				.map((n) => n[0])
+				.join('')
+				.toUpperCase()
+				.slice(0, 2);
 		}
 		if (email) {
 			return email[0].toUpperCase();
@@ -35,7 +40,7 @@
 
 <div class="container mx-auto px-4 py-8">
 	<div class="mb-8">
-		<h1 class="text-4xl font-bold tracking-tight mb-4">{m.posts_title()}</h1>
+		<h1 class="mb-4 text-4xl font-bold tracking-tight">{m.posts_title()}</h1>
 		{#if data.pagination.totalItems > 0}
 			<p class="text-muted-foreground">
 				{m.posts_count({ count: data.pagination.totalItems })}
@@ -44,39 +49,36 @@
 	</div>
 
 	{#if data.posts.length === 0}
-		<div class="text-center py-12">
-			<h2 class="text-2xl font-semibold mb-2">{m.posts_empty_title()}</h2>
+		<div class="py-12 text-center">
+			<h2 class="mb-2 text-2xl font-semibold">{m.posts_empty_title()}</h2>
 			<p class="text-muted-foreground">{m.posts_empty_description()}</p>
 		</div>
 	{:else}
-		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+		<div class="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 			{#each data.posts as post}
-				<Card.Root class="overflow-hidden hover:shadow-lg transition-shadow">
+				<Card.Root class="overflow-hidden transition-shadow hover:shadow-lg">
 					{#if post.image}
 						<div class="aspect-video overflow-hidden">
 							<img
 								src={`/api/pb/_superusers/files/${post.collectionId}/${post.id}/${post.image}`}
 								alt={post.title}
-								class="w-full h-full object-cover hover:scale-105 transition-transform"
+								class="h-full w-full object-cover transition-transform hover:scale-105"
 							/>
 						</div>
 					{/if}
 					<Card.Content class="p-6">
 						<div class="mb-4">
-							<h2 class="text-xl font-semibold mb-2 line-clamp-2">
-								<a
-									href={`/posts/${post.slug}`}
-									class="hover:text-primary transition-colors"
-								>
+							<h2 class="mb-2 line-clamp-2 text-xl font-semibold">
+								<a href={`/posts/${post.slug}`} class="transition-colors hover:text-primary">
 									{post.title}
 								</a>
 							</h2>
 							{#if post.summary}
-								<p class="text-muted-foreground line-clamp-3">{post.summary}</p>
+								<p class="line-clamp-3 text-muted-foreground">{post.summary}</p>
 							{/if}
 						</div>
 
-						<div class="flex items-center gap-3 mb-4">
+						<div class="mb-4 flex items-center gap-3">
 							{#if post.expand?.author && post.expand.author.length > 0}
 								{@const author = post.expand.author[0]}
 								<Avatar class="h-8 w-8">
@@ -136,10 +138,7 @@
 								</Pagination.Item>
 							{:else}
 								<Pagination.Item>
-									<Pagination.Link
-										{page}
-										isActive={currentPage === page.value}
-									>
+									<Pagination.Link {page} isActive={currentPage === page.value}>
 										{page.value}
 									</Pagination.Link>
 								</Pagination.Item>

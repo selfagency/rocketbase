@@ -9,7 +9,8 @@ describe('/+page.svelte', () => {
 			props: {
 				data: {
 					navItems: [],
-					user: null
+					user: null,
+					homePage: null
 				}
 			}
 		});

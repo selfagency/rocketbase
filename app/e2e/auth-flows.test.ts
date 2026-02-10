@@ -7,978 +7,993 @@ const MAILPIT_POLL_INTERVAL_MS = 1000;
 const MAILPIT_POLL_TIMEOUT_MS = 10000;
 
 async function getEmailsForRecipient(email: string) {
-	const response = await fetch(MAILPIT_LIST_API);
-	const data = await response.json();
-	const allMessages = data.messages || [];
-	const normalizedEmail = email.toLowerCase();
+  const response = await fetch(MAILPIT_LIST_API);
+  const data = await response.json();
+  const allMessages = data.messages || [];
+  const normalizedEmail = email.toLowerCase();
 
-	const matchesRecipient = (toField: any) => {
-		if (!toField) {
-			return false;
-		}
+  const matchesRecipient = (toField: any) => {
+    if (!toField) {
+      return false;
+    }
 
-		const recipients = Array.isArray(toField) ? toField : [toField];
-		return recipients.some((recipient) => {
-			const value = (() => {
-				if (recipient == null) return '';
-				if (typeof recipient === 'string') return recipient;
-				if (typeof recipient === 'object') {
-					return (
-						recipient.Address ||
-						recipient.Email ||
-						recipient.Name ||
-						JSON.stringify(recipient)
-					).toString();
-				}
-				return recipient.toString();
-			})();
-			return value.toLowerCase().includes(normalizedEmail);
-		});
-	};
+    const recipients = Array.isArray(toField) ? toField : [toField];
+    return recipients.some(recipient => {
+      const value = (() => {
+        if (recipient == null) return '';
+        if (typeof recipient === 'string') return recipient;
+        if (typeof recipient === 'object') {
+          return (recipient.Address || recipient.Email || recipient.Name || JSON.stringify(recipient)).toString();
+        }
+        return recipient.toString();
+      })();
+      return value.toLowerCase().includes(normalizedEmail);
+    });
+  };
 
-	const filtered = allMessages.filter((message: any) => matchesRecipient(message.To));
+  const filtered = allMessages.filter((message: any) => matchesRecipient(message.To));
 
-	return filtered.sort((a: any, b: any) => getMessageTimestamp(b) - getMessageTimestamp(a));
+  return filtered.sort((a: any, b: any) => getMessageTimestamp(b) - getMessageTimestamp(a));
 }
 
 async function getAllEmails() {
-	const response = await fetch(MAILPIT_LIST_API);
-	const data = await response.json();
-	console.debug('Total messages in Mailpit:', data.messages?.length || 0);
-	if (data.messages && data.messages.length > 0) {
-		console.debug(
-			'Recent 3 messages:',
-			data.messages.slice(0, 3).map((m: any) => ({ ID: m.ID, To: m.To, Subject: m.Subject }))
-		);
-	}
-	return data.messages || [];
+  const response = await fetch(MAILPIT_LIST_API);
+  const data = await response.json();
+  console.debug('Total messages in Mailpit:', data.messages?.length || 0);
+  if (data.messages && data.messages.length > 0) {
+    console.debug(
+      'Recent 3 messages:',
+      data.messages.slice(0, 3).map((m: any) => ({ ID: m.ID, To: m.To, Subject: m.Subject }))
+    );
+  }
+  return data.messages || [];
 }
 
 async function getLatestEmailForRecipient(email: string) {
-	const start = Date.now();
-	let attempt = 0;
+  const start = Date.now();
+  let attempt = 0;
 
-	while (Date.now() - start < MAILPIT_POLL_TIMEOUT_MS) {
-		attempt += 1;
-		const emails = await getEmailsForRecipient(email);
-		if (emails.length > 0) {
-			const selected = emails[0];
-			console.debug('Selected message for', email, 'candidate:', {
-				id: getMailpitMessageId(selected),
-				to: selected?.To,
-				subject: selected?.Subject
-			});
-			console.debug(`Found email for ${email} on attempt ${attempt}`);
-			return emails[0];
-		}
+  while (Date.now() - start < MAILPIT_POLL_TIMEOUT_MS) {
+    attempt += 1;
+    const emails = await getEmailsForRecipient(email);
+    if (emails.length > 0) {
+      const selected = emails[0];
+      console.debug('Selected message for', email, 'candidate:', {
+        id: getMailpitMessageId(selected),
+        to: selected?.To,
+        subject: selected?.Subject,
+      });
+      console.debug(`Found email for ${email} on attempt ${attempt}`);
+      return emails[0];
+    }
 
-		const elapsed = Date.now() - start;
-		const remaining = MAILPIT_POLL_TIMEOUT_MS - elapsed;
-		if (remaining <= 0) break;
+    const elapsed = Date.now() - start;
+    const remaining = MAILPIT_POLL_TIMEOUT_MS - elapsed;
+    if (remaining <= 0) break;
 
-		const waitTime = Math.min(MAILPIT_POLL_INTERVAL_MS, remaining);
-		console.debug(`No email for ${email} yet, waiting ${waitTime}ms... (attempt ${attempt})`);
-		await new Promise((resolve) => setTimeout(resolve, waitTime));
-	}
+    const waitTime = Math.min(MAILPIT_POLL_INTERVAL_MS, remaining);
+    console.debug(`No email for ${email} yet, waiting ${waitTime}ms... (attempt ${attempt})`);
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+  }
 
-	return null;
+  return null;
 }
 
 function getMessageTimestamp(message: any): number {
-	const timeKeys = ['CreatedAt', 'ReceivedAt', 'SentAt', 'Created', 'Time'];
-	for (const key of timeKeys) {
-		const value = message[key];
-		if (typeof value === 'number') {
-			return value;
-		}
-		if (typeof value === 'string') {
-			const parsed = Date.parse(value);
-			if (!Number.isNaN(parsed)) {
-				return parsed;
-			}
-		}
-	}
+  const timeKeys = ['CreatedAt', 'ReceivedAt', 'SentAt', 'Created', 'Time'];
+  for (const key of timeKeys) {
+    const value = message[key];
+    if (typeof value === 'number') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = Date.parse(value);
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+  }
 
-	if (message.ID && typeof message.ID === 'number') {
-		return message.ID;
-	}
+  if (message.ID && typeof message.ID === 'number') {
+    return message.ID;
+  }
 
-	return 0;
+  return 0;
 }
 
 function getMailpitMessageId(message: any): string | null {
-	if (!message) {
-		return null;
-	}
+  if (!message) {
+    return null;
+  }
 
-	const candidates = [message.ID, message.id, message.Id, message._id];
-	for (const candidate of candidates) {
-		if (candidate === undefined || candidate === null) {
-			continue;
-		}
-		return candidate.toString();
-	}
+  const candidates = [message.ID, message.id, message.Id, message._id];
+  for (const candidate of candidates) {
+    if (candidate === undefined || candidate === null) {
+      continue;
+    }
+    return candidate.toString();
+  }
 
-	return null;
+  return null;
 }
 
 async function extractOTPFromEmail(email: string): Promise<string | null> {
-	try {
-		const message = await getLatestEmailForRecipient(email);
-		if (!message) {
-			console.error('No message found for email:', email);
-			// Debug: show all emails
-			await getAllEmails();
-			return null;
-		}
+  try {
+    const message = await getLatestEmailForRecipient(email);
+    if (!message) {
+      console.error('No message found for email:', email);
+      // Debug: show all emails
+      await getAllEmails();
+      return null;
+    }
 
-		const messageId = getMailpitMessageId(message);
-		if (!messageId) {
-			console.error('Missing message ID when extracting OTP for', email, 'message:', message);
-			await getAllEmails();
-			return null;
-		}
+    const messageId = getMailpitMessageId(message);
+    if (!messageId) {
+      console.error('Missing message ID when extracting OTP for', email, 'message:', message);
+      await getAllEmails();
+      return null;
+    }
 
-		const response = await fetch(`${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
-		if (!response.ok) {
-			console.error('Failed to fetch email detail', {
-				status: response.status,
-				statusText: response.statusText
-			});
-			console.error('Detail URL', `${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
-			return null;
-		}
-		const data = await response.json();
+    const response = await fetch(`${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
+    if (!response.ok) {
+      console.error('Failed to fetch email detail', {
+        status: response.status,
+        statusText: response.statusText,
+      });
+      console.error('Detail URL', `${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
+      return null;
+    }
+    const data = await response.json();
 
-		// Get email body - try HTML first, then text
-		const emailBody = data.HTML || data.Text || '';
-		console.debug('Email HTML exists:', !!data.HTML, 'Text exists:', !!data.Text);
-		if (emailBody.length === 0) {
-			console.debug('Email body is empty!');
-			console.debug('Full message data keys:', Object.keys(data));
-		}
-		console.debug('Email body (first 500 chars):', emailBody.substring(0, 500));
+    // Get email body - try HTML first, then text
+    const emailBody = data.HTML || data.Text || '';
+    console.debug('Email HTML exists:', !!data.HTML, 'Text exists:', !!data.Text);
+    if (emailBody.length === 0) {
+      console.debug('Email body is empty!');
+      console.debug('Full message data keys:', Object.keys(data));
+    }
+    console.debug('Email body (first 500 chars):', emailBody.substring(0, 500));
 
-		// Extract OTP - try multiple patterns:
-		// 1. Exactly 8 consecutive digits
-		// 2. Exactly 6 consecutive digits (PocketBase default)
-		// 3. Code: followed by digits
-		// 4. OTP: followed by digits
-		let match = emailBody.match(/\b(\d{8})\b/);
-		if (match) {
-			console.debug('Found 8-digit OTP:', match[1]);
-			return match[1];
-		}
+    // Extract OTP - try multiple patterns:
+    // 1. Exactly 8 consecutive digits
+    // 2. Exactly 6 consecutive digits (PocketBase default)
+    // 3. Code: followed by digits
+    // 4. OTP: followed by digits
+    let match = emailBody.match(/\b(\d{8})\b/);
+    if (match) {
+      console.debug('Found 8-digit OTP:', match[1]);
+      return match[1];
+    }
 
-		// Try 6-digit code (common OTP format)
-		match = emailBody.match(/\b(\d{6})\b/);
-		if (match) {
-			console.debug('Found 6-digit OTP:', match[1]);
-			return match[1];
-		}
+    // Try 6-digit code (common OTP format)
+    match = emailBody.match(/\b(\d{6})\b/);
+    if (match) {
+      console.debug('Found 6-digit OTP:', match[1]);
+      return match[1];
+    }
 
-		// Try "code" followed by digits (case insensitive)
-		match = emailBody.match(/code[:\s]+(\d+)/i);
-		if (match) {
-			console.debug('Found code-formatted OTP:', match[1]);
-			return match[1];
-		}
+    // Try "code" followed by digits (case insensitive)
+    match = emailBody.match(/code[:\s]+(\d+)/i);
+    if (match) {
+      console.debug('Found code-formatted OTP:', match[1]);
+      return match[1];
+    }
 
-		// Try OTP: followed by digits
-		match = emailBody.match(/OTP[:\s]+(\d+)/i);
-		if (match) {
-			console.debug('Found OTP-formatted code:', match[1]);
-			return match[1];
-		}
+    // Try OTP: followed by digits
+    match = emailBody.match(/OTP[:\s]+(\d+)/i);
+    if (match) {
+      console.debug('Found OTP-formatted code:', match[1]);
+      return match[1];
+    }
 
-		console.error('No OTP found in email with any pattern');
-		return null;
-	} catch (error) {
-		console.error('Error extracting OTP:', error);
-		return null;
-	}
+    console.error('No OTP found in email with any pattern');
+    return null;
+  } catch (error) {
+    console.error('Error extracting OTP:', error);
+    return null;
+  }
 }
 
 async function extractVerificationLinkFromEmail(email: string): Promise<string | null> {
-	const message = await getLatestEmailForRecipient(email);
-	if (!message) {
-		console.error('No message found for email:', email);
-		return null;
-	}
+  const message = await getLatestEmailForRecipient(email);
+  if (!message) {
+    console.error('No message found for email:', email);
+    return null;
+  }
 
-	const messageId = getMailpitMessageId(message);
-	if (!messageId) {
-		console.error(
-			'Missing message ID when extracting verification link for',
-			email,
-			'message:',
-			message
-		);
-		return null;
-	}
+  const messageId = getMailpitMessageId(message);
+  if (!messageId) {
+    console.error('Missing message ID when extracting verification link for', email, 'message:', message);
+    return null;
+  }
 
-	const response = await fetch(`${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
-	if (!response.ok) {
-		console.error('Failed to fetch email detail', {
-			status: response.status,
-			statusText: response.statusText
-		});
-		console.error('Detail URL', `${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
-		return null;
-	}
-	const data = await response.json();
+  const response = await fetch(`${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
+  if (!response.ok) {
+    console.error('Failed to fetch email detail', {
+      status: response.status,
+      statusText: response.statusText,
+    });
+    console.error('Detail URL', `${MAILPIT_MESSAGE_API}/${encodeURIComponent(messageId)}`);
+    return null;
+  }
+  const data = await response.json();
 
-	// Get email body - try HTML first, then text
-	const emailBody = data.HTML || data.Text || '';
-	console.debug('Email body (first 1000 chars):', emailBody.substring(0, 1000));
+  // Get email body - try HTML first, then text
+  const emailBody = data.HTML || data.Text || '';
+  console.debug('Email body (first 1000 chars):', emailBody.substring(0, 1000));
 
-	// Extract verification link - try multiple patterns:
-	// 1. Full URL with /confirm-verification/ path
-	// 2. Full URL with /api/collections/users/confirm-verification path (PocketBase default)
-	// 3. URL in href attribute
-	// 4. Any localhost/127.0.0.1 URL with verify/confirm in the email
-	let match = emailBody.match(/(https?:\/\/[^\s"'<>]+\/confirm-verification\/[^\s"'<>]+)/);
-	if (match) {
-		console.debug('Found confirm-verification URL:', match[1].substring(0, 100));
-		return match[1];
-	}
+  // Extract verification link - try multiple patterns:
+  // 1. Full URL with /confirm-verification/ path
+  // 2. Full URL with /api/collections/users/confirm-verification path (PocketBase default)
+  // 3. URL in href attribute
+  // 4. Any localhost/127.0.0.1 URL with verify/confirm in the email
+  let match = emailBody.match(/(https?:\/\/[^\s"'<>]+\/confirm-verification\/[^\s"'<>]+)/);
+  if (match) {
+    console.debug('Found confirm-verification URL:', match[1].substring(0, 100));
+    return match[1];
+  }
 
-	// Try PocketBase API verification path
-	match = emailBody.match(
-		/(https?:\/\/[^\s"'<>]+\/api\/collections\/users\/confirm-verification[^\s"'<>]*)/
-	);
-	if (match) {
-		console.debug('Found PocketBase API verification URL:', match[1].substring(0, 100));
-		return match[1];
-	}
+  // Try PocketBase API verification path
+  match = emailBody.match(/(https?:\/\/[^\s"'<>]+\/api\/collections\/users\/confirm-verification[^\s"'<>]*)/);
+  if (match) {
+    console.debug('Found PocketBase API verification URL:', match[1].substring(0, 100));
+    return match[1];
+  }
 
-	// Try looking for href
-	match = emailBody.match(/href=["']([^"']+\/confirm-verification[^"']+)["']/);
-	if (match) {
-		console.debug('Found href-style verification URL:', match[1].substring(0, 100));
-		return match[1];
-	}
+  // Try looking for href
+  match = emailBody.match(/href=["']([^"']+\/confirm-verification[^"']+)["']/);
+  if (match) {
+    console.debug('Found href-style verification URL:', match[1].substring(0, 100));
+    return match[1];
+  }
 
-	// Last resort: look for ANY URL containing "confirm", "verification", or "verify"
-	match = emailBody.match(/(https?:\/\/[^\s"'<>]*(?:confirm|verif)[^\s"'<>]*)/i);
-	if (match) {
-		console.debug('Found generic verification URL:', match[1].substring(0, 100));
-		return match[1];
-	}
+  // Last resort: look for ANY URL containing "confirm", "verification", or "verify"
+  match = emailBody.match(/(https?:\/\/[^\s"'<>]*(?:confirm|verif)[^\s"'<>]*)/i);
+  if (match) {
+    console.debug('Found generic verification URL:', match[1].substring(0, 100));
+    return match[1];
+  }
 
-	console.error('No verification link found in email with any pattern');
-	console.debug('Email body dump:', emailBody);
-	return null;
+  console.error('No verification link found in email with any pattern');
+  console.debug('Email body dump:', emailBody);
+  return null;
 }
 
 // PocketBase Admin API cleanup helper
 async function deleteUserByEmail(email: string) {
-	try {
-		// Get admin token from environment - in production, use proper auth
-		const adminEmail = process.env.PB_ADMIN_EMAIL || process.env.API_USER || 'admin@example.com';
-		const adminPassword = process.env.PB_ADMIN_PASSWORD || 'admin123456';
+  try {
+    // Get admin token from environment - in production, use proper auth
+    const adminEmail = process.env.PB_ADMIN_EMAIL || process.env.API_USER || 'admin@example.com';
+    const adminPassword = process.env.PB_ADMIN_PASSWORD || 'admin123456';
 
-		// Try to authenticate as admin (preferred). Use the admin auth endpoint.
-		let token: string | null = null;
-		try {
-			const authResponse = await fetch('http://localhost:8090/api/admins/auth-with-password', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ identity: adminEmail, password: adminPassword })
-			});
+    // Try to authenticate as admin (preferred). Use the admin auth endpoint.
+    let token: string | null = null;
+    try {
+      const authResponse = await fetch('http://localhost:8090/api/admins/auth-with-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identity: adminEmail, password: adminPassword }),
+      });
 
-			if (authResponse.ok) {
-				const authData = await authResponse.json();
-				// PocketBase admin auth returns a token
-				token = authData?.token || null;
-				if (!token && authData?.admin?.token) token = authData.admin.token;
-			} else {
-				console.debug('Admin auth failed during cleanup, status:', authResponse.status);
-			}
-		} catch (err) {
-			console.debug('Admin auth error during cleanup:', err);
-		}
+      if (authResponse.ok) {
+        const authData = await authResponse.json();
+        // PocketBase admin auth returns a token
+        token = authData?.token || null;
+        if (!token && authData?.admin?.token) token = authData.admin.token;
+      } else {
+        console.debug('Admin auth failed during cleanup, status:', authResponse.status);
+      }
+    } catch (err) {
+      console.debug('Admin auth error during cleanup:', err);
+    }
 
-		// Find user by email - try multiple auth strategies
-		const serviceKey =
-			process.env.SERVICE_KEY || process.env.PB_SERVICE_KEY || process.env.API_KEY || null;
+    // Find user by email - try multiple auth strategies
+    const serviceKey = process.env.SERVICE_KEY || process.env.PB_SERVICE_KEY || process.env.API_KEY || null;
 
-		// Build headers for subsequent requests. Prefer Bearer token, fall back to service key via X-Api-Key.
-		const headers: Record<string, string> = {
-			'Content-Type': 'application/json'
-		};
-		if (token) headers.Authorization = `Bearer ${token}`;
-		if (serviceKey) headers['X-Api-Key'] = serviceKey;
+    // Build headers for subsequent requests. Prefer Bearer token, fall back to service key via X-Api-Key.
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    if (serviceKey) headers['X-Api-Key'] = serviceKey;
 
-		// Use perPage to ensure we fetch enough records in one call
-		const searchFilter = `email="${email}"`;
-		const searchUrl = `http://localhost:8090/api/collections/users/records?filter=${encodeURIComponent(
-			searchFilter
-		)}&perPage=50`;
-		console.debug('Attempting to find users for cleanup at', searchUrl);
+    // Use perPage to ensure we fetch enough records in one call
+    const searchFilter = `email="${email}"`;
+    const searchUrl = `http://localhost:8090/api/collections/users/records?filter=${encodeURIComponent(
+      searchFilter
+    )}&perPage=50`;
+    console.debug('Attempting to find users for cleanup at', searchUrl);
 
-		let searchResponse;
-		try {
-			searchResponse = await fetch(searchUrl, {
-				method: 'GET',
-				headers
-			});
-		} catch (err) {
-			console.debug('User search request failed during cleanup:', err);
-			return;
-		}
+    let searchResponse;
+    try {
+      searchResponse = await fetch(searchUrl, {
+        method: 'GET',
+        headers,
+      });
+    } catch (err) {
+      console.debug('User search request failed during cleanup:', err);
+      return;
+    }
 
-		if (!searchResponse.ok) {
-			const bodyText = await searchResponse.text().catch(() => '<no body>');
-			console.debug(
-				'User search failed during cleanup, status:',
-				searchResponse.status,
-				'body:',
-				bodyText
-			);
-			return;
-		}
+    if (!searchResponse.ok) {
+      const bodyText = await searchResponse.text().catch(() => '<no body>');
+      console.debug('User search failed during cleanup, status:', searchResponse.status, 'body:', bodyText);
+      return;
+    }
 
-		const searchData = await searchResponse.json();
-		const items = searchData?.items || searchData || [];
-		// If search returned no items, try an unfiltered fetch and scan client-side.
-		if (!items || items.length === 0) {
-			console.debug(
-				'Filtered search returned no items; trying unfiltered fetch to scan for matches'
-			);
-			try {
-				const allRes = await fetch(
-					`http://localhost:8090/api/collections/users/records?perPage=100`,
-					{ method: 'GET', headers }
-				);
-				if (allRes.ok) {
-					const allData = await allRes.json();
-					const allItems = allData?.items || allData || [];
-					const matches = (allItems || []).filter((it: any) => {
-						const e = (it?.email || it?.Email || it?.emailAddress || '').toString().toLowerCase();
-						return e === email.toLowerCase();
-					});
-					if (matches.length > 0) {
-						console.debug('Found', matches.length, 'matching user(s) via unfiltered scan');
-						for (const item of matches) {
-							const id = item?.id || item?.ID || item?._id;
-							if (!id) continue;
-							const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
-							console.debug('Deleting user (fallback) ', id, 'via', deleteUrl);
-							try {
-								const delRes = await fetch(deleteUrl, { method: 'DELETE', headers });
-								if (!delRes.ok) {
-									const delBody = await delRes.text().catch(() => '<no body>');
-									console.debug(
-										'Failed deleting user (fallback)',
-										id,
-										'status:',
-										delRes.status,
-										'body:',
-										delBody
-									);
-								}
-							} catch (err) {
-								console.debug('Error deleting user (fallback)', id, err);
-							}
-						}
-						return;
-					}
-				} else {
-					console.debug('Unfiltered fetch failed during cleanup, status:', allRes.status);
-				}
-			} catch (err) {
-				console.debug('Unfiltered fetch error during cleanup:', err);
-			}
-		}
-		if (items && items.length > 0) {
-			console.debug('Found', items.length, 'user(s) to delete');
-			// Delete each user record found
-			for (const item of items) {
-				const id = item?.id || item?.ID || item?._id;
-				if (!id) continue;
-				const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
-				console.debug('Deleting user', id, 'via', deleteUrl);
-				try {
-					const delRes = await fetch(deleteUrl, {
-						method: 'DELETE',
-						headers
-					});
-					if (!delRes.ok) {
-						const delBody = await delRes.text().catch(() => '<no body>');
-						console.debug('Failed deleting user', id, 'status:', delRes.status, 'body:', delBody);
-					}
-				} catch (err) {
-					console.debug('Error deleting user', id, err);
-				}
-			}
-		} else {
-			console.debug('No users found for', email);
-		}
-	} catch (err) {
-		// Silently fail if cleanup doesn't work - tests should still pass
-	}
+    const searchData = await searchResponse.json();
+    const items = searchData?.items || searchData || [];
+    // If search returned no items, try an unfiltered fetch and scan client-side.
+    if (!items || items.length === 0) {
+      console.debug('Filtered search returned no items; trying unfiltered fetch to scan for matches');
+      try {
+        const allRes = await fetch(`http://localhost:8090/api/collections/users/records?perPage=100`, {
+          method: 'GET',
+          headers,
+        });
+        if (allRes.ok) {
+          const allData = await allRes.json();
+          const allItems = allData?.items || allData || [];
+          const matches = (allItems || []).filter((it: any) => {
+            const e = (it?.email || it?.Email || it?.emailAddress || '').toString().toLowerCase();
+            return e === email.toLowerCase();
+          });
+          if (matches.length > 0) {
+            console.debug('Found', matches.length, 'matching user(s) via unfiltered scan');
+            for (const item of matches) {
+              const id = item?.id || item?.ID || item?._id;
+              if (!id) continue;
+              const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
+              console.debug('Deleting user (fallback) ', id, 'via', deleteUrl);
+              try {
+                const delRes = await fetch(deleteUrl, { method: 'DELETE', headers });
+                if (!delRes.ok) {
+                  const delBody = await delRes.text().catch(() => '<no body>');
+                  console.debug('Failed deleting user (fallback)', id, 'status:', delRes.status, 'body:', delBody);
+                }
+              } catch (err) {
+                console.debug('Error deleting user (fallback)', id, err);
+              }
+            }
+            return;
+          }
+        } else {
+          console.debug('Unfiltered fetch failed during cleanup, status:', allRes.status);
+        }
+      } catch (err) {
+        console.debug('Unfiltered fetch error during cleanup:', err);
+      }
+    }
+    if (items && items.length > 0) {
+      console.debug('Found', items.length, 'user(s) to delete');
+      // Delete each user record found
+      for (const item of items) {
+        const id = item?.id || item?.ID || item?._id;
+        if (!id) continue;
+        const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
+        console.debug('Deleting user', id, 'via', deleteUrl);
+        try {
+          const delRes = await fetch(deleteUrl, {
+            method: 'DELETE',
+            headers,
+          });
+          if (!delRes.ok) {
+            const delBody = await delRes.text().catch(() => '<no body>');
+            console.debug('Failed deleting user', id, 'status:', delRes.status, 'body:', delBody);
+          }
+        } catch (err) {
+          console.debug('Error deleting user', id, err);
+        }
+      }
+    } else {
+      console.debug('No users found for', email);
+    }
+  } catch (err) {
+    // Silently fail if cleanup doesn't work - tests should still pass
+  }
 }
 
 test.describe('Authentication Flows', () => {
-	// const testUser = {
-	// 	name: 'Test User',
-	// 	email: `test-${Date.now()}@example.com`,
-	// 	password: 'Password123!'
-	// };
-
-	test.describe('Registration Flow', () => {
-		test('should register a new user successfully', async ({ page }) => {
-			const email = `register-basic-${Date.now()}@example.com`;
-			try {
-				await page.goto('/register');
-
-				// Fill registration form
-				await page.fill('input[name="name"]', 'Test User');
-				await page.fill('input[name="email"]', email);
-				await page.fill('input[name="password"]', 'Password123!');
-				await page.fill('input[name="passwordConfirm"]', 'Password123!');
-
-				// Submit form
-				await page.click('button[type="submit"]');
-
-				// Should redirect to home page after successful registration
-				await expect(page).toHaveURL('/');
-
-				// Should see welcome message
-				await expect(page.locator('text=/welcome/i')).toBeVisible();
-			} finally {
-				await deleteUserByEmail(email);
-			}
-		});
-
-		test('should show error for mismatched passwords', async ({ page }) => {
-			const email = `register-mismatch-${Date.now()}@example.com`;
-			try {
-				await page.goto('/register');
-
-				await page.fill('input[name="name"]', 'Test User');
-				await page.fill('input[name="email"]', email);
-				await page.fill('input[name="password"]', 'Password123!');
-				await page.fill('input[name="passwordConfirm"]', 'DifferentPassword123!');
-
-				await page.click('button[type="submit"]');
-
-				// Should show validation error
-				await expect(page.locator('text=/passwords do not match/i')).toBeVisible();
-			} finally {
-				await deleteUserByEmail(email);
-			}
-		});
-
-		test('should show error for invalid email', async ({ page }) => {
-			await page.goto('/register');
-
-			await page.fill('input[name="name"]', 'Test User');
-			await page.fill('input[name="email"]', 'invalid-email');
-			await page.fill('input[name="password"]', 'Password123!');
-			await page.fill('input[name="passwordConfirm"]', 'Password123!');
-
-			await page.click('button[type="submit"]');
-
-			await expect(page.locator('text=/invalid email/i')).toBeVisible();
-		});
-
-		test('should navigate to login page from link', async ({ page }) => {
-			await page.goto('/register');
-
-			await page.click('a[href="/login"]');
-
-			await expect(page).toHaveURL('/login');
-		});
-	});
-
-	test.describe('Login with 2FA Flow', () => {
-		test('should login with 2FA using OTP code from email', async ({ page }) => {
-			const email = `2fa-login-${Date.now()}@example.com`;
-			const password = 'SecurePassword123!';
-
-			try {
-				// Register user with 2FA profile
-				await page.goto('/register');
-				await page.fill('input[name="name"]', '2FA User');
-				await page.fill('input[name="email"]', email);
-				await page.fill('input[name="password"]', password);
-				await page.fill('input[name="passwordConfirm"]', password);
-				await page.click('button[type="submit"]');
-
-				// Wait for registration to complete
-				await expect(page).toHaveURL('/');
-
-				// Enable 2FA in account settings
-				await page.goto('/account');
-				await page.waitForLoadState('networkidle');
-				await page.click('#mfa-opt-in');
-				await page.waitForLoadState('networkidle');
-
-				// Go to home page and logout
-				await page.goto('/');
-				await page.waitForSelector('[data-testid="logout-button"]');
-				await page.click('[data-testid="logout-button"]');
-				await expect(page).toHaveURL('/login');
-
-				// Now login
-				await page.fill('input[name="email"]', email);
-				await page.fill('input[name="password"]', password);
-				await page.click('button[type="submit"]');
-
-				// Should be on MFA verification page
-				await expect(page.locator('[data-testid="mfa-verification-form"]')).toBeVisible();
-				// Get OTP from email - wait longer for email delivery
-				await page.waitForTimeout(3000);
-				const otp = await extractOTPFromEmail(email);
-				expect(otp).toBeTruthy();
-				// Enter OTP
-				await page.locator('[data-testid="mfa-code-input"]').fill(otp!);
-				await page.locator('[data-testid="mfa-verify-button"]').click();
-
-				// Should redirect to home after 2FA success
-				await expect(page).toHaveURL('/');
-				await expect(page.getByText('Successfully logged in!')).toBeVisible();
-			} finally {
-				await deleteUserByEmail(email);
-			}
-		});
-
-		test('should reject invalid OTP code', async ({ page }) => {
-			const email = `2fa-invalid-${Date.now()}@example.com`;
-			const password = 'SecurePassword123!';
-			try {
-				// Register and enable 2FA
-				await page.goto('/register');
-				await page.fill('input[name="name"]', '2FA Invalid Test');
-				await page.fill('input[name="email"]', email);
-				await page.fill('input[name="password"]', password);
-				await page.fill('input[name="passwordConfirm"]', password);
-				await page.click('button[type="submit"]');
-				// Wait for registration to complete
-				await expect(page).toHaveURL('/');
-				await page.goto('/account');
-				await page.waitForLoadState('networkidle');
-				await page.click('#mfa-opt-in');
-				await page.waitForLoadState('networkidle');
-				// Go to home page and logout
-				await page.goto('/');
-				await page.waitForSelector('[data-testid="logout-button"]');
-				await page.click('[data-testid="logout-button"]');
-				await expect(page).toHaveURL('/login');
-				// Submit login form (fill credentials first)
-				await page.fill('input[name="email"]', email);
-				await page.fill('input[name="password"]', password);
-				await page.click('button[type="submit"]');
-
-				// Wait for MFA verification form and enter invalid OTP
-				await expect(page.locator('[data-testid="mfa-verification-form"]')).toBeVisible();
-				await page.waitForTimeout(1000);
-				await page.locator('[data-testid="mfa-code-input"]').fill('00000000');
-				await page.locator('[data-testid="mfa-verify-button"]').click();
-				// Should show error
-				await expect(page.locator('text=/invalid|expired/i')).toBeVisible();
-			} finally {
-				await deleteUserByEmail(email);
-			}
-		});
-	});
-
-	test.describe('Email Verification Flow', () => {
-		test('should send and verify email via link', async ({ page }) => {
-			const email = `verify-email-${Date.now()}@example.com`;
-			const password = 'SecurePassword123!';
-
-			try {
-				// Register user
-				await page.goto('/register');
-				await page.fill('input[name="name"]', 'Email Verify Test');
-				await page.fill('input[name="email"]', email);
-				await page.fill('input[name="password"]', password);
-				await page.fill('input[name="passwordConfirm"]', password);
-				await page.click('button[type="submit"]');
-
-				await expect(page).toHaveURL('/');
-
-				// Go to account page
-				await page.goto('/account');
-				await page.waitForLoadState('networkidle');
-
-				// Email should not be verified yet
-				await expect(page.locator('text=/please verify your email/i')).toBeVisible();
-
-				// Send verification email
-				await page.click('[data-testid="send-verification-email-button"]');
-				await page.waitForLoadState('networkidle');
-
-				// Should see "check your inbox" message
-				await expect(page.locator('[data-testid="email-verification-sent"]')).toBeVisible();
-
-				// Get verification link from email - wait longer for email delivery
-				await page.waitForTimeout(3000);
-				const verificationLink = await extractVerificationLinkFromEmail(email);
-				expect(verificationLink).toBeTruthy();
-				// Navigate to verification link
-				const parsedVerificationUrl = new URL(verificationLink!);
-				const currentOrigin = new URL(page.url()).origin;
-				const correctedOrigin = new URL(currentOrigin);
-				parsedVerificationUrl.protocol = correctedOrigin.protocol;
-				parsedVerificationUrl.hostname = correctedOrigin.hostname;
-				parsedVerificationUrl.port = correctedOrigin.port;
-				// Navigate to verification link using the same host/port as the running dev server
-				await page.goto(parsedVerificationUrl.toString());
-				// Should redirect to account page with success
-				await expect(page).toHaveURL(/\/account/);
-				await expect(page.locator('text=/email verified successfully/i')).toBeVisible();
-
-				// Navigate back to account page
-				await page.goto('/account');
-				await page.waitForLoadState('networkidle');
-
-				// Should not show the "send verification" button anymore (indicates verified)
-				await expect(page.locator('[data-testid="send-verification-email-button"]')).toHaveCount(0);
-			} finally {
-				await deleteUserByEmail(email);
-			}
-		});
-
-		test('should handle invalid verification link', async ({ page }) => {
-			// Try to verify with invalid token
-			await page.goto('/auth/confirm-verification/invalid-token-12345');
-
-			// Should show error
-			await expect(page.locator('text=/failed|expired|invalid/i')).toBeVisible();
-		});
-	});
-
-	test.describe('Login Flow', () => {
-		test('should login successfully with valid credentials', async ({ page }) => {
-			const uniqueEmail = `login-test-${Date.now()}@example.com`;
-			try {
-				// First register a user
-				await page.goto('/register');
-
-				await page.fill('input[name="name"]', 'Login Test');
-				await page.fill('input[name="email"]', uniqueEmail);
-				await page.fill('input[name="password"]', 'Password123!');
-				await page.fill('input[name="passwordConfirm"]', 'Password123!');
-				await page.click('button[type="submit"]');
-
-				// Logout
-				await page.click('button[type="submit"]:has-text("Logout")');
-
-				// Now login
-				await page.goto('/login');
-				await page.fill('input[name="email"]', uniqueEmail);
-				await page.fill('input[name="password"]', 'Password123!');
-				await page.click('button[type="submit"]');
-
-				// Should redirect to home
-				await expect(page).toHaveURL('/');
-				await expect(page.locator('text=/logged in/i')).toBeVisible();
-			} finally {
-				await deleteUserByEmail(uniqueEmail);
-			}
-		});
-
-		test('should show error for invalid credentials', async ({ page }) => {
-			await page.goto('/login');
-
-			await page.fill('input[name="email"]', 'nonexistent@example.com');
-			await page.fill('input[name="password"]', 'WrongPassword123!');
-
-			await page.click('button[type="submit"]');
-
-			await expect(page.locator('text=/invalid email or password/i')).toBeVisible();
-		});
-
-		test('should navigate to register page from link', async ({ page }) => {
-			await page.goto('/login');
-
-			await page.click('a[href="/register"]');
-
-			await expect(page).toHaveURL('/register');
-		});
-
-		test('should navigate to forgot password page from link', async ({ page }) => {
-			await page.goto('/login');
-
-			await page.click('a[href="/forgot-password"]');
-
-			await expect(page).toHaveURL('/forgot-password');
-		});
-	});
-
-	test.describe('Account Management Flow', () => {
-		test('should access account page when logged in', async ({ page }) => {
-			// Register and login
-			await page.goto('/register');
-			const uniqueEmail = `account-test-${Date.now()}@example.com`;
-
-			await page.fill('input[name="name"]', 'Account Test');
-			await page.fill('input[name="email"]', uniqueEmail);
-			await page.fill('input[name="password"]', 'Password123!');
-			await page.fill('input[name="passwordConfirm"]', 'Password123!');
-			await page.click('button[type="submit"]');
-
-			// Wait for redirect to home after registration
-			await page.waitForURL('/');
-
-			// Navigate to account page
-			await page.goto('/account');
-
-			// Wait for account page to load
-			await page.waitForLoadState('networkidle');
-
-			// Should see account settings
-			await expect(page.locator('text=/account settings/i')).toBeVisible();
-
-			await expect(page.locator('input[name="email"]')).toHaveValue(uniqueEmail);
-		});
-
-		test('should redirect to login when not authenticated', async ({ page }) => {
-			await page.goto('/account');
-
-			// Should redirect to login
-			await expect(page).toHaveURL('/login');
-		});
-
-		test('should update profile information', async ({ page }) => {
-			// Register and login
-			await page.goto('/register');
-			const uniqueEmail = `profile-test-${Date.now()}@example.com`;
-
-			await page.fill('input[name="name"]', 'Profile Test');
-			await page.fill('input[name="email"]', uniqueEmail);
-			await page.fill('input[name="password"]', 'Password123!');
-			await page.fill('input[name="passwordConfirm"]', 'Password123!');
-			await page.click('button[type="submit"]');
-
-			try {
-				// Wait for registration redirect to complete
-				await expect(page).toHaveURL('/');
-
-				// Go to account page
-				await page.goto('/account');
-
-				// Wait for account page to load
-				await page.waitForLoadState('networkidle');
-
-				// Update profile
-				await page.fill('input[name="title"]', 'Software Engineer');
-				await page.fill('textarea[name="bio"]', 'Test bio');
-				await page.fill('input[name="website"]', 'https://example.com');
-
-				// Submit form and wait for response
-				const responsePromise = page.waitForResponse(
-					(response) => response.url().includes('/account') && response.status() === 200
-				);
-				await page.click('button[type="submit"]:has-text("Save Changes")');
-				await responsePromise;
-
-				// Wait for form to update with new values
-				await expect(page.locator('input[name="title"]')).toHaveValue('Software Engineer');
-			} finally {
-				await deleteUserByEmail(uniqueEmail);
-			}
-		});
-
-		test('should enable and disable 2FA', async ({ page }) => {
-			// Register and login
-			await page.goto('/register');
-			const uniqueEmail = `2fa-toggle-${Date.now()}@example.com`;
-
-			await page.fill('input[name="name"]', '2FA Toggle Test');
-			await page.fill('input[name="email"]', uniqueEmail);
-			await page.fill('input[name="password"]', 'Password123!');
-			await page.fill('input[name="passwordConfirm"]', 'Password123!');
-			await page.click('button[type="submit"]');
-
-			try {
-				// Wait for registration redirect to complete
-				await expect(page).toHaveURL('/');
-
-				// Go to account page
-				await page.goto('/account');
-
-				// Wait for account page to load
-				await page.waitForLoadState('networkidle');
-
-				// Should see 2FA toggle
-				await expect(page.locator('#mfa-opt-in')).toBeVisible();
-
-				// Enable 2FA
-				await page.click('#mfa-opt-in');
-				await page.waitForTimeout(500);
-
-				// Should show toggle is checked
-				await expect(page.locator('#mfa-opt-in')).toHaveAttribute('data-state', 'checked');
-
-				// Disable 2FA
-				await page.click('#mfa-opt-in');
-				await page.waitForTimeout(500);
-
-				// Should show toggle is unchecked
-				await expect(page.locator('#mfa-opt-in')).not.toHaveAttribute('data-state', 'checked');
-			} finally {
-				await deleteUserByEmail(uniqueEmail);
-			}
-		});
-
-		test('should change password', async ({ page }) => {
-			// Register and login
-			await page.goto('/register');
-			const uniqueEmail = `password-test-${Date.now()}@example.com`;
-			const oldPassword = 'OldPassword123!';
-			const newPassword = 'NewPassword123!';
-
-			try {
-				await page.fill('input[name="name"]', 'Password Test');
-				await page.fill('input[name="email"]', uniqueEmail);
-				await page.fill('input[name="password"]', oldPassword);
-				await page.fill('input[name="passwordConfirm"]', oldPassword);
-				await page.click('button[type="submit"]');
-
-				await expect(page).toHaveURL('/');
-
-				// Go to account page
-				await page.goto('/account');
-				await page.waitForLoadState('networkidle');
-
-				// Scroll to password section
-				await page.getByText('Change Password', { exact: true }).first().scrollIntoViewIfNeeded();
-
-				// Fill password change form
-				await page.fill('input[name="oldPassword"]', oldPassword);
-				await page.fill('input[name="password"]', newPassword);
-				await page.fill('input[name="passwordConfirm"]', newPassword);
-
-				// Submit password change
-				await page.click('button:has-text("Change Password")');
-
-				// Wait for response but don't wait for networkidle since password change may redirect
-				await page.waitForTimeout(1000);
-
-				// The password change should either show a success message or redirect
-				// Check if we're still on account page or if we redirected
-				const currentUrl = page.url();
-
-				if (currentUrl.includes('/account')) {
-					// Still on account page, should see success message
-					await expect(page.locator('text=/password changed successfully/i')).toBeVisible({
-						timeout: 2000
-					});
-				}
-
-				// Navigate to home to logout (in case we're still logged in)
-				await page.goto('/', { waitUntil: 'networkidle' });
-
-				// Check if we're still logged in (logout button visible)
-				const logoutButton = page.locator('[data-testid="logout-button"]');
-				if (await logoutButton.isVisible({ timeout: 1000 }).catch(() => false)) {
-					await page.click('[data-testid="logout-button"]');
-				} else {
-					// Already logged out, navigate to login
-					await page.goto('/login');
-				}
-
-				// Try login with old password - should fail
-				await page.fill('input[name="email"]', uniqueEmail);
-				await page.fill('input[name="password"]', oldPassword);
-				await page.click('button[type="submit"]');
-
-				await expect(page.locator('text=/invalid email or password/i')).toBeVisible();
-
-				// Login with new password - should succeed
-				await page.fill('input[name="email"]', uniqueEmail);
-				await page.fill('input[name="password"]', newPassword);
-				await page.click('button[type="submit"]');
-
-				await expect(page).toHaveURL('/');
-			} finally {
-				await deleteUserByEmail(uniqueEmail);
-			}
-		});
-
-		test('should show 2FA section', async ({ page }) => {
-			// Register and login
-			await page.goto('/register');
-			const uniqueEmail = `2fa-section-${Date.now()}@example.com`;
-
-			try {
-				await page.fill('input[name="name"]', '2FA Section Test');
-				await page.fill('input[name="email"]', uniqueEmail);
-				await page.fill('input[name="password"]', 'Password123!');
-				await page.fill('input[name="passwordConfirm"]', 'Password123!');
-				await page.click('button[type="submit"]');
-
-				// Wait for registration redirect to complete
-				await expect(page).toHaveURL('/');
-
-				// Go to account page
-				await page.goto('/account');
-
-				// Wait for account page to load
-				await page.waitForLoadState('networkidle');
-
-				// Should see 2FA information section (regular users can opt in)
-				await expect(page.getByText('Two-Factor Authentication', { exact: true })).toBeVisible();
-				await expect(page.getByText('2FA Not Required')).toBeVisible();
-				await expect(page.locator('#mfa-opt-in')).toBeVisible();
-			} finally {
-				await deleteUserByEmail(uniqueEmail);
-			}
-		});
-
-		test.describe('Protected Routes', () => {
-			test('should redirect to login for protected routes when not authenticated', async ({
-				page
-			}) => {
-				await page.goto('/account');
-				await expect(page).toHaveURL('/login');
-			});
-
-			test('should allow access to public routes when not authenticated', async ({ page }) => {
-				await page.goto('/');
-				await expect(page).toHaveURL('/');
-
-				await page.goto('/login');
-				await expect(page).toHaveURL('/login');
-
-				await page.goto('/register');
-				await expect(page).toHaveURL('/register');
-
-				await page.goto('/forgot-password');
-				await expect(page).toHaveURL('/forgot-password');
-			});
-		});
-
-		test.describe('Logout Flow', () => {
-			test('should logout user and redirect to login', async ({ page }) => {
-				// First login
-				await page.goto('/register');
-				const uniqueEmail = `logout-test-${Date.now()}@example.com`;
-
-				try {
-					await page.fill('input[name="name"]', 'Logout Test');
-					await page.fill('input[name="email"]', uniqueEmail);
-					await page.fill('input[name="password"]', 'Password123!');
-					await page.fill('input[name="passwordConfirm"]', 'Password123!');
-					await page.click('button[type="submit"]');
-
-					// Should be logged in
-					await expect(page.locator('text=/logged in/i')).toBeVisible();
-
-					// Logout
-					await page.click('button[type="submit"]:has-text("Logout")');
-
-					// Should redirect to login page
-					await expect(page).toHaveURL('/login');
-				} finally {
-					await deleteUserByEmail(uniqueEmail);
-				}
-			});
-		});
-	});
+  // const testUser = {
+  // 	name: 'Test User',
+  // 	email: `test-${Date.now()}@example.com`,
+  // 	password: 'Password123!'
+  // };
+
+  test.describe('Registration Flow', () => {
+    test('should register a new user successfully', async ({ page }) => {
+      const email = `register-basic-${Date.now()}@example.com`;
+      try {
+        await page.goto('/register');
+
+        // Fill registration form
+        await page.fill('input[name="name"]', 'Test User');
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', 'Password123!');
+        await page.fill('input[name="passwordConfirm"]', 'Password123!');
+
+        // Submit form
+        await page.click('button[type="submit"]');
+
+        // Should redirect to login page after successful registration
+        await expect(page).toHaveURL('/login?registered=true');
+
+        // Should see success message
+        await expect(page.locator('text=/registration successful/i')).toBeVisible();
+      } finally {
+        await deleteUserByEmail(email);
+      }
+    });
+
+    test('should show error for mismatched passwords', async ({ page }) => {
+      const email = `register-mismatch-${Date.now()}@example.com`;
+      try {
+        await page.goto('/register');
+
+        await page.fill('input[name="name"]', 'Test User');
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', 'Password123!');
+        await page.fill('input[name="passwordConfirm"]', 'DifferentPassword123!');
+
+        await page.click('button[type="submit"]');
+
+        // Should show validation error
+        await expect(page.locator('text=/passwords do not match/i')).toBeVisible();
+      } finally {
+        await deleteUserByEmail(email);
+      }
+    });
+
+    test('should show error for invalid email', async ({ page }) => {
+      await page.goto('/register');
+
+      await page.fill('input[name="name"]', 'Test User');
+      await page.fill('input[name="email"]', 'invalid-email');
+      await page.fill('input[name="password"]', 'Password123!');
+      await page.fill('input[name="passwordConfirm"]', 'Password123!');
+
+      await page.click('button[type="submit"]');
+
+      await expect(page.locator('text=/invalid email/i')).toBeVisible();
+    });
+
+    test('should navigate to login page from link', async ({ page }) => {
+      await page.goto('/register');
+
+      await page.click('a[href="/login"]');
+
+      await expect(page).toHaveURL('/login');
+    });
+  });
+
+  test.describe('Login with 2FA Flow', () => {
+    test('should login with 2FA using OTP code from email', async ({ page }) => {
+      const email = `2fa-login-${Date.now()}@example.com`;
+      const password = 'SecurePassword123!';
+
+      try {
+        // Register user with 2FA profile
+        await page.goto('/register');
+        await page.fill('input[name="name"]', '2FA User');
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
+        await page.fill('input[name="passwordConfirm"]', password);
+        await page.click('button[type="submit"]');
+
+        // Wait for registration to complete - redirects to login
+        await expect(page).toHaveURL('/login?registered=true');
+
+        // Now login to enable 2FA
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
+        await page.click('button[type="submit"]');
+        await expect(page).toHaveURL('/?login=success');
+
+        // Enable 2FA in account settings
+        await page.goto('/account');
+        await page.waitForLoadState('networkidle');
+        await page.click('#mfa-opt-in');
+        await page.waitForLoadState('networkidle');
+
+        // Go to home page and logout
+        await page.goto('/');
+        await page.waitForSelector('[data-testid="logout-button"]');
+        await page.click('[data-testid="logout-button"]');
+        await expect(page).toHaveURL('/login');
+
+        // Now login
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
+        await page.click('button[type="submit"]');
+
+        // Should be on MFA verification page
+        await expect(page.locator('[data-testid="mfa-verification-form"]')).toBeVisible();
+        // Get OTP from email - wait longer for email delivery
+        await page.waitForTimeout(3000);
+        const otp = await extractOTPFromEmail(email);
+        expect(otp).toBeTruthy();
+        // Enter OTP
+        await page.locator('[data-testid="mfa-code-input"]').fill(otp!);
+        await page.locator('[data-testid="mfa-verify-button"]').click();
+
+        // Should redirect to home after 2FA success
+        await expect(page).toHaveURL('/?login=success');
+        await expect(page.getByText('Successfully logged in!')).toBeVisible();
+      } finally {
+        await deleteUserByEmail(email);
+      }
+    });
+
+    test('should reject invalid OTP code', async ({ page }) => {
+      const email = `2fa-invalid-${Date.now()}@example.com`;
+      const password = 'SecurePassword123!';
+      try {
+        // Register and enable 2FA
+        await page.goto('/register');
+        await page.fill('input[name="name"]', '2FA Invalid Test');
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
+        await page.fill('input[name="passwordConfirm"]', password);
+        await page.click('button[type="submit"]');
+        // Wait for registration to complete - redirects to login
+        await expect(page).toHaveURL('/login?registered=true');
+
+        // Now login
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
+        await page.click('button[type="submit"]');
+        await expect(page).toHaveURL('/?login=success');
+
+        await page.goto('/account');
+        await page.waitForLoadState('networkidle');
+        await page.click('#mfa-opt-in');
+        await page.waitForLoadState('networkidle');
+        // Go to home page and logout
+        await page.goto('/');
+        await page.waitForSelector('[data-testid="logout-button"]');
+        await page.click('[data-testid="logout-button"]');
+        await expect(page).toHaveURL('/login');
+        // Submit login form (fill credentials first)
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
+        await page.click('button[type="submit"]');
+
+        // Wait for MFA verification form and enter invalid OTP
+        await expect(page.locator('[data-testid="mfa-verification-form"]')).toBeVisible();
+        await page.waitForTimeout(1000);
+        await page.locator('[data-testid="mfa-code-input"]').fill('00000000');
+        await page.locator('[data-testid="mfa-verify-button"]').click();
+        // Should show error
+        await expect(page.locator('text=/invalid|expired/i')).toBeVisible();
+      } finally {
+        await deleteUserByEmail(email);
+      }
+    });
+  });
+
+  test.describe('Email Verification Flow', () => {
+    test('should send and verify email via link', async ({ page }) => {
+      const email = `verify-email-${Date.now()}@example.com`;
+      const password = 'SecurePassword123!';
+
+      try {
+        // Register user
+        await page.goto('/register');
+        await page.fill('input[name="name"]', 'Email Verify Test');
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
+        await page.fill('input[name="passwordConfirm"]', password);
+        await page.click('button[type="submit"]');
+
+        // Wait for registration to complete - redirects to login
+        await expect(page).toHaveURL('/login?registered=true');
+
+        // Now login
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
+        await page.click('button[type="submit"]');
+        await expect(page).toHaveURL('/?login=success');
+
+        // Go to account page
+        await page.goto('/account');
+        await page.waitForLoadState('networkidle');
+
+        // Email should not be verified yet
+        await expect(page.locator('text=/please verify your email/i')).toBeVisible();
+
+        // Send verification email
+        await page.click('[data-testid="send-verification-email-button"]');
+        await page.waitForLoadState('networkidle');
+
+        // Should see "check your inbox" message
+        await expect(page.locator('[data-testid="email-verification-sent"]')).toBeVisible();
+
+        // Get verification link from email - wait longer for email delivery
+        await page.waitForTimeout(3000);
+        const verificationLink = await extractVerificationLinkFromEmail(email);
+        expect(verificationLink).toBeTruthy();
+        // Navigate to verification link
+        const parsedVerificationUrl = new URL(verificationLink!);
+        const currentOrigin = new URL(page.url()).origin;
+        const correctedOrigin = new URL(currentOrigin);
+        parsedVerificationUrl.protocol = correctedOrigin.protocol;
+        parsedVerificationUrl.hostname = correctedOrigin.hostname;
+        parsedVerificationUrl.port = correctedOrigin.port;
+        // Navigate to verification link using the same host/port as the running dev server
+        await page.goto(parsedVerificationUrl.toString());
+        // Should redirect to account page with success
+        await expect(page).toHaveURL(/\/account/);
+        await expect(page.locator('text=/email verified successfully/i')).toBeVisible();
+
+        // Navigate back to account page
+        await page.goto('/account');
+        await page.waitForLoadState('networkidle');
+
+        // Should not show the "send verification" button anymore (indicates verified)
+        await expect(page.locator('[data-testid="send-verification-email-button"]')).toHaveCount(0);
+      } finally {
+        await deleteUserByEmail(email);
+      }
+    });
+
+    test('should handle invalid verification link', async ({ page }) => {
+      // Try to verify with invalid token
+      await page.goto('/auth/confirm-verification/invalid-token-12345');
+
+      // Should show error
+      await expect(page.locator('text=/failed|expired|invalid/i')).toBeVisible();
+    });
+  });
+
+  test.describe('Login Flow', () => {
+    test('should login successfully with valid credentials', async ({ page }) => {
+      const uniqueEmail = `login-test-${Date.now()}@example.com`;
+      try {
+        // First register a user
+        await page.goto('/register');
+
+        await page.fill('input[name="name"]', 'Login Test');
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', 'Password123!');
+        await page.fill('input[name="passwordConfirm"]', 'Password123!');
+        await page.click('button[type="submit"]');
+
+        // Wait for registration to complete - redirects to login
+        await expect(page).toHaveURL('/login?registered=true');
+
+        // Now login
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', 'Password123!');
+        await page.click('button[type="submit"]');
+
+        // Should redirect to home with login success
+        await expect(page).toHaveURL('/?login=success');
+        await expect(page.locator('text=/logged in/i')).toBeVisible();
+      } finally {
+        await deleteUserByEmail(uniqueEmail);
+      }
+    });
+
+    test('should show error for invalid credentials', async ({ page }) => {
+      await page.goto('/login');
+
+      await page.fill('input[name="email"]', 'nonexistent@example.com');
+      await page.fill('input[name="password"]', 'WrongPassword123!');
+
+      await page.click('button[type="submit"]');
+
+      await expect(page.locator('text=/invalid email or password/i')).toBeVisible();
+    });
+
+    test('should navigate to register page from link', async ({ page }) => {
+      await page.goto('/login');
+
+      await page.click('a[href="/register"]');
+
+      await expect(page).toHaveURL('/register');
+    });
+
+    test('should navigate to forgot password page from link', async ({ page }) => {
+      await page.goto('/login');
+
+      await page.click('a[href="/forgot-password"]');
+
+      await expect(page).toHaveURL('/forgot-password');
+    });
+  });
+
+  test.describe('Account Management Flow', () => {
+    test('should access account page when logged in', async ({ page }) => {
+      // Register and login
+      await page.goto('/register');
+      const uniqueEmail = `account-test-${Date.now()}@example.com`;
+
+      await page.fill('input[name="name"]', 'Account Test');
+      await page.fill('input[name="email"]', uniqueEmail);
+      await page.fill('input[name="password"]', 'Password123!');
+      await page.fill('input[name="passwordConfirm"]', 'Password123!');
+      await page.click('button[type="submit"]');
+
+      // Wait for redirect to home after registration
+      await page.waitForURL('/');
+
+      // Navigate to account page
+      await page.goto('/account');
+
+      // Wait for account page to load
+      await page.waitForLoadState('networkidle');
+
+      // Should see account settings
+      await expect(page.locator('text=/account settings/i')).toBeVisible();
+
+      await expect(page.locator('input[name="email"]')).toHaveValue(uniqueEmail);
+    });
+
+    test('should redirect to login when not authenticated', async ({ page }) => {
+      await page.goto('/account');
+
+      // Should redirect to login
+      await expect(page).toHaveURL('/login');
+    });
+
+    test('should update profile information', async ({ page }) => {
+      // Register and login
+      await page.goto('/register');
+      const uniqueEmail = `profile-test-${Date.now()}@example.com`;
+
+      await page.fill('input[name="name"]', 'Profile Test');
+      await page.fill('input[name="email"]', uniqueEmail);
+      await page.fill('input[name="password"]', 'Password123!');
+      await page.fill('input[name="passwordConfirm"]', 'Password123!');
+      await page.click('button[type="submit"]');
+
+      try {
+        // Wait for registration redirect to login
+        await expect(page).toHaveURL('/login?registered=true');
+
+        // Now login
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', 'Password123!');
+        await page.click('button[type="submit"]');
+        await expect(page).toHaveURL('/?login=success');
+
+        // Go to account page
+        await page.goto('/account');
+
+        // Wait for account page to load
+        await page.waitForLoadState('networkidle');
+
+        // Update profile
+        await page.fill('input[name="title"]', 'Software Engineer');
+        await page.fill('textarea[name="bio"]', 'Test bio');
+        await page.fill('input[name="website"]', 'https://example.com');
+
+        // Submit form and wait for response
+        const responsePromise = page.waitForResponse(
+          response => response.url().includes('/account') && response.status() === 200
+        );
+        await page.click('button[type="submit"]:has-text("Save Changes")');
+        await responsePromise;
+
+        // Wait for form to update with new values
+        await expect(page.locator('input[name="title"]')).toHaveValue('Software Engineer');
+      } finally {
+        await deleteUserByEmail(uniqueEmail);
+      }
+    });
+
+    test('should enable and disable 2FA', async ({ page }) => {
+      // Register and login
+      await page.goto('/register');
+      const uniqueEmail = `2fa-toggle-${Date.now()}@example.com`;
+
+      await page.fill('input[name="name"]', '2FA Toggle Test');
+      await page.fill('input[name="email"]', uniqueEmail);
+      await page.fill('input[name="password"]', 'Password123!');
+      await page.fill('input[name="passwordConfirm"]', 'Password123!');
+      await page.click('button[type="submit"]');
+
+      try {
+        // Wait for registration redirect to login
+        await expect(page).toHaveURL('/login?registered=true');
+
+        // Now login
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', 'Password123!');
+        await page.click('button[type="submit"]');
+        await expect(page).toHaveURL('/?login=success');
+
+        // Go to account page
+        await page.goto('/account');
+
+        // Wait for account page to load
+        await page.waitForLoadState('networkidle');
+
+        // Should see 2FA toggle
+        await expect(page.locator('#mfa-opt-in')).toBeVisible();
+
+        // Enable 2FA
+        await page.click('#mfa-opt-in');
+        await page.waitForTimeout(500);
+
+        // Should show toggle is checked
+        await expect(page.locator('#mfa-opt-in')).toHaveAttribute('data-state', 'checked');
+
+        // Disable 2FA
+        await page.click('#mfa-opt-in');
+        await page.waitForTimeout(500);
+
+        // Should show toggle is unchecked
+        await expect(page.locator('#mfa-opt-in')).not.toHaveAttribute('data-state', 'checked');
+      } finally {
+        await deleteUserByEmail(uniqueEmail);
+      }
+    });
+
+    test('should change password', async ({ page }) => {
+      // Register and login
+      await page.goto('/register');
+      const uniqueEmail = `password-test-${Date.now()}@example.com`;
+      const oldPassword = 'OldPassword123!';
+      const newPassword = 'NewPassword123!';
+
+      try {
+        await page.fill('input[name="name"]', 'Password Test');
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', oldPassword);
+        await page.fill('input[name="passwordConfirm"]', oldPassword);
+        await page.click('button[type="submit"]');
+
+        // Wait for registration redirect to login
+        await expect(page).toHaveURL('/login?registered=true');
+
+        // Now login
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', oldPassword);
+        await page.click('button[type="submit"]');
+        await expect(page).toHaveURL('/?login=success');
+
+        // Go to account page
+        await page.goto('/account');
+        await page.waitForLoadState('networkidle');
+
+        // Scroll to password section
+        await page.getByText('Change Password', { exact: true }).first().scrollIntoViewIfNeeded();
+
+        // Fill password change form
+        await page.fill('input[name="oldPassword"]', oldPassword);
+        await page.fill('input[name="password"]', newPassword);
+        await page.fill('input[name="passwordConfirm"]', newPassword);
+
+        // Submit password change
+        await page.click('button:has-text("Change Password")');
+
+        // Wait for response but don't wait for networkidle since password change may redirect
+        await page.waitForTimeout(1000);
+
+        // The password change should either show a success message or redirect
+        // Check if we're still on account page or if we redirected
+        const currentUrl = page.url();
+
+        if (currentUrl.includes('/account')) {
+          // Still on account page, should see success message
+          await expect(page.locator('text=/password changed successfully/i')).toBeVisible({
+            timeout: 2000,
+          });
+        }
+
+        // Navigate to home to logout (in case we're still logged in)
+        await page.goto('/', { waitUntil: 'networkidle' });
+
+        // Check if we're still logged in (logout button visible)
+        const logoutButton = page.locator('[data-testid="logout-button"]');
+        if (await logoutButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await page.click('[data-testid="logout-button"]');
+        } else {
+          // Already logged out, navigate to login
+          await page.goto('/login');
+        }
+
+        // Try login with old password - should fail
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', oldPassword);
+        await page.click('button[type="submit"]');
+
+        await expect(page.locator('text=/invalid email or password/i')).toBeVisible();
+
+        // Login with new password - should succeed
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', newPassword);
+        await page.click('button[type="submit"]');
+
+        await expect(page).toHaveURL('/?login=success');
+      } finally {
+        await deleteUserByEmail(uniqueEmail);
+      }
+    });
+
+    test('should show 2FA section', async ({ page }) => {
+      // Register and login
+      await page.goto('/register');
+      const uniqueEmail = `2fa-section-${Date.now()}@example.com`;
+
+      try {
+        await page.fill('input[name="name"]', '2FA Section Test');
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', 'Password123!');
+        await page.fill('input[name="passwordConfirm"]', 'Password123!');
+        await page.click('button[type="submit"]');
+
+        // Wait for registration redirect to login
+        await expect(page).toHaveURL('/login?registered=true');
+
+        // Now login
+        await page.fill('input[name="email"]', uniqueEmail);
+        await page.fill('input[name="password"]', 'Password123!');
+        await page.click('button[type="submit"]');
+        await expect(page).toHaveURL('/?login=success');
+
+        // Go to account page
+        await page.goto('/account');
+
+        // Wait for account page to load
+        await page.waitForLoadState('networkidle');
+
+        // Should see 2FA information section (regular users can opt in)
+        await expect(page.getByText('Two-Factor Authentication', { exact: true })).toBeVisible();
+        await expect(page.getByText('2FA Not Required')).toBeVisible();
+        await expect(page.locator('#mfa-opt-in')).toBeVisible();
+      } finally {
+        await deleteUserByEmail(uniqueEmail);
+      }
+    });
+
+    test.describe('Protected Routes', () => {
+      test('should redirect to login for protected routes when not authenticated', async ({ page }) => {
+        await page.goto('/account');
+        await expect(page).toHaveURL('/login');
+      });
+
+      test('should allow access to public routes when not authenticated', async ({ page }) => {
+        await page.goto('/');
+        await expect(page).toHaveURL('/');
+
+        await page.goto('/login');
+        await expect(page).toHaveURL('/login');
+
+        await page.goto('/register');
+        await expect(page).toHaveURL('/register');
+
+        await page.goto('/forgot-password');
+        await expect(page).toHaveURL('/forgot-password');
+      });
+    });
+
+    test.describe('Logout Flow', () => {
+      test('should logout user and redirect to login', async ({ page }) => {
+        // First login
+        await page.goto('/register');
+        const uniqueEmail = `logout-test-${Date.now()}@example.com`;
+
+        try {
+          await page.fill('input[name="name"]', 'Logout Test');
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', 'Password123!');
+          await page.fill('input[name="passwordConfirm"]', 'Password123!');
+          await page.click('button[type="submit"]');
+
+          // Should be logged in
+          await expect(page.locator('text=/logged in/i')).toBeVisible();
+
+          // Logout
+          await page.click('button[type="submit"]:has-text("Logout")');
+
+          // Should redirect to login page
+          await expect(page).toHaveURL('/login');
+        } finally {
+          await deleteUserByEmail(uniqueEmail);
+        }
+      });
+    });
+  });
 });

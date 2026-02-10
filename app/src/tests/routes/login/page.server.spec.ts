@@ -48,7 +48,7 @@ describe('Login Server Actions', () => {
 			} catch (error: any) {
 				// Expecting a redirect
 				expect(error.status).toBe(303);
-				expect(error.location).toBe('/');
+				expect(error.location).toBe('/?login=success');
 			}
 		});
 
@@ -145,9 +145,13 @@ describe('Login Server Actions', () => {
 				record: { id: '123', email: 'test@example.com', disabled: false }
 			});
 
-			const result: any = await actions.verifyMfa(mockEvent as any);
-
-			expect(result.success).toBe(true);
+			try {
+				await actions.verifyMfa(mockEvent as any);
+			} catch (error: any) {
+				// Expecting a redirect
+				expect(error.status).toBe(303);
+				expect(error.location).toBe('/?login=success');
+			}
 		});
 
 		it('returns error for invalid OTP code', async () => {

@@ -27,44 +27,36 @@ describe('Register Server Actions', () => {
 	});
 
 	describe('default action (register)', () => {
-		it('successfully creates user and auto-logs in', async () => {
-			const formData = new FormData();
-			formData.append('name', 'Test User');
-			formData.append('email', 'test@example.com');
-			formData.append('password', 'password123');
-			formData.append('passwordConfirm', 'password123');
+it('successfully creates user and redirects to login', async () => {
+		const formData = new FormData();
+		formData.append('name', 'Test User');
+		formData.append('email', 'test@example.com');
+		formData.append('password', 'password123');
+		formData.append('passwordConfirm', 'password123');
 
-			mockEvent.request = new Request('http://localhost', {
-				method: 'POST',
-				body: formData
-			});
+		mockEvent.request = new Request('http://localhost', {
+			method: 'POST',
+			body: formData
+		});
 
-			const mockUser = { id: '123', email: 'test@example.com', name: 'Test User' };
-			mockLocals.pb.collection().create.mockResolvedValue(mockUser);
-			mockLocals.pb.collection().authWithPassword.mockResolvedValue({
-				token: 'test-token',
-				record: mockUser
-			});
+		const mockUser = { id: '123', email: 'test@example.com', name: 'Test User' };
+		mockLocals.pb.collection().create.mockResolvedValue(mockUser);
 
-			try {
-				await actions.default(mockEvent as any);
-			} catch (error: any) {
-				// Expecting a redirect
-				expect(error.status).toBe(303);
-				expect(error.location).toBe('/');
-			}
+		try {
+			await actions.default(mockEvent as any);
+		} catch (error: any) {
+			// Expecting a redirect to login page
+			expect(error.status).toBe(303);
+			expect(error.location).toBe('/login?registered=true');
+		}
 
-			expect(mockLocals.pb.collection().create).toHaveBeenCalledWith({
-				email: 'test@example.com',
-				password: 'password123',
-				passwordConfirm: 'password123',
-				name: 'Test User',
-				role: 'user'
-			});
-			expect(mockLocals.pb.collection().authWithPassword).toHaveBeenCalledWith(
-				'test@example.com',
-				'password123'
-			);
+		expect(mockLocals.pb.collection().create).toHaveBeenCalledWith({
+			email: 'test@example.com',
+			password: 'password123',
+			passwordConfirm: 'password123',
+			name: 'Test User',
+			role: 'user'
+		});
 		});
 
 		it('returns error when passwords do not match', async () => {

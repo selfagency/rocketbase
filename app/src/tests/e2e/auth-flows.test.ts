@@ -379,12 +379,7 @@ async function deleteUserByEmail(email: string) {
  */
 async function deleteAllTestUsers() {
   try {
-    const authTokenUrl = `http://localhost:8090/api/admins/auth-with-password?adminUsername=admin&adminPassword=admin`;
-    const authRes = await fetch(authTokenUrl, { method: 'POST' });
-    if (!authRes.ok) return;
-
-    const authData = (await authRes.json()) as any;
-    const adminToken = authData?.token;
+    const adminToken = process.env.API_KEY;
     if (!adminToken) return;
 
     const headers = {

@@ -198,8 +198,8 @@ export const actions: Actions = {
       // First, verify the old password by attempting to re-authenticate
       try {
         await locals.pb.collection('users').authWithPassword(locals.user.email, form.data.oldPassword);
-      } catch (authErr: any) {
-        form.message = m['validation.password_incorrect']?.() || 'Invalid current password';
+      } catch (_) {
+        form.message = 'Invalid current password';
         return fail(400, { passwordForm: form });
       }
 

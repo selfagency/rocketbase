@@ -52,7 +52,7 @@
 					{#if item.children && item.children.length > 0}
 						<!-- Menu with children -->
 						<NavigationMenu.Item>
-							<NavigationMenu.Trigger>
+							<NavigationMenu.Trigger href="/{item.slug}">
 								{item.title || item.slug}
 							</NavigationMenu.Trigger>
 							<NavigationMenu.Content>

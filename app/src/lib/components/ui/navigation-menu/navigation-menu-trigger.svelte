@@ -1,3 +1,7 @@
+<!--
+	This component has been modified from the original shadcn-svelte NavigationMenu.Trigger.
+	Changes: Added optional `href` prop to make triggers clickable when provided.
+-->
 <script lang="ts" module>
 	import { cn } from '$lib/utils.js';
 	import { tv } from 'tailwind-variants';
@@ -8,15 +12,16 @@
 </script>
 
 <script lang="ts">
-	import { NavigationMenu as NavigationMenuPrimitive } from 'bits-ui';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
+	import { NavigationMenu as NavigationMenuPrimitive } from 'bits-ui';
 
 	let {
 		ref = $bindable(null),
 		class: className,
 		children,
+		href,
 		...restProps
-	}: NavigationMenuPrimitive.TriggerProps = $props();
+	}: NavigationMenuPrimitive.TriggerProps & { href?: string } = $props();
 </script>
 
 <NavigationMenuPrimitive.Trigger
@@ -25,10 +30,20 @@
 	class={cn(navigationMenuTriggerStyle(), 'group', className)}
 	{...restProps}
 >
-	{@render children?.()}
+	{#if href}
+		<a {href} class="flex items-center">
+			{@render children?.()}
+			<ChevronDownIcon
+				class="relative top-[1px] ms-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
+				aria-hidden="true"
+			/>
+		</a>
+	{:else}
+		{@render children?.()}
 
-	<ChevronDownIcon
-		class="relative top-[1px] ms-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
-		aria-hidden="true"
-	/>
+		<ChevronDownIcon
+			class="relative top-[1px] ms-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
+			aria-hidden="true"
+		/>
+	{/if}
 </NavigationMenuPrimitive.Trigger>

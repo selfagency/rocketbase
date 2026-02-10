@@ -9,7 +9,7 @@ export default defineConfig({
 			timeout: 10000
 		},
 		{
-			command: 'pnpm run pb',
+			command: 'cd .. && pnpm run db',
 			port: 8090,
 			reuseExistingServer: !process.env.CI
 		},

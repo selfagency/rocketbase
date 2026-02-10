@@ -394,6 +394,12 @@ async function deleteUserByEmail(email: string) {
 }
 
 test.describe('Authentication Flows', () => {
+  test.beforeAll(async () => {
+    console.log('\n⚠️  WARNING: E2E tests require a valid PocketBase superuser for test cleanup');
+    console.log('   Set PB_ADMIN_EMAIL and PB_ADMIN_PASSWORD environment variables');
+    console.log('   Default: admin@example.com / admin123456\n');
+  });
+
   // const testUser = {
   // 	name: 'Test User',
   // 	email: `test-${Date.now()}@example.com`,
@@ -472,28 +478,31 @@ test.describe('Authentication Flows', () => {
       const password = 'SecurePassword123!';
 
       try {
-        // Register user with 2FA profile
-        await page.goto('/register');
-        await page.fill('input[name="name"]', '2FA User');
-        await page.fill('input[name="email"]', email);
-        await page.fill('input[name="password"]', password);
-        await page.fill('input[name="passwordConfirm"]', password);
-        await page.click('button[type="submit"]');
+        await test.step('Register user', async () => {
+          await page.goto('/register');
+          await page.fill('input[name="name"]', '2FA User');
+          await page.fill('input[name="email"]', email);
+          await page.fill('input[name="password"]', password);
+          await page.fill('input[name="passwordConfirm"]', password);
+          await page.click('button[type="submit"]');
 
-        // Wait for registration to complete - redirects to login
-        await expect(page).toHaveURL('/login?registered=true');
+          // Wait for registration to complete - redirects to login
+          await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
+        });
 
-        // Now login to enable 2FA
-        await page.fill('input[name="email"]', email);
-        await page.fill('input[name="password"]', password);
-        await page.click('button[type="submit"]');
-        await expect(page).toHaveURL('/?login=success');
+        await test.step('Login to enable 2FA', async () => {
+          await page.fill('input[name="email"]', email);
+          await page.fill('input[name="password"]', password);
+          await page.click('button[type="submit"]');
+          await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
+        });
 
-        // Enable 2FA in account settings
-        await page.goto('/account');
-        await page.waitForLoadState('networkidle');
-        await page.click('#mfa-opt-in');
-        await page.waitForLoadState('networkidle');
+        await test.step('Enable 2FA in account settings', async () => {
+          await page.goto('/account');
+          await page.waitForLoadState('networkidle');
+          await page.click('#mfa-opt-in');
+          await page.waitForLoadState('networkidle');
+        });
 
         // Go to home page and logout
         await page.goto('/');
@@ -528,26 +537,28 @@ test.describe('Authentication Flows', () => {
       const email = `2fa-invalid-${Date.now()}@example.com`;
       const password = 'SecurePassword123!';
       try {
-        // Register and enable 2FA
-        await page.goto('/register');
-        await page.fill('input[name="name"]', '2FA Invalid Test');
-        await page.fill('input[name="email"]', email);
-        await page.fill('input[name="password"]', password);
-        await page.fill('input[name="passwordConfirm"]', password);
-        await page.click('button[type="submit"]');
-        // Wait for registration to complete - redirects to login
-        await expect(page).toHaveURL('/login?registered=true');
+        await test.step('Register user', async () => {
+          await page.goto('/register');
+          await page.fill('input[name="name"]', '2FA Invalid Test');
+          await page.fill('input[name="email"]', email);
+          await page.fill('input[name="password"]', password);
+          await page.fill('input[name="passwordConfirm"]', password);
+          await page.click('button[type="submit"]');
+          // Wait for registration to complete - redirects to login
+          await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
+        });
 
-        // Now login
-        await page.fill('input[name="email"]', email);
-        await page.fill('input[name="password"]', password);
-        await page.click('button[type="submit"]');
-        await expect(page).toHaveURL('/?login=success');
+        await test.step('Login and enable 2FA', async () => {
+          await page.fill('input[name="email"]', email);
+          await page.fill('input[name="password"]', password);
+          await page.click('button[type="submit"]');
+          await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
 
-        await page.goto('/account');
-        await page.waitForLoadState('networkidle');
-        await page.click('#mfa-opt-in');
-        await page.waitForLoadState('networkidle');
+          await page.goto('/account');
+          await page.waitForLoadState('networkidle');
+          await page.click('#mfa-opt-in');
+          await page.waitForLoadState('networkidle');
+        });
         // Go to home page and logout
         await page.goto('/');
         await page.waitForSelector('[data-testid="logout-button"]');
@@ -577,16 +588,17 @@ test.describe('Authentication Flows', () => {
       const password = 'SecurePassword123!';
 
       try {
-        // Register user
-        await page.goto('/register');
-        await page.fill('input[name="name"]', 'Email Verify Test');
-        await page.fill('input[name="email"]', email);
-        await page.fill('input[name="password"]', password);
-        await page.fill('input[name="passwordConfirm"]', password);
-        await page.click('button[type="submit"]');
+        await test.step('Register user', async () => {
+          await page.goto('/register');
+          await page.fill('input[name="name"]', 'Email Verify Test');
+          await page.fill('input[name="email"]', email);
+          await page.fill('input[name="password"]', password);
+          await page.fill('input[name="passwordConfirm"]', password);
+          await page.click('button[type="submit"]');
 
-        // Wait for registration to complete - redirects to login
-        await expect(page).toHaveURL('/login?registered=true');
+          // Wait for registration to complete - redirects to login
+          await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
+        });
 
         // Now login
         await page.fill('input[name="email"]', email);
@@ -649,26 +661,28 @@ test.describe('Authentication Flows', () => {
     test('should login successfully with valid credentials', async ({ page }) => {
       const uniqueEmail = `login-test-${Date.now()}@example.com`;
       try {
-        // First register a user
-        await page.goto('/register');
+        await test.step('Register user', async () => {
+          await page.goto('/register');
 
-        await page.fill('input[name="name"]', 'Login Test');
-        await page.fill('input[name="email"]', uniqueEmail);
-        await page.fill('input[name="password"]', 'Password123!');
-        await page.fill('input[name="passwordConfirm"]', 'Password123!');
-        await page.click('button[type="submit"]');
+          await page.fill('input[name="name"]', 'Login Test');
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', 'Password123!');
+          await page.fill('input[name="passwordConfirm"]', 'Password123!');
+          await page.click('button[type="submit"]');
 
-        // Wait for registration to complete - redirects to login
-        await expect(page).toHaveURL('/login?registered=true');
+          // Wait for registration to complete - redirects to login
+          await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
+        });
 
-        // Now login
-        await page.fill('input[name="email"]', uniqueEmail);
-        await page.fill('input[name="password"]', 'Password123!');
-        await page.click('button[type="submit"]');
+        await test.step('Login with credentials', async () => {
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', 'Password123!');
+          await page.click('button[type="submit"]');
 
-        // Should redirect to home with login success
-        await expect(page).toHaveURL('/?login=success');
-        await expect(page.locator('text=/logged in/i')).toBeVisible();
+          // Should redirect to home with login success
+          await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
+          await expect(page.locator('text=/logged in/i')).toBeVisible();
+        });
       } finally {
         await deleteUserByEmail(uniqueEmail);
       }
@@ -737,25 +751,27 @@ test.describe('Authentication Flows', () => {
     });
 
     test('should update profile information', async ({ page }) => {
-      // Register and login
-      await page.goto('/register');
       const uniqueEmail = `profile-test-${Date.now()}@example.com`;
 
-      await page.fill('input[name="name"]', 'Profile Test');
-      await page.fill('input[name="email"]', uniqueEmail);
-      await page.fill('input[name="password"]', 'Password123!');
-      await page.fill('input[name="passwordConfirm"]', 'Password123!');
-      await page.click('button[type="submit"]');
-
       try {
-        // Wait for registration redirect to login
-        await expect(page).toHaveURL('/login?registered=true');
+        await test.step('Register user', async () => {
+          await page.goto('/register');
+          await page.fill('input[name="name"]', 'Profile Test');
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', 'Password123!');
+          await page.fill('input[name="passwordConfirm"]', 'Password123!');
+          await page.click('button[type="submit"]');
 
-        // Now login
-        await page.fill('input[name="email"]', uniqueEmail);
-        await page.fill('input[name="password"]', 'Password123!');
-        await page.click('button[type="submit"]');
-        await expect(page).toHaveURL('/?login=success');
+          // Wait for registration redirect to login
+          await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
+        });
+
+        await test.step('Login', async () => {
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', 'Password123!');
+          await page.click('button[type="submit"]');
+          await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
+        });
 
         // Go to account page
         await page.goto('/account');
@@ -783,25 +799,27 @@ test.describe('Authentication Flows', () => {
     });
 
     test('should enable and disable 2FA', async ({ page }) => {
-      // Register and login
-      await page.goto('/register');
       const uniqueEmail = `2fa-toggle-${Date.now()}@example.com`;
 
-      await page.fill('input[name="name"]', '2FA Toggle Test');
-      await page.fill('input[name="email"]', uniqueEmail);
-      await page.fill('input[name="password"]', 'Password123!');
-      await page.fill('input[name="passwordConfirm"]', 'Password123!');
-      await page.click('button[type="submit"]');
-
       try {
-        // Wait for registration redirect to login
-        await expect(page).toHaveURL('/login?registered=true');
+        await test.step('Register user', async () => {
+          await page.goto('/register');
+          await page.fill('input[name="name"]', '2FA Toggle Test');
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', 'Password123!');
+          await page.fill('input[name="passwordConfirm"]', 'Password123!');
+          await page.click('button[type="submit"]');
 
-        // Now login
-        await page.fill('input[name="email"]', uniqueEmail);
-        await page.fill('input[name="password"]', 'Password123!');
-        await page.click('button[type="submit"]');
-        await expect(page).toHaveURL('/?login=success');
+          // Wait for registration redirect to login
+          await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
+        });
+
+        await test.step('Login', async () => {
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', 'Password123!');
+          await page.click('button[type="submit"]');
+          await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
+        });
 
         // Go to account page
         await page.goto('/account');
@@ -831,27 +849,29 @@ test.describe('Authentication Flows', () => {
     });
 
     test('should change password', async ({ page }) => {
-      // Register and login
-      await page.goto('/register');
       const uniqueEmail = `password-test-${Date.now()}@example.com`;
       const oldPassword = 'OldPassword123!';
       const newPassword = 'NewPassword123!';
 
       try {
-        await page.fill('input[name="name"]', 'Password Test');
-        await page.fill('input[name="email"]', uniqueEmail);
-        await page.fill('input[name="password"]', oldPassword);
-        await page.fill('input[name="passwordConfirm"]', oldPassword);
-        await page.click('button[type="submit"]');
+        await test.step('Register user', async () => {
+          await page.goto('/register');
+          await page.fill('input[name="name"]', 'Password Test');
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', oldPassword);
+          await page.fill('input[name="passwordConfirm"]', oldPassword);
+          await page.click('button[type="submit"]');
 
-        // Wait for registration redirect to login
-        await expect(page).toHaveURL('/login?registered=true');
+          // Wait for registration redirect to login
+          await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
+        });
 
-        // Now login
-        await page.fill('input[name="email"]', uniqueEmail);
-        await page.fill('input[name="password"]', oldPassword);
-        await page.click('button[type="submit"]');
-        await expect(page).toHaveURL('/?login=success');
+        await test.step('Login', async () => {
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', oldPassword);
+          await page.click('button[type="submit"]');
+          await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
+        });
 
         // Go to account page
         await page.goto('/account');
@@ -913,25 +933,27 @@ test.describe('Authentication Flows', () => {
     });
 
     test('should show 2FA section', async ({ page }) => {
-      // Register and login
-      await page.goto('/register');
       const uniqueEmail = `2fa-section-${Date.now()}@example.com`;
 
       try {
-        await page.fill('input[name="name"]', '2FA Section Test');
-        await page.fill('input[name="email"]', uniqueEmail);
-        await page.fill('input[name="password"]', 'Password123!');
-        await page.fill('input[name="passwordConfirm"]', 'Password123!');
-        await page.click('button[type="submit"]');
+        await test.step('Register user', async () => {
+          await page.goto('/register');
+          await page.fill('input[name="name"]', '2FA Section Test');
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', 'Password123!');
+          await page.fill('input[name="passwordConfirm"]', 'Password123!');
+          await page.click('button[type="submit"]');
 
-        // Wait for registration redirect to login
-        await expect(page).toHaveURL('/login?registered=true');
+          // Wait for registration redirect to login
+          await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
+        });
 
-        // Now login
-        await page.fill('input[name="email"]', uniqueEmail);
-        await page.fill('input[name="password"]', 'Password123!');
-        await page.click('button[type="submit"]');
-        await expect(page).toHaveURL('/?login=success');
+        await test.step('Login', async () => {
+          await page.fill('input[name="email"]', uniqueEmail);
+          await page.fill('input[name="password"]', 'Password123!');
+          await page.click('button[type="submit"]');
+          await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
+        });
 
         // Go to account page
         await page.goto('/account');

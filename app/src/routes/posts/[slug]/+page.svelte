@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
+	import { Badge } from '$lib/components/ui/badge';
 	import * as m from '$lib/paraglide/messages';
 	import type { PageData } from './$types';
 
@@ -14,7 +14,10 @@
 		<meta name="description" content={data.post.summary} />
 	{/if}
 	{#if data.post.image}
-		<meta property="og:image" content="{page.url.origin}/api/pb/files/posts/{data.post.id}/{data.post.image}" />
+		<meta
+			property="og:image"
+			content="{page.url.origin}/api/pb/files/posts/{data.post.id}/{data.post.image}"
+		/>
 	{/if}
 </svelte:head>
 
@@ -27,7 +30,7 @@
 				</h1>
 
 				{#if data.post.summary}
-					<p class="text-xl leading-relaxed text-muted-foreground mb-4">
+					<p class="mb-4 text-xl leading-relaxed text-muted-foreground">
 						{data.post.summary}
 					</p>
 				{/if}
@@ -36,7 +39,7 @@
 					<img
 						src="{page.url.origin}/api/pb/files/posts/{data.post.id}/{data.post.image}"
 						alt={data.post.title}
-						class="mt-6 h-64 w-full rounded-lg object-cover mb-6"
+						class="mt-6 mb-6 h-64 w-full rounded-lg object-cover"
 					/>
 				{/if}
 

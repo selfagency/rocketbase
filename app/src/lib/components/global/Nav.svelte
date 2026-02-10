@@ -8,6 +8,7 @@
 	import * as NavigationMenu from '$lib/components/ui/navigation-menu';
 	import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
 	import * as m from '$lib/paraglide/messages';
+	import { isMobile } from '$lib/stores/screen';
 	import type { NavItem } from '../../../types';
 
 	let { navItems = [] }: { navItems?: NavItem[] } = $props();
@@ -39,7 +40,7 @@
 	class="fixed top-0 left-0 z-40 w-screen border border-border/60 bg-background/80 shadow-md backdrop-blur-md"
 >
 	<div class="flex items-center justify-between gap-4 px-4 py-2">
-		<NavigationMenu.Root viewport={false}>
+		<NavigationMenu.Root viewport={$isMobile}>
 			<NavigationMenu.List class="flex items-center">
 				<NavigationMenu.Item>
 					<NavigationMenu.Link href="/" class={navigationMenuTriggerStyle()}>

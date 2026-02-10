@@ -36,6 +36,15 @@
 	});
 
 	const { form, enhance, message } = superFormObj;
+
+	/** @type {import('./$types').Snapshot<{name: string, email: string}>} */
+	export const snapshot = {
+		capture: () => ({ name: $form.name, email: $form.email }),
+		restore: (value) => {
+			$form.name = value.name;
+			$form.email = value.email;
+		}
+	};
 </script>
 
 <div class="flex min-h-screen items-center justify-center px-4">
@@ -45,7 +54,7 @@
 			<CardDescription>{m['auth.register.description']()}</CardDescription>
 		</CardHeader>
 		<CardContent>
-			<form method="POST" use:enhance class="space-y-4">
+			<form method="POST" action="?/register" use:enhance class="space-y-4">
 				{#if $message}
 					<Alert variant="destructive">
 						<CircleAlert class="h-4 w-4" />

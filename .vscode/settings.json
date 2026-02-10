@@ -5,19 +5,17 @@
   },
   "oxc.typeAware": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "i18n-ally.localesPaths": [
-    "template/messages",
-    "template/src/lib/paraglide/messages"
-  ],
   "[javascript]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
-  "vite.devCommand": "pnpm --filter template run dev ",
-  "vite.buildCommand": "pnpm --filter template run build ",
+  "vite.devCommand": "pnpm --filter app run dev ",
+  "vite.buildCommand": "pnpm --filter app run build ",
   "vite.port": 5173,
   "vite.showTerminal": true,
-  "sarif-viewer.connectToGithubCodeScanning": "off",
   "[shellscript]": {
     "editor.defaultFormatter": "mkhl.shfmt"
   },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
 }

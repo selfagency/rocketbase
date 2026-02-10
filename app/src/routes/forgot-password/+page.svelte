@@ -36,6 +36,12 @@
 
 	const { form, enhance } = superFormObj;
 
+	/** @type {import('./$types').Snapshot<string>} */
+	export const snapshot = {
+		capture: () => $form.email,
+		restore: (value) => ($form.email = value)
+	};
+
 	// svelte-ignore state_referenced_locally
 	let showSuccess = $state(actionData?.success);
 

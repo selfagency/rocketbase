@@ -33,6 +33,12 @@
 
 	const { form, enhance, message } = superFormObj;
 
+	/** @type {import('./$types').Snapshot<string>} */
+	export const snapshot = {
+		capture: () => $form.email,
+		restore: (value) => ($form.email = value)
+	};
+
 	let showMfaForm = $state(false);
 	let mfaData = $state({ mfaId: '', otpId: '', email: '' });
 	let mfaCode = $state('');

@@ -264,7 +264,7 @@ async function deleteUserByEmail(email: string) {
   try {
     // Use API_KEY with impersonation token for cleanup
     const apiKey = process.env.API_KEY;
-    
+
     if (!apiKey) {
       console.debug('No API_KEY set, skipping cleanup for:', email);
       return;
@@ -275,7 +275,7 @@ async function deleteUserByEmail(email: string) {
     // Build headers with API_KEY using User impersonation format
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `User ${token}`
+      Authorization: `User ${token}`,
     };
 
     // Use perPage to ensure we fetch enough records in one call
@@ -383,7 +383,6 @@ test.beforeAll(async () => {
 });
 
 test.describe('Authentication Flows', () => {
-
   // const testUser = {
   // 	name: 'Test User',
   // 	email: `test-${Date.now()}@example.com`,
@@ -393,6 +392,20 @@ test.describe('Authentication Flows', () => {
   test.describe('Registration Flow', () => {
     test('should register a new user successfully', async ({ page }) => {
       const email = `register-basic-${Date.now()}@example.com`;
+
+      // Capture console logs and errors
+      const consoleMessages: string[] = [];
+      const pageErrors: string[] = [];
+
+      page.on('console', msg => {
+        consoleMessages.push(`${msg.type()}: ${msg.text()}`);
+      });
+
+      page.on('pageerror', error => {
+        pageErrors.push(error.message);
+        console.error('❌ Page error:', error.message);
+      });
+
       try {
         await page.goto('/register');
 
@@ -404,6 +417,28 @@ test.describe('Authentication Flows', () => {
 
         // Submit form
         await page.click('button[type="submit"]');
+
+        // Wait a moment for form submission
+        await page.waitForTimeout(2000);
+
+        // Check if there's an error message
+        const errorAlert = page.locator('[role="alert"]');
+        if (await errorAlert.isVisible()) {
+          const errorText = await errorAlert.textContent();
+          console.error('Registration error shown on page:', errorText);
+        }
+
+        // Check current URL
+        const currentUrl = page.url();
+        console.log('Current URL after form submission:', currentUrl);
+
+        // Log captured errors and messages
+        if (pageErrors.length > 0) {
+          console.error('❌ Page errors captured:', pageErrors);
+        }
+        if (consoleMessages.length > 0) {
+          console.log('📝 Console messages (last 15):', consoleMessages.slice(-15));
+        }
 
         // Should redirect to login page after successful registration
         await expect(page).toHaveURL('/login?registered=true');

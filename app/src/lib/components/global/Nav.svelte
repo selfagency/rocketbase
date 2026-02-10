@@ -8,6 +8,9 @@
 	import * as NavigationMenu from '$lib/components/ui/navigation-menu';
 	import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
 	import * as m from '$lib/paraglide/messages';
+	import type { NavItem } from '../../../types';
+
+	let { navItems = [] }: { navItems?: NavItem[] } = $props();
 
 	let logoutFormRef = $state<HTMLFormElement | null>(null);
 
@@ -44,6 +47,46 @@
 						{/snippet}
 					</NavigationMenu.Link>
 				</NavigationMenu.Item>
+
+				{#each navItems as item}
+					{#if item.children && item.children.length > 0}
+						<!-- Menu with children -->
+						<NavigationMenu.Item>
+							<NavigationMenu.Trigger>{item.title || item.slug}</NavigationMenu.Trigger>
+							<NavigationMenu.Content>
+								<ul class="grid w-100 gap-3 p-4 md:w-125 md:grid-cols-2 lg:w-150">
+									{#each item.children as childItem}
+										<li>
+											<NavigationMenu.Link>
+												{#snippet child()}
+													<a
+														href="/{childItem?.slug}"
+														class="block space-y-1 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+													>
+														<div class="text-sm leading-none font-medium">
+															{childItem?.title || childItem?.slug}
+														</div>
+													</a>
+												{/snippet}
+											</NavigationMenu.Link>
+										</li>
+									{/each}
+								</ul>
+							</NavigationMenu.Content>
+						</NavigationMenu.Item>
+					{:else}
+						<!-- Simple link without children -->
+						<NavigationMenu.Item>
+							<NavigationMenu.Link>
+								{#snippet child()}
+									<a href="/{item.slug}" class={navigationMenuTriggerStyle()}>
+										{item.title || item.slug}
+									</a>
+								{/snippet}
+							</NavigationMenu.Link>
+						</NavigationMenu.Item>
+					{/if}
+				{/each}
 			</NavigationMenu.List>
 		</NavigationMenu.Root>
 

@@ -1,9 +1,20 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardDescription, CardHeader } from '$lib/components/ui/card';
 	import * as m from '$lib/paraglide/messages';
+	import { toast } from '$lib/stores/toast';
 
 	let { data } = $props();
+
+	// Show success toast if user just logged in via MFA
+	$effect(() => {
+		if (page.url.searchParams.get('login') === 'success') {
+			toast(m['auth.login.success'](), 'success');
+			// Clean up URL without reload
+			window.history.replaceState({}, '', '/');
+		}
+	});
 </script>
 
 <div class="container mx-auto max-w-2xl px-4 py-16">

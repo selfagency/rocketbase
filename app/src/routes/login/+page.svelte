@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
@@ -15,7 +14,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as m from '$lib/paraglide/messages';
 	import { toast } from '$lib/stores/toast';
-	import { AlertCircle } from '@lucide/svelte';
+	import { CircleAlert } from '@lucide/svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -50,25 +49,14 @@
 	// Watch for MFA data from action result
 	$effect(() => {
 		const actionResult = page.form as any;
-		if (actionResult?.mfaRequired) {
+		if (actionResult?.mfaRequired && !showMfaForm) {
 			showMfaForm = true;
 			mfaData = {
 				mfaId: actionResult.mfaId || '',
 				otpId: actionResult.otpId || '',
 				email: actionResult.email || ''
 			};
-		}
-	});
-
-	// Watch for MFA success
-	$effect(() => {
-		const actionResult = page.form as any;
-		if (actionResult?.success) {
-			toast(m['auth.login.success'](), 'success');
-			// Redirect to home after showing toast
-			setTimeout(() => {
-				goto('/');
-			}, 1000);
+			mfaCode = ''; // Clear code field
 		}
 	});
 </script>
@@ -96,7 +84,7 @@
 				>
 					{#if page.form?.message}
 						<Alert variant="destructive" data-testid="mfa-error-alert">
-							<AlertCircle class="h-4 w-4" />
+							<CircleAlert class="h-4 w-4" />
 							<AlertDescription>{page.form.message}</AlertDescription>
 						</Alert>
 					{/if}
@@ -126,7 +114,11 @@
 						type="button"
 						variant="outline"
 						class="w-full"
-						onclick={() => window.location.reload()}
+						onclick={() => {
+							showMfaForm = false;
+							mfaCode = '';
+							mfaData = { mfaId: '', otpId: '', email: '' };
+						}}
 					>
 						{m['auth.login.mfa_back_button']()}
 					</Button>
@@ -136,7 +128,7 @@
 				<form method="POST" action="?/login" use:enhance class="space-y-4">
 					{#if $message}
 						<Alert variant="destructive">
-							<AlertCircle class="h-4 w-4" />
+							<CircleAlert class="h-4 w-4" />
 							<AlertDescription>{$message}</AlertDescription>
 						</Alert>
 					{/if}

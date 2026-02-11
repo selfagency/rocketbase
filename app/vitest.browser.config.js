@@ -8,6 +8,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
     browser: {
       enabled: true,
       provider: playwright(),

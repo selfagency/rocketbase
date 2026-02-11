@@ -31,9 +31,6 @@ jobs:
         env:
           PB_ADMIN_EMAIL: admin@example.com
           PB_ADMIN_PASSWORD: test1234567890
-        volumes:
-          - ${{ github.workspace }}/db/pb_hooks:/pb_hooks
-          - ${{ github.workspace }}/db/pb_migrations:/pb_migrations
         options: >-
           --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:8090/api/health"
           --health-interval 5s

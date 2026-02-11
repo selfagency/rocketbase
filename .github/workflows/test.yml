@@ -83,6 +83,7 @@ jobs:
                   -H "Authorization: Bearer $PB_TOKEN" \
                   -H "Content-Type: application/json" \
                   -d '{
+                    "emailAuth": {"enabled":true,"allowEmailAuth":true,"allowUsernameAuth":false,"requireEmail":true,"exceptDomains":null,"onlyDomains":null,"minPasswordLength":8,"allowOAuth2Auth":true,"allowUsernameChange":true,"allowEmailChange":true,"verifyEmailChange":false},
                     "smtp": {"enabled":true,"port":1025,"host":"mailpit","username":"","authMethod":"PLAIN","tls":false,"localName":""},
                     "meta": {"appName":"RocketBase","appURL":"http://localhost:3000","senderName":"RocketBase","senderAddress":"no-reply@rocketbase.local","hideControls":false},
                     "rateLimits": {"enabled":false},

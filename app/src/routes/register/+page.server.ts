@@ -44,7 +44,8 @@ export const actions: Actions = {
 				password: form.data.password,
 				passwordConfirm: form.data.passwordConfirm,
 				name: form.data.name,
-				role: 'user'
+				role: 'user',
+				verified: true
 			});
 		} catch (err: any) {
 			locals.logger

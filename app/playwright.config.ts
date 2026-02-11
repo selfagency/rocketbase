@@ -23,5 +23,6 @@ export default defineConfig({
 	use: {
 		baseURL: 'http://localhost:3000'
 	},
-	globalTeardown: './util/global-teardown.ts'
+	globalTeardown: './util/global-teardown.ts',
+	reporter: [['html'], ['line']]
 });

@@ -15,6 +15,19 @@ export default defineConfig({
 			headless: true
 		},
 		include: ['src/tests/**/*.svelte.spec.{js,ts}', 'src/lib/components/**/*.spec.{js,ts}'],
-		exclude: ['src/tests/**/*.server.spec.{js,ts}', 'node_modules']
+		exclude: ['src/tests/**/*.server.spec.{js,ts}', 'node_modules'],
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'json', 'html'],
+			exclude: [
+				'node_modules/',
+				'src/tests/',
+				'**/*.d.ts',
+				'**/*.config.{js,ts}',
+				'src/lib/types/',
+				'build/',
+				'.svelte-kit/'
+			]
+		}
 	}
 });

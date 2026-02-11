@@ -1,0 +1,141 @@
+name: Tests
+
+on:
+  push:
+    branches: ["*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mailpit:
+        image: axllent/mailpit
+        ports:
+          - 1025:1025
+          - 8025:8025
+        options: >-
+          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:8025/readyz"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 3
+
+      pocketbase:
+        image: ghcr.io/muchobien/pocketbase:latest
+        ports:
+          - 8090:8090
+        env:
+          PB_ADMIN_EMAIL: admin@example.com
+          PB_ADMIN_PASSWORD: test1234567890
+        volumes:
+          - ${{ github.workspace }}/db/pb_hooks:/pb_hooks
+          - ${{ github.workspace }}/db/pb_migrations:/pb_migrations
+        options: >-
+          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:8090/api/health"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 3
+          --health-start-period 30s
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure PocketBase
+        run: |
+          # Wait for PocketBase to be ready and configure it
+          timeout=60
+          counter=0
+          while ! curl -f http://localhost:8090/api/health >/dev/null 2>&1; do
+            if [ $counter -ge $timeout ]; then
+              echo "Timeout waiting for PocketBase"
+              exit 1
+            fi
+            counter=$((counter + 1))
+            sleep 1
+          done
+
+          # Authenticate and configure PocketBase
+          PB_TOKEN=$(curl -s http://localhost:8090/api/collections/_superusers/auth-with-password \
+            -X POST -H "Content-Type: application/json" \
+            -d '{"identity":"admin@example.com","password":"test1234567890"}' | \
+            python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))" 2>/dev/null)
+
+          if [ -n "$PB_TOKEN" ]; then
+            curl -sf http://localhost:8090/api/settings -X PATCH \
+              -H "Authorization: Bearer $PB_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "smtp": {"enabled":true,"port":1025,"host":"mailpit","username":"","authMethod":"PLAIN","tls":false,"localName":""},
+                "meta": {"appName":"RocketBase","appURL":"http://localhost:3000","senderName":"RocketBase","senderAddress":"no-reply@rocketbase.local","hideControls":false},
+                "rateLimits": {"enabled":false},
+                "batch": {"enabled":true,"maxRequests":50,"timeout":3,"maxBodySize":0},
+                "logs": {"maxDays":5,"minLevel":0,"logIP":true,"logAuthId":false}
+              }' > /dev/null && echo "PocketBase settings configured." || echo "Warning: Failed to configure PocketBase settings"
+          else
+            echo "Warning: Could not authenticate with PocketBase superuser"
+          fi
+
+      - name: Build application
+        run: cd app && pnpm build
+
+      - name: Run unit tests with coverage
+        run: cd app && pnpm run test:unit -- --coverage
+
+      - name: Run e2e tests
+        run: cd app && pnpm run test:e2e
+        env:
+          CI: true
+          PUBLIC_POCKETBASE_URL: http://localhost:8090
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            app/coverage/
+          retention-days: 30
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            app/test-results/
+            app/playwright-report/
+          retention-days: 30

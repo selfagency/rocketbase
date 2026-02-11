@@ -2,11 +2,20 @@ import { PinoTransport } from '@loglayer/transport-pino';
 import { LogLayer } from 'loglayer';
 import pino from 'pino';
 
-const isDev = process.env.NODE_ENV !== 'production';
+function createPinoLogger() {
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      return pino({ transport: { target: 'pino-pretty' } });
+    } catch {
+      // pino-pretty not available (e.g. production build), fall through
+    }
+  }
+  return pino();
+}
 
 const log = new LogLayer({
   transport: new PinoTransport({
-    logger: pino(isDev ? { transport: { target: 'pino-pretty' } } : {}),
+    logger: createPinoLogger(),
   }),
   contextFieldName: 'context',
   metadataFieldName: 'metadata',

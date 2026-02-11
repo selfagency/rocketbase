@@ -27,6 +27,7 @@ WORKDIR /app
 COPY --from=builder /workspace/app/build ./build
 
 # Set environment variable with default
+ENV NODE_ENV=production
 ENV PUBLIC_POCKETBASE_URL=http://localhost:8090
 
 # Expose port (adjust if needed)

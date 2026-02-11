@@ -50,6 +50,8 @@ services:
     depends_on:
       pocketbase:
         condition: service_healthy
+    networks:
+      - e2e
 
 networks:
   e2e:

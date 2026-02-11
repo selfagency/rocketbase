@@ -73,7 +73,7 @@ jobs:
           for i in {1..60}; do
             if curl -f http://localhost:8090/api/health >/dev/null 2>&1; then
               echo "PocketBase is ready"
-              
+
               # Configure PocketBase settings
               PB_TOKEN=$(curl -s http://localhost:8090/api/collections/_superusers/auth-with-password \
                 -X POST -H "Content-Type: application/json" \
@@ -94,7 +94,7 @@ jobs:
               else
                 echo "Warning: Could not authenticate with PocketBase superuser"
               fi
-              
+
               break
             fi
             sleep 2

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
@@ -34,6 +33,10 @@
 		bio: z.string().optional(),
 		website: z.string().url().optional().or(z.literal('')),
 		avatar: z.instanceof(File).optional()
+	});
+
+	const mfaSchema = z.object({
+		mfaOptIn: z.boolean()
 	});
 
 	const passwordSchema = z
@@ -90,12 +93,26 @@
 		message: passwordMessage
 	} = passwordFormObj;
 
-	let savedMfaOptIn = $state(false);
-	let uiMfaOptIn = $state(false);
-	let mfaPending = $state(false);
-	let mfaMessage = $state<string | null>(null);
-	let mfaFormRef = $state<HTMLFormElement | null>(null);
-	let mfaInitialized = $state(false);
+	// MFA form
+	// svelte-ignore state_referenced_locally
+	const mfaFormObj = superForm(data.mfaForm, {
+		validators: zod4Client(mfaSchema),
+		resetForm: false,
+		onResult: ({ result }) => {
+			if (result.type === 'success') {
+				const nextOptIn = (result.data as { mfaOptIn?: boolean } | undefined)?.mfaOptIn;
+				if (typeof nextOptIn === 'boolean') {
+					toast(
+						nextOptIn ? m['account.2fa_enabled_success']() : m['account.2fa_disabled_success'](),
+						nextOptIn ? 'success' : 'info'
+					);
+				}
+			}
+		}
+	});
+
+	const { form: mfaForm, enhance: mfaEnhance } = mfaFormObj;
+
 	let verificationEmailSent = $state(false);
 
 	// Check for email verification success on mount
@@ -104,22 +121,6 @@
 		if (verifiedFlag === 'true') {
 			toast(m['account.email_verified_success'](), 'success');
 		}
-
-		// Initialize MFA state from server data
-		if (typeof data.mfaOptIn === 'boolean') {
-			savedMfaOptIn = data.mfaOptIn;
-			uiMfaOptIn = data.mfaOptIn;
-			mfaInitialized = true;
-		}
-	});
-
-	$effect(() => {
-		if (!mfaFormRef) return;
-		if (uiMfaOptIn === savedMfaOptIn) return;
-		if (mfaPending) return;
-		mfaPending = true;
-		mfaMessage = null;
-		mfaFormRef.requestSubmit();
 	});
 
 	function handleAvatarChange(e: Event) {
@@ -371,55 +372,30 @@
 			{:else}
 				<Alert>
 					<AlertTitle>
-						{uiMfaOptIn ? m['account.2fa_enabled_title']() : m['account.2fa_not_required_title']()}
+						{$mfaForm.mfaOptIn
+							? m['account.2fa_enabled_title']()
+							: m['account.2fa_not_required_title']()}
 					</AlertTitle>
 					<AlertDescription>
-						{uiMfaOptIn ? m['account.2fa_opted_in_info']() : m['account.2fa_opt_in_info']()}
+						{$mfaForm.mfaOptIn ? m['account.2fa_opted_in_info']() : m['account.2fa_opt_in_info']()}
 					</AlertDescription>
 				</Alert>
-				{#if mfaMessage}
-					<Alert class="mt-4" variant="destructive">
-						<AlertTitle>{m['common.error_title']()}</AlertTitle>
-						<AlertDescription>{mfaMessage}</AlertDescription>
-					</Alert>
-				{/if}
-				<form
-					method="POST"
-					action="?/toggleMfaOptIn"
-					class="mt-4 flex items-center gap-3"
-					use:enhance={() => {
-						return async ({ result, update }) => {
-							if (result.type === 'success') {
-								const nextOptIn = (result.data as { mfaOptIn?: boolean } | undefined)?.mfaOptIn;
-								if (typeof nextOptIn === 'boolean') {
-									savedMfaOptIn = nextOptIn;
-									uiMfaOptIn = nextOptIn;
-									toast(
-										nextOptIn
-											? m['account.2fa_enabled_success']()
-											: m['account.2fa_disabled_success'](),
-										nextOptIn ? 'success' : 'info'
-									);
-								} else {
-									savedMfaOptIn = uiMfaOptIn;
-								}
-							} else if (result.type === 'failure') {
-								uiMfaOptIn = savedMfaOptIn;
-								mfaMessage =
-									(result.data as { message?: string } | undefined)?.message ??
-									m['account.error_message']();
-							}
-							mfaPending = false;
-							await update();
-						};
-					}}
-					bind:this={mfaFormRef}
-				>
-					<input type="hidden" name="mfaOptIn" value={uiMfaOptIn ? 'true' : 'false'} />
-					<Switch id="mfa-opt-in" bind:checked={uiMfaOptIn} disabled={mfaPending} />
-					<Label for="mfa-opt-in">
-						{uiMfaOptIn ? m['account.2fa_disable_button']() : m['account.2fa_enable_button']()}
-					</Label>
+				<form method="POST" action="?/toggleMfaOptIn" use:mfaEnhance class="mt-4">
+					<Form.Field form={mfaFormObj} name="mfaOptIn">
+						<Form.Control>
+							{#snippet children({ props })}
+								<div class="flex items-center gap-3">
+									<Switch {...props} id="mfa-opt-in" bind:checked={$mfaForm.mfaOptIn} />
+									<Label for="mfa-opt-in">
+										{$mfaForm.mfaOptIn
+											? m['account.2fa_disable_button']()
+											: m['account.2fa_enable_button']()}
+									</Label>
+								</div>
+							{/snippet}
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
 				</form>
 			{/if}
 		</CardContent>

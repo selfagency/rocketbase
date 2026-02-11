@@ -6,6 +6,7 @@ type PageData = {
 	navItems: any[];
 	profileForm: any;
 	passwordForm: any;
+	mfaForm: any;
 	mfaRequired: boolean;
 	mfaOptIn: boolean;
 	mfaEnabled: boolean;
@@ -55,6 +56,17 @@ describe('Account Page Component', () => {
 			constraints: {},
 			message: undefined,
 			id: 'passwordForm'
+		},
+		mfaForm: {
+			valid: true,
+			posted: false,
+			errors: {},
+			data: {
+				mfaOptIn: false
+			},
+			constraints: {},
+			message: undefined,
+			id: 'mfaForm'
 		},
 		mfaRequired: false,
 		mfaOptIn: false,

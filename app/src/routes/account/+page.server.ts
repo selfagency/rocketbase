@@ -25,8 +25,13 @@ const passwordSchema = z
 		path: ['passwordConfirm']
 	});
 
+const mfaSchema = z.object({
+	mfaOptIn: z.boolean()
+});
+
 type ProfileSchema = z.infer<typeof profileSchema>;
 type PasswordSchema = z.infer<typeof passwordSchema>;
+type MfaSchema = z.infer<typeof mfaSchema>;
 
 // Roles that require MFA per PocketBase collection config
 const MFA_REQUIRED_ROLES = ['admin', 'editor', 'contributor'];
@@ -52,6 +57,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 		id: 'passwordForm'
 	});
 
+	const mfaForm = await superValidate<MfaSchema>(
+		{ mfaOptIn: Boolean((locals.user as { mfaOptIn?: boolean }).mfaOptIn) },
+		zod4(mfaSchema),
+		{ id: 'mfaForm' }
+	);
+
 	// MFA is enforced automatically by PocketBase based on the user's role
 	const mfaRequired = MFA_REQUIRED_ROLES.includes(locals.user.role || '');
 	const mfaOptIn = Boolean((locals.user as { mfaOptIn?: boolean }).mfaOptIn);
@@ -60,6 +71,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return {
 		profileForm,
 		passwordForm,
+		mfaForm,
 		mfaRequired,
 		mfaOptIn,
 		mfaEnabled,
@@ -143,11 +155,19 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const nextOptIn = formData.get('mfaOptIn') === 'true';
+		const form = await superValidate<MfaSchema>(formData, zod4(mfaSchema), {
+			id: 'mfaForm'
+		});
+
+		if (!form.valid) {
+			return fail(400, { mfaForm: form });
+		}
+
+		const nextOptIn = form.data.mfaOptIn;
 		const mfaRequired = MFA_REQUIRED_ROLES.includes(locals.user.role || '');
 
 		if (mfaRequired && !nextOptIn) {
-			return fail(400, { message: m['account.error_message']() });
+			return fail(400, { mfaForm: form, message: m['account.error_message']() });
 		}
 
 		try {
@@ -159,6 +179,11 @@ export const actions: Actions = {
 			locals.user = locals.pb.authStore.record as any;
 
 			return {
+				mfaForm: await superValidate<MfaSchema>(
+					{ mfaOptIn: nextOptIn },
+					zod4(mfaSchema),
+					{ id: 'mfaForm' }
+				),
 				success: true,
 				mfaOptIn: nextOptIn,
 				mfaEnabled: mfaRequired || nextOptIn
@@ -172,7 +197,10 @@ export const actions: Actions = {
 				})
 				.withMetadata(err)
 				.error('MFA opt-in update error:');
-			return fail(400, { message: m['account.error_message']() });
+			return fail(400, {
+				mfaForm: form,
+				message: err?.message || m['account.error_message']()
+			});
 		}
 	},
 

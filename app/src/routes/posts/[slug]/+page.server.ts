@@ -1,4 +1,4 @@
-import * as m from '$lib/paraglide/messages';
+import * as m from '$lib/paraglide/messages.js';
 import { error } from '@sveltejs/kit';
 import type { PostsResponse } from '../../../lib/types/pocketbase';
 import type { PageServerLoad } from './$types';

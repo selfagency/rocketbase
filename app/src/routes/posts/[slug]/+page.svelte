@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 	import { Badge } from '$lib/components/ui/badge';
-	import * as m from '$lib/paraglide/messages';
+	import * as m from '$lib/paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

@@ -19,6 +19,7 @@
     "*.css": "tailwindcss"
   },
   "chat.tools.terminal.autoApprove": {
-    "pnpm": true
+    "pnpm": true,
+    "timeout": true
   }
 }

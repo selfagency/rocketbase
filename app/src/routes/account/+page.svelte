@@ -18,7 +18,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Switch } from '$lib/components/ui/switch';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import * as m from '$lib/paraglide/messages';
+	import * as m from '$lib/paraglide/messages.js';
 	import { toast } from '$lib/stores/toast';
 	import { onMount } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';

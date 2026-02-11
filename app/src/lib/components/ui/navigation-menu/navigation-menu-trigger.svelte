@@ -34,7 +34,7 @@
 		<a {href} class="flex items-center">
 			{@render children?.()}
 			<ChevronDownIcon
-				class="relative top-[1px] ms-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
+				class="relative top-px ms-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
 				aria-hidden="true"
 			/>
 		</a>
@@ -42,7 +42,7 @@
 		{@render children?.()}
 
 		<ChevronDownIcon
-			class="relative top-[1px] ms-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
+			class="relative top-px ms-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
 			aria-hidden="true"
 		/>
 	{/if}

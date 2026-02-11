@@ -3,7 +3,7 @@
 	import PageContent from '$lib/components/PageContent.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardDescription, CardHeader } from '$lib/components/ui/card';
-	import * as m from '$lib/paraglide/messages';
+	import * as m from '$lib/paraglide/messages.js';
 	import { toast } from '$lib/stores/toast';
 	import { onMount } from 'svelte';
 

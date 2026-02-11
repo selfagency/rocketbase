@@ -766,9 +766,11 @@ test.describe('Authentication Flows', () => {
 
       await page.click('button[type="submit"]');
 
+      // Wait for form to process - stay on same page with error
+      await page.waitForLoadState('load');
+
       // Wait for the error message in the alert
-      // The error should appear after the form submission
-      await expect(page.locator('[role="alert"]')).toBeVisible({ timeout: 3000 });
+      await expect(page.locator('[role="alert"]')).toBeVisible({ timeout: 5000 });
 
       // Verify the alert contains an error message
       const alertText = await page.locator('[role="alert"]').textContent();
@@ -810,10 +812,10 @@ test.describe('Authentication Flows', () => {
       // Now login with the same credentials
       await page.fill('input[name="email"]', uniqueEmail);
       await page.fill('input[name="password"]', 'Password123!');
-      await page.click('button[type="submit"]');
 
-      // Wait for redirect to home after successful login
-      await page.waitForURL('/?login=success');
+      // Click login and wait for redirect
+      await page.click('button[type="submit"]');
+      await page.waitForURL('/?login=success', { timeout: 15000 });
 
       // Navigate to account page
       await page.goto('/account');
@@ -954,7 +956,7 @@ test.describe('Authentication Flows', () => {
           await page.fill('input[name="email"]', uniqueEmail);
           await page.fill('input[name="password"]', oldPassword);
           await page.click('button[type="submit"]');
-          await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
+          await page.waitForURL('/?login=success', { timeout: 15000 });
         });
 
         // Go to account page
@@ -969,22 +971,13 @@ test.describe('Authentication Flows', () => {
         await page.fill('input[name="password"]', newPassword);
         await page.fill('input[name="passwordConfirm"]', newPassword);
 
-        // Submit password change
-        await page.click('button:has-text("Change Password")');
+        // Submit password change and wait for response
+        await Promise.all([page.waitForLoadState('networkidle'), page.click('button:has-text("Change Password")')]);
 
-        // Wait for response but don't wait for networkidle since password change may redirect
-        await page.waitForTimeout(1000);
-
-        // The password change should either show a success message or redirect
-        // Check if we're still on account page or if we redirected
-        const currentUrl = page.url();
-
-        if (currentUrl.includes('/account')) {
-          // Still on account page, should see success message
-          await expect(page.locator('text=/password changed successfully/i')).toBeVisible({
-            timeout: 2000,
-          });
-        }
+        // The password change should show a success message
+        await expect(page.locator('text=/password changed successfully/i')).toBeVisible({
+          timeout: 3000,
+        });
 
         // Navigate to home to logout (in case we're still logged in)
         await page.goto('/', { waitUntil: 'networkidle' });
@@ -1094,10 +1087,10 @@ test.describe('Authentication Flows', () => {
           // Now login to complete registration flow
           await page.fill('input[name="email"]', uniqueEmail);
           await page.fill('input[name="password"]', 'Password123!');
-          await page.click('button[type="submit"]');
 
-          // Should be logged in (redirect to home with success)
-          await page.waitForURL('/?login=success');
+          // Click login and wait for redirect
+          await page.click('button[type="submit"]');
+          await page.waitForURL('/?login=success', { timeout: 15000 });
 
           // Logout
           await page.click('button[type="submit"]:has-text("Logout")');

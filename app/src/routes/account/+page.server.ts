@@ -1,4 +1,4 @@
-import * as m from '$lib/paraglide/messages';
+import * as m from '$lib/paraglide/messages.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
@@ -195,16 +195,10 @@ export const actions: Actions = {
     }
 
     try {
-      // First, verify the old password by attempting to re-authenticate
-      try {
-        await locals.pb.collection('users').authWithPassword(locals.user.email, form.data.oldPassword);
-      } catch (_) {
-        form.message = 'Invalid current password';
-        return fail(400, { passwordForm: form });
-      }
-
-      // If old password is valid, update to new password
+      // Update password with old password verification
+      // PocketBase validates oldPassword internally, keeping auth state intact
       await locals.pb.collection('users').update(locals.user.id, {
+        oldPassword: form.data.oldPassword,
         password: form.data.password,
         passwordConfirm: form.data.passwordConfirm,
       });
@@ -218,10 +212,20 @@ export const actions: Actions = {
           id: 'passwordForm',
         }),
         success: true,
+        message: 'Password changed successfully',
       };
     } catch (err: any) {
       locals.logger.withMetadata(err).error('Password change error:');
-      form.message = err?.message || m['account.error_message']();
+      // Check if it's an old password validation error
+      if (
+        err?.message?.toLowerCase().includes('old password') ||
+        err?.message?.toLowerCase().includes('oldpassword') ||
+        err?.data?.data?.oldPassword
+      ) {
+        form.message = 'Invalid current password';
+      } else {
+        form.message = err?.message || m['account.error_message']();
+      }
       return fail(400, { passwordForm: form });
     }
   },
@@ -233,6 +237,7 @@ export const actions: Actions = {
 
     try {
       const formData = await request.formData();
+      // oxlint-disable-next-line typescript/no-base-to-string
       const email = formData.get('email')?.toString() || locals.user.email;
 
       const response = await locals.pb.collection('users').requestOTP(email);
@@ -254,7 +259,9 @@ export const actions: Actions = {
 
     try {
       const formData = await request.formData();
+      // oxlint-disable-next-line typescript/no-base-to-string
       const otpId = formData.get('otpId')?.toString();
+      // oxlint-disable-next-line typescript/no-base-to-string
       const code = formData.get('code')?.toString();
 
       if (!otpId || !code) {

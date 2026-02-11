@@ -15,6 +15,9 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+	import { toast } from '$lib/stores/toast';
+	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 
 	const loginSchema = z.object({
 		email: z.string().optional(),
@@ -36,6 +39,12 @@
 	// Show MFA code input if both mfaId and otpId are present in form data
 	const showMfaInput = $derived.by(() => {
 		return Boolean($form.mfaId && $form.otpId);
+	});
+
+	onMount(() => {
+		if (page.url.searchParams.get('registered') === 'true') {
+			toast(m['auth.register.success'](), 'success');
+		}
 	});
 </script>
 

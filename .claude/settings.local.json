@@ -19,7 +19,14 @@
       "mcp__chrome-devtools__list_network_requests",
       "mcp__chrome-devtools__get_network_request",
       "mcp__chrome-devtools__wait_for",
-      "mcp__chrome-devtools__evaluate_script"
+      "mcp__chrome-devtools__evaluate_script",
+      "Bash(pnpm run test:e2e:*)",
+      "Bash(/Users/daniel/.npm-packages/bin/pnpm run test:e2e)",
+      "Bash(PATH=\"/Users/daniel/.npm-packages/bin:$PATH\":*)",
+      "Bash(export PATH:*)",
+      "Bash(docker pull:*)",
+      "Bash(pnpm test:e2e:*)",
+      "Bash(PATH=\"/Users/daniel/.npm-packages/bin:$PATH\" /Users/daniel/.npm-packages/bin/pnpm test:e2e:*)"
     ]
   }
 }

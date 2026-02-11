@@ -101,6 +101,13 @@ export const actions: Actions = {
     try {
       const authData = await usersCollection.authWithPassword(email, password);
 
+      // Verify auth actually returned valid data
+      if (!authData?.token || !locals.pb.authStore.isValid) {
+        locals.pb.authStore.clear();
+        form.message = m['auth.login.invalid_credentials']();
+        return fail(400, { form });
+      }
+
       // Check if account is disabled
       if (authData.record.disabled) {
         locals.pb.authStore.clear();

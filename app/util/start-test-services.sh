@@ -6,8 +6,9 @@ echo "Starting docker-compose services..."
 # Set timeout for all health checks
 timeout=60
 
-# fail silently
+# Tear down any existing services (dev or test) to avoid conflicts
 docker-compose -f ../docker-compose.dev.yml down >/dev/null 2>&1 || true
+docker-compose -f ../docker-compose.test.yml down -v >/dev/null 2>&1 || true
 docker-compose -f ../docker-compose.test.yml up -d --build
 
 # Wait for Mailpit to be ready
@@ -36,10 +37,23 @@ done
 
 # Configure PocketBase settings (SMTP -> mailpit, app meta, etc.)
 echo "Configuring PocketBase settings..."
-PB_TOKEN=$(curl -sf http://localhost:8090/api/collections/_superusers/auth-with-password \
-  -X POST -H "Content-Type: application/json" \
-  -d '{"identity":"admin@example.com","password":"test1234567890"}' \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
+
+# Retry admin auth - PocketBase may need a moment after health check passes
+PB_TOKEN=""
+for attempt in $(seq 1 10); do
+  AUTH_RESPONSE=$(curl -s http://localhost:8090/api/collections/_superusers/auth-with-password \
+    -X POST -H "Content-Type: application/json" \
+    -d '{"identity":"admin@example.com","password":"test1234567890"}' 2>&1)
+
+  PB_TOKEN=$(echo "$AUTH_RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))" 2>/dev/null)
+
+  if [ -n "$PB_TOKEN" ]; then
+    echo "PocketBase admin auth succeeded on attempt $attempt"
+    break
+  fi
+  echo "PocketBase admin auth attempt $attempt failed, retrying in 2s..."
+  sleep 2
+done
 
 if [ -n "$PB_TOKEN" ]; then
   curl -sf http://localhost:8090/api/settings -X PATCH \
@@ -53,7 +67,7 @@ if [ -n "$PB_TOKEN" ]; then
       "logs": {"maxDays":5,"minLevel":0,"logIP":true,"logAuthId":false}
     }' > /dev/null && echo "PocketBase settings configured." || echo "Warning: Failed to configure PocketBase settings"
 else
-  echo "Warning: Could not authenticate with PocketBase superuser"
+  echo "Warning: Could not authenticate with PocketBase superuser after 10 attempts"
 fi
 
 # Wait for app to be ready
@@ -70,12 +84,9 @@ done
 
 echo "All services are ready!"
 
-# Keep the script running to satisfy Playwright's webServer
+# Keep the script running to satisfy Playwright's webServer.
+# Use a simple sleep loop - Docker containers run independently via -d flag.
+# Don't exit on transient docker-compose ps failures.
 while true; do
-  sleep 1
-  # Check if services are still running
-  if ! docker-compose -f ../docker-compose.test.yml ps | grep -q "Up"; then
-    echo "Services stopped, exiting..."
-    exit 1
-  fi
+  sleep 5
 done

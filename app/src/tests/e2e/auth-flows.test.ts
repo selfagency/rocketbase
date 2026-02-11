@@ -706,7 +706,7 @@ test.describe('Authentication Flows', () => {
       await page.click('button[type="submit"]');
 
       // Wait for redirect to login page (not home)
-      await page.waitForURL('/login?registered=true');
+      await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
 
       // Now login with the same credentials
       await page.fill('input[name="email"]', uniqueEmail);
@@ -714,7 +714,7 @@ test.describe('Authentication Flows', () => {
 
       // Click login and wait for redirect
       await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
-      await page.waitForURL('/?login=success', { timeout: 15000 });
+      await expect(page).toHaveURL('/?login=success', { timeout: 15000 });
 
       // Navigate to account page
       await page.goto('/account');
@@ -988,7 +988,7 @@ test.describe('Authentication Flows', () => {
           await page.click('button[type="submit"]');
 
           // Wait for redirect to login page
-          await page.waitForURL('/login?registered=true');
+          await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
 
           // Now login to complete registration flow
           await page.fill('input[name="email"]', uniqueEmail);
@@ -996,7 +996,7 @@ test.describe('Authentication Flows', () => {
 
           // Click login and wait for redirect
           await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
-          await page.waitForURL('/?login=success', { timeout: 15000 });
+          await expect(page).toHaveURL('/?login=success', { timeout: 15000 });
 
           // Logout
           await page.click('button[type="submit"]:has-text("Logout")');

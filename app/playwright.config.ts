@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 config({ path: resolve(__dirname, '.env') });
 
 export default defineConfig({
-  webServer: [
+  webServer: process.env.CI ? undefined : [
     {
       command: 'pnpm run test:setup',
       url: 'http://localhost:3000',

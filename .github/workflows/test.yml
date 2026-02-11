@@ -119,6 +119,21 @@ jobs:
         env:
           PUBLIC_POCKETBASE_URL: http://localhost:8090
 
+      - name: Start SvelteKit app for e2e tests
+        run: cd app && pnpm run preview &
+        env:
+          PUBLIC_POCKETBASE_URL: http://localhost:8090
+
+      - name: Wait for app to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 >/dev/null 2>&1; then
+              echo "SvelteKit app is ready"
+              break
+            fi
+            sleep 2
+          done
+
       - name: Run e2e tests
         run: cd app && pnpm run test:e2e
         env:

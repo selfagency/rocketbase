@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+	import { env } from '$env/dynamic/public';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { Badge } from '$lib/components/ui/badge';
@@ -139,7 +139,7 @@
 
 	function getAvatarUrl(user: typeof data.user) {
 		if (user.avatar) {
-			return `${PUBLIC_POCKETBASE_URL || 'http://127.0.0.1:8090'}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`;
+			return `${env.PUBLIC_POCKETBASE_URL || 'http://127.0.0.1:8090'}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`;
 		}
 		return null;
 	}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+	import { env } from '$env/dynamic/public';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -30,7 +30,7 @@
 
 	const getAvatarUrl = (user?: { id?: string | null; avatar?: string | null }) => {
 		if (!user?.id || !user.avatar) return null;
-		const baseUrl = PUBLIC_POCKETBASE_URL || 'http://127.0.0.1:8090';
+		const baseUrl = env.PUBLIC_POCKETBASE_URL || 'http://127.0.0.1:8090';
 		return `${baseUrl}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`;
 	};
 </script>

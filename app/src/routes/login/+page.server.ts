@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-  login: async ({ request, locals }) => {
+  login: async ({ request, locals, url }) => {
     const form = await superValidate(request, zod4(loginSchema));
 
     if (!form.valid) {
@@ -65,7 +65,10 @@ export const actions: Actions = {
           throw err;
         }
 
-        locals.logger.withMetadata(err).error('MFA verification error');
+        locals.logger
+          .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+          .withMetadata(err)
+          .error('MFA verification error');
         const errorMsg = err?.response?.message || err?.message;
         form.message = `${m['auth.mfa_invalid_code']()} - ${errorMsg || 'Unknown error'}`;
         // Keep all form data so user can retry
@@ -113,19 +116,38 @@ export const actions: Actions = {
         throw err;
       }
 
-      locals.logger.withMetadata(err).error('Login error');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err)
+        .error('Login error');
 
       // Check if MFA is required
       const mfaIdFromError = err?.response?.mfaId;
       if (mfaIdFromError) {
         // MFA is required - request OTP
         try {
-          locals.logger.withMetadata({ email }).debug('MFA required, requesting OTP');
+          locals.logger
+            .withContext({
+              route: url.pathname,
+              userId: locals.pb?.authStore?.record?.id,
+              requestId: locals.requestId,
+              email,
+            })
+            .debug('MFA required, requesting OTP');
 
           const otpResponse = await usersCollection.requestOTP(email, { mfaId: mfaIdFromError } as any);
 
-          locals.logger.debug('OTP request successful');
-          locals.logger.withMetadata({ otpId: otpResponse.otpId }).debug('OTP sent');
+          locals.logger
+            .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+            .debug('OTP request successful');
+          locals.logger
+            .withContext({
+              route: url.pathname,
+              userId: locals.pb?.authStore?.record?.id,
+              requestId: locals.requestId,
+              otpId: otpResponse.otpId,
+            })
+            .debug('OTP sent');
 
           // Store MFA data and credentials in form for next submission
           form.data.email = email;
@@ -135,7 +157,10 @@ export const actions: Actions = {
           form.message = m['auth.mfa_code_required']();
           return fail(400, { form });
         } catch (otpErr) {
-          locals.logger.withMetadata({ error: otpErr }).error('OTP request error');
+          locals.logger
+            .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+            .withMetadata({ error: otpErr })
+            .error('OTP request error');
           form.message = m['auth.mfa_send_failed']();
           return fail(400, { form });
         }

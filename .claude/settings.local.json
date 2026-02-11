@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:loglayer.dev)",
+      "Bash(bd list:*)",
+      "Bash(bd close:*)",
+      "Bash(bd create:*)"
+    ]
+  }
+}

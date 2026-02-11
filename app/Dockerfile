@@ -18,13 +18,12 @@ RUN pnpm install --frozen-lockfile
 # Build the app
 RUN pnpm run -C app build
 
-# Runtime stage
-# Runtime stage: only the built bundle is required (no production deps)
+# Runtime stage: only the built bundle is required
 FROM node:20.19-alpine
 
 WORKDIR /app
 
-# Copy built application from builder (bundle contains all runtime code)
+# Copy built application from builder
 COPY --from=builder /workspace/app/build ./build
 
 # Set environment variable with default

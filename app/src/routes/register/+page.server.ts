@@ -30,7 +30,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-  register: async ({ request, locals }) => {
+  register: async ({ request, locals, url }) => {
     const form = await superValidate<RegisterSchema>(request, zod4(registerSchema));
 
     if (!form.valid) {
@@ -47,7 +47,10 @@ export const actions: Actions = {
         role: 'user',
       });
     } catch (err: any) {
-      locals.logger.withMetadata(err).error('Registration error');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err)
+        .error('Registration error');
       return fail(400, {
         form,
         message: err?.message || m['auth.register_failed'](),

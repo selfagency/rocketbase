@@ -1,7 +1,7 @@
 import * as m from '$lib/paraglide/messages.js';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request, locals, url }) => {
   try {
     const { token } = await request.json();
 
@@ -24,7 +24,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (err: any) {
-    locals.logger.withMetadata(err).error('API: Email verification error');
+    locals.logger
+      .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+      .withMetadata(err)
+      .error('API: Email verification error');
     return new Response(
       JSON.stringify({
         error: err?.message || m['api.email_verification_failed'](),

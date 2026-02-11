@@ -17,7 +17,7 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
+  default: async ({ request, locals, url }) => {
     const form = await superValidate<ForgotPasswordSchema>(request, zod4(forgotPasswordSchema));
 
     if (!form.valid) {
@@ -33,7 +33,10 @@ export const actions: Actions = {
         message: 'If an account exists with this email, a password reset link has been sent.',
       };
     } catch (err) {
-      locals.logger.withMetadata(err as Error).error('Password reset error');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err as Error)
+        .error('Password reset error');
 
       // Return success message even on error for security
       // (don't reveal whether email exists)

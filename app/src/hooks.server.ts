@@ -3,7 +3,17 @@ import logger from '$lib/server/logger';
 import { createPocketBaseClient } from '$lib/server/pocketbase';
 import type { Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
+import crypto from 'node:crypto';
 import type { UsersResponse } from './lib/types/pocketbase';
+
+const generateRequestId: Handle = async ({ event, resolve }) => {
+  const requestId = crypto.randomUUID();
+  event.locals.requestId = requestId;
+
+  const response = await resolve(event);
+  response.headers.set('X-Request-ID', requestId);
+  return response;
+};
 
 const handleAuth: Handle = async ({ event, resolve }) => {
   event.locals.logger = logger;
@@ -17,13 +27,12 @@ const handleAuth: Handle = async ({ event, resolve }) => {
     if (event.locals.pb.authStore.isValid) {
       await event.locals.pb.collection('users').authRefresh();
     }
-  } catch (_) {
+  } catch {
     // Clear auth on failed refresh
     event.locals.pb.authStore.clear();
   }
 
   event.locals.user = event.locals.pb.authStore.record as unknown as UsersResponse | null;
-
   const response = await resolve(event);
 
   // Set auth cookie in response
@@ -41,4 +50,4 @@ const handleParaglide: Handle = ({ event, resolve }) =>
     });
   });
 
-export const handle: Handle = sequence(handleAuth, handleParaglide);
+export const handle: Handle = sequence(generateRequestId, handleAuth, handleParaglide);

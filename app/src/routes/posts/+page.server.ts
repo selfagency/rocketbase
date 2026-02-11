@@ -31,7 +31,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
       },
     };
   } catch (err) {
-    locals.logger.withContext(err as Error).error('Error loading posts');
+    locals.logger
+      .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+      .withContext(err as Error)
+      .error('Error loading posts');
     return {
       posts: [],
       pagination: {

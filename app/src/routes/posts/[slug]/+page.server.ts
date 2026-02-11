@@ -3,7 +3,7 @@ import { error } from '@sveltejs/kit';
 import type { PostsResponse } from '../../../lib/types/pocketbase';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, url }) => {
   const { pb } = locals;
 
   try {
@@ -21,7 +21,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       post,
     };
   } catch (err) {
-    locals.logger.withMetadata(err as Error).error('Unable to fetch post');
+    locals.logger
+      .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+      .withMetadata(err as Error)
+      .error('Unable to fetch post');
     throw error(404, m['error.post_not_found']());
   }
 };

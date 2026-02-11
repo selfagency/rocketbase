@@ -68,7 +68,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-  updateProfile: async ({ request, locals }) => {
+  updateProfile: async ({ request, locals, url }) => {
     if (!locals.user) {
       return fail(401, { message: m['auth.unauthorized']() });
     }
@@ -122,7 +122,10 @@ export const actions: Actions = {
         message: m['account.success_message'](),
       };
     } catch (err: any) {
-      locals.logger.withMetadata(err).error('Profile update error:');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err)
+        .error('Profile update error:');
       return fail(400, {
         profileForm: form,
         message: err?.message || m['account.error_message'](),
@@ -130,7 +133,7 @@ export const actions: Actions = {
     }
   },
 
-  toggleMfaOptIn: async ({ request, locals }) => {
+  toggleMfaOptIn: async ({ request, locals, url }) => {
     if (!locals.user) {
       return fail(401, { message: m['auth.unauthorized']() });
     }
@@ -157,12 +160,15 @@ export const actions: Actions = {
         mfaEnabled: mfaRequired || nextOptIn,
       };
     } catch (err: any) {
-      locals.logger.withMetadata(err).error('MFA opt-in update error:');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err)
+        .error('MFA opt-in update error:');
       return fail(400, { message: m['account.error_message']() });
     }
   },
 
-  sendVerificationEmail: async ({ locals }) => {
+  sendVerificationEmail: async ({ locals, url }) => {
     if (!locals.user) {
       return fail(401, { message: m['auth.unauthorized']() });
     }
@@ -174,13 +180,16 @@ export const actions: Actions = {
         message: m['account.email_verification_sent'](),
       };
     } catch (err: any) {
-      locals.logger.withMetadata(err).error('Email verification error:');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err)
+        .error('Email verification error:');
       const message = err?.data?.message || err?.message || m['account.error_message']();
       return fail(400, { message });
     }
   },
 
-  changePassword: async ({ request, locals }) => {
+  changePassword: async ({ request, locals, url }) => {
     if (!locals.user) {
       return fail(401, { message: m['auth.unauthorized']() });
     }
@@ -216,7 +225,10 @@ export const actions: Actions = {
         message: 'Password changed successfully',
       };
     } catch (err: any) {
-      locals.logger.withMetadata(err).error('Password change error:');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err)
+        .error('Password change error:');
       // Check if it's an old password validation error
       if (
         err?.message?.toLowerCase().includes('old password') ||
@@ -231,7 +243,7 @@ export const actions: Actions = {
     }
   },
 
-  requestTwoFactor: async ({ request, locals }) => {
+  requestTwoFactor: async ({ request, locals, url }) => {
     if (!locals.user) {
       return fail(401, { message: m['auth.unauthorized']() });
     }
@@ -248,12 +260,15 @@ export const actions: Actions = {
         otpRequested: true,
       };
     } catch (err: any) {
-      locals.logger.withMetadata(err).error('OTP request error:');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err)
+        .error('OTP request error:');
       return fail(400, { message: err?.message || m['account.error_message']() });
     }
   },
 
-  verifyTwoFactor: async ({ request, locals }) => {
+  verifyTwoFactor: async ({ request, locals, url }) => {
     if (!locals.user) {
       return fail(401, { message: m['auth.unauthorized']() });
     }
@@ -293,12 +308,15 @@ export const actions: Actions = {
         success: true,
       };
     } catch (err: any) {
-      locals.logger.withMetadata(err).error('2FA verification error:');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err)
+        .error('2FA verification error:');
       return fail(400, { message: err?.message || m['auth.invalid_code']() });
     }
   },
 
-  disableTwoFactor: async ({ locals }) => {
+  disableTwoFactor: async ({ locals, url }) => {
     if (!locals.user) {
       return fail(401, { message: m['auth.unauthorized']() });
     }
@@ -317,7 +335,10 @@ export const actions: Actions = {
         success: true,
       };
     } catch (err: any) {
-      locals.logger.withMetadata(err).error('2FA disable error:');
+      locals.logger
+        .withContext({ route: url.pathname, userId: locals.pb?.authStore?.record?.id, requestId: locals.requestId })
+        .withMetadata(err)
+        .error('2FA disable error:');
       return fail(400, { message: err?.message || m['account.error_message']() });
     }
   },

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -11,13 +12,12 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import * as m from '$lib/paraglide/messages.js';
+	import { toast } from '$lib/stores/toast';
 	import { CircleAlert } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import { toast } from '$lib/stores/toast';
-	import { onMount } from 'svelte';
-	import { page } from '$app/state';
 
 	const loginSchema = z.object({
 		email: z.string().optional(),

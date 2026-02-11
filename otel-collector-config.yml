@@ -1,0 +1,24 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: {}
+      http: {}
+  zipkin:
+    endpoint: "0.0.0.0:9411"
+
+exporters:
+  zipkin:
+    endpoint: "http://zipkin:9411/api/v2/spans"
+  logging:
+    loglevel: info
+
+processors:
+  batch: {}
+  # transform: (disabled) - custom mapping removed due to collector config schema
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp, zipkin]
+      processors: [batch]
+      exporters: [zipkin, logging]

@@ -41,7 +41,17 @@
 		"Advanced PocketBase Server": {
 			"type": "http",
 			"url": "https://server.smithery.ai/pocketbase-server"
-		}
+		},
+		// "opentelemetry-mcp": {
+		// 	"command": "uvx",
+		// 	"args": [
+		// 		"opentelemetry-mcp"
+		// 	],
+		// 	"env": {
+		// 		"BACKEND_TYPE": "zipkin",
+		// 		"BACKEND_URL": "http://localhost:9411"
+		// 	}
+		// }
 	},
 	"inputs": []
 }

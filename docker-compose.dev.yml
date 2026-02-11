@@ -4,6 +4,7 @@ services:
     container_name: mailpit
     ports:
       - "1025:1025"
+      # keep original internal port; proxy previously exposed host port 8025
       - "8025:8025"
     networks:
       - e2e
@@ -12,6 +13,7 @@ services:
       interval: 5s
       timeout: 10s
       retries: 3
+    # no environment variables (deinstrumented)
 
   pocketbase:
     image: ghcr.io/muchobien/pocketbase:latest
@@ -33,6 +35,45 @@ services:
         condition: service_healthy
     networks:
       - e2e
+
+  zipkin:
+    image: openzipkin/zipkin:2.23
+    container_name: zipkin
+    ports:
+      - "9412:9411"
+    networks:
+      - e2e
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+    environment:
+      # expose Zipkin UI; collector forwards traces here. Also set resource attrs for Zipkin itself if it emits spans
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=zipkin,deployment.environment=development"
+
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.87.0
+    container_name: otel-collector
+    command: ["--config", "/etc/otel-collector-config.yml"]
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml:ro
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "9411:9411" # Zipkin receiver (collector fronting Zipkin)
+    networks:
+      - e2e
+    depends_on:
+      zipkin:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4318/metrics"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+
+  # Proxies removed — services are deinstrumented for now. Keep collector/zipkin for app tracing only.
 
 networks:
   e2e:

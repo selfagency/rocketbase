@@ -12,16 +12,16 @@ const __dirname = dirname(__filename);
 config({ path: resolve(__dirname, '.env') });
 
 export default defineConfig({
-  webServer: [
-    {
-      command: 'pnpm run test:setup',
-      url: 'http://localhost:3000',
-      timeout: 120000,
-    },
-  ],
-  testDir: 'src/tests/e2e',
-  use: {
-    baseURL: 'http://localhost:3000',
-  },
-  globalTeardown: './util/global-teardown.ts',
+	webServer: [
+		{
+			command: 'pnpm run test:setup',
+			url: 'http://localhost:3000',
+			timeout: 120000
+		}
+	],
+	testDir: 'src/tests/e2e',
+	use: {
+		baseURL: 'http://localhost:3000'
+	},
+	globalTeardown: './util/global-teardown.ts'
 });

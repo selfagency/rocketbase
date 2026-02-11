@@ -100,6 +100,8 @@ jobs:
 
       - name: Build application
         run: cd app && pnpm build
+        env:
+          PUBLIC_POCKETBASE_URL: http://localhost:8090
 
       - name: Run unit tests with coverage
         run: cd app && pnpm run test:unit -- --coverage

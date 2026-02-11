@@ -233,11 +233,18 @@ async function extractVerificationLinkFromEmail(email: string): Promise<string |
 	console.debug('Email body (first 1000 chars):', emailBody.substring(0, 1000));
 
 	// Extract verification link - try multiple patterns:
-	// 1. Full URL with /confirm-verification/ path
-	// 2. Full URL with /api/collections/users/confirm-verification path (PocketBase default)
-	// 3. URL in href attribute
-	// 4. Any localhost/127.0.0.1 URL with verify/confirm in the email
-	let match = emailBody.match(/(https?:\/\/[^\s"'<>]+\/confirm-verification\/[^\s"'<>]+)/);
+	// 1. Full URL with /verify-email/ path (custom route)
+	// 2. Full URL with /confirm-verification/ path
+	// 3. Full URL with /api/collections/users/confirm-verification path (PocketBase default)
+	// 4. URL in href attribute
+	// 5. Any localhost/127.0.0.1 URL with verify/confirm in the email
+	let match = emailBody.match(/(https?:\/\/[^\s"'<>]+\/verify-email\/[^\s"'<>]+)/);
+	if (match) {
+		console.debug('Found verify-email URL:', match[1].substring(0, 100));
+		return match[1];
+	}
+
+	match = emailBody.match(/(https?:\/\/[^\s"'<>]+\/confirm-verification\/[^\s"'<>]+)/);
 	if (match) {
 		console.debug('Found confirm-verification URL:', match[1].substring(0, 100));
 		return match[1];
@@ -574,21 +581,63 @@ test.describe('Authentication Flows', () => {
 					await expect(page).toHaveURL('/login?registered=true', { timeout: 10000 });
 				});
 
-				// Now login - user should be verified since verified: true is set during registration
-				await page.fill('input[name="email"]', email);
-				await page.fill('input[name="password"]', password);
-				await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
-				await expect(page).toHaveURL('/?login=success');
+				await test.step('Login with unverified account', async () => {
+					// Login should succeed even for unverified users
+					await page.fill('input[name="email"]', email);
+					await page.fill('input[name="password"]', password);
+					await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
 
-				// Go to account page
-				await page.goto('/account');
-				await page.waitForLoadState('networkidle');
+					// Should redirect to home with login success
+					await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
+				});
 
-				// Email should be verified (since verified: true in registration)
-				await expect(page.locator('text=/please verify your email/i')).not.toBeVisible();
+				await test.step('Go to account page and send verification email', async () => {
+					await page.goto('/account');
+					await page.waitForLoadState('networkidle');
 
-				// Skip email verification test since users are created as verified in test environment
-				console.log('Skipping email verification test - users are created as verified in CI');
+					// Should show the send verification email button since user is not verified
+					await expect(page.locator('[data-testid="send-verification-email-button"]')).toBeVisible();
+
+					// Click the send verification email button
+					await page.click('[data-testid="send-verification-email-button"]');
+					await page.waitForLoadState('networkidle');
+
+					// Should see "check your inbox" message
+					await expect(page.locator('[data-testid="email-verification-sent"]')).toBeVisible();
+				});
+
+				await test.step('Verify email and complete verification', async () => {
+					// Get verification link from email - wait longer for email delivery
+					await page.waitForTimeout(5000);
+					const verificationLink = await extractVerificationLinkFromEmail(email);
+					expect(verificationLink).toBeTruthy();
+
+					// Navigate to verification link
+					const parsedVerificationUrl = new URL(verificationLink!);
+					const currentOrigin = new URL(page.url()).origin;
+					const correctedOrigin = new URL(currentOrigin);
+					parsedVerificationUrl.protocol = correctedOrigin.protocol;
+					parsedVerificationUrl.hostname = correctedOrigin.hostname;
+					parsedVerificationUrl.port = correctedOrigin.port;
+
+					await page.goto(parsedVerificationUrl.toString());
+					// Should redirect to account page with verified=true
+					await expect(page).toHaveURL('/account?verified=true');
+					// Should show success toast with verification message
+					await expect(page.locator('text=Email verified successfully!')).toBeVisible();
+				});
+
+				await test.step('Verify account shows as verified', async () => {
+					// Should already be on account page after verification
+					await expect(page).toHaveURL('/account?verified=true');
+
+					// Should not show the "send verification" button anymore (indicates verified)
+					await expect(page.locator('[data-testid="send-verification-email-button"]')).toHaveCount(0);
+
+					// Navigate to home page to verify user is logged in (logout button should be visible)
+					await page.goto('/');
+					await expect(page.locator('[data-testid="logout-button"]')).toBeVisible();
+				});
 			} catch (error) {
 				console.error('Email verification test failed:', error);
 				throw error;

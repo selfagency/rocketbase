@@ -24,7 +24,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # Paraglide
-src/lib/paraglide
+src/lib/paraglide/
 project.inlang/cache/
-
+playwright-report/
 chrome/

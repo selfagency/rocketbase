@@ -106,6 +106,9 @@ jobs:
       - name: Run unit tests with coverage
         run: cd app && pnpm run test:unit -- --coverage
 
+      - name: Install Playwright browsers
+        run: cd app && pnpm exec playwright install --with-deps
+
       - name: Run e2e tests
         run: cd app && pnpm run test:e2e
         env:

@@ -37,6 +37,7 @@ describe('Account Server Actions', () => {
 				}
 			},
 			logger: {
+				withContext: vi.fn().mockReturnThis(),
 				withMetadata: vi.fn().mockReturnThis(),
 				error: vi.fn(),
 				info: vi.fn(),
@@ -53,7 +54,8 @@ describe('Account Server Actions', () => {
 			request: new Request('http://localhost', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-			})
+			}),
+			url: new URL('http://localhost/account')
 		};
 	});
 

@@ -19,6 +19,7 @@ describe('Login Server Actions', () => {
 				collection: vi.fn(() => mockCollection)
 			},
 			logger: {
+				withContext: vi.fn().mockReturnThis(),
 				withMetadata: vi.fn().mockReturnThis(),
 				error: vi.fn(),
 				debug: vi.fn(),
@@ -36,7 +37,8 @@ describe('Login Server Actions', () => {
 			request: new Request('http://localhost', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-			})
+			}),
+			url: new URL('http://localhost/login')
 		};
 	});
 

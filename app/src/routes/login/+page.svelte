@@ -36,6 +36,38 @@
 
 	const { form, enhance, message } = superFormObj;
 
+	// Wrap enhance to log submissions for debugging (Playwright captures console)
+	function enhanceWithLogging(node: HTMLFormElement) {
+		console.log('enhanceWithLogging: attaching enhance to form', node.action, node.method);
+		// Log submit details (non-sensitive: email only) to help e2e debugging
+		const submitListener = (ev: Event) => {
+			try {
+				const emailInput = node.querySelector('input[name="email"]') as HTMLInputElement | null;
+				const emailVal = emailInput?.value || '<empty>';
+				console.log('form submit:', node.action, 'method:', node.method, 'email:', emailVal);
+			} catch (err) {
+				console.log('form submit: could not read email', err);
+			}
+		};
+		node.addEventListener('submit', submitListener);
+
+		const result = enhance(node as HTMLFormElement);
+
+		// Return a cleanup function if supported by the enhancer result
+		return {
+			destroy() {
+				try {
+					node.removeEventListener('submit', submitListener);
+				} catch (e) {
+					/* ignore */
+				}
+				if (result && typeof result === 'object' && typeof (result as any).destroy === 'function') {
+					(result as any).destroy();
+				}
+			}
+		};
+	}
+
 	// Show MFA code input if both mfaId and otpId are present in form data
 	const showMfaInput = $derived.by(() => {
 		return Boolean($form.mfaId && $form.otpId);
@@ -55,7 +87,7 @@
 			<CardDescription>{m['auth.login.description']()}</CardDescription>
 		</CardHeader>
 		<CardContent>
-			<form method="POST" action="?/login" use:enhance class="space-y-4">
+			<form method="POST" action="?/login" use:enhance={enhanceWithLogging} class="space-y-4">
 				{#if $message}
 					<Alert variant="destructive" role="alert">
 						<CircleAlert class="h-4 w-4" />
@@ -130,12 +162,12 @@
 					<input type="hidden" name="otpId" value={$form.otpId || ''} />
 				{:else}
 					<div class="flex items-center justify-between text-sm">
-						<a href="/register" class="text-primary hover:underline"
-							>{m['auth.login.create_account_link']()}</a
-						>
-						<a href="/forgot-password" class="text-primary hover:underline"
-							>{m['auth.login.forgot_password_link']()}</a
-						>
+						<a href="/register" class="text-primary hover:underline">
+							{m['auth.login.create_account_link']()}
+						</a>
+						<a href="/forgot-password" class="text-primary hover:underline">
+							{m['auth.login.forgot_password_link']()}
+						</a>
 					</div>
 
 					<Button type="submit" class="w-full">{m['auth.login.submit_button']()}</Button>

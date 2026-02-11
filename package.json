@@ -13,7 +13,9 @@
     ]
   },
   "scripts": {
-    "db": "pocketbase serve --dev --dir db/pb_data --hooksDir db/pb_hooks --migrationsDir db/pb_migrations"
+    "db": "pocketbase serve --dev --dir db/pb_data --hooksDir db/pb_hooks --migrationsDir db/pb_migrations",
+    "dev": "overmind s -f Procfile.dev",
+    "test": "pnpm -C app test"
   },
   "engines": {
     "node": "20.x"

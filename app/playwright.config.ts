@@ -12,13 +12,14 @@ const __dirname = dirname(__filename);
 config({ path: resolve(__dirname, '.env') });
 
 export default defineConfig({
-  webServer: process.env.CI ? undefined : [
-    {
-      command: 'pnpm run test:setup',
-      url: 'http://localhost:3000',
-      timeout: 120000,
-    },
-  ],
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: 'pnpm run test:setup',
+        url: 'http://localhost:3000',
+        timeout: 180000,
+        reuseExistingServer: !process.env.CI,
+      },
   testDir: 'src/tests/e2e',
   use: {
     baseURL: 'http://localhost:3000',

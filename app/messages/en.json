@@ -63,7 +63,7 @@
 	"auth.forgot_password.title": "Reset Password",
 	"auth.invalid_code": "Invalid code",
 	"auth.invalid_otp": "Invalid OTP",
-	"auth.login.account_disabled": "Your account has been disabled. Please contact the site administrator.",
+	"auth.login.account_disabled": "Your account has been disabled. Please contact the site administrator if you believe this was in error.",
 	"auth.login.create_account_link": "Create an account",
 	"auth.login.description": "Enter your credentials to access your account",
 	"auth.login.email_label": "Email",

@@ -1,0 +1,3 @@
+dbs: pnpm run db
+app: pnpm -C app run dev
+car: pnpm -C sidecar run dev

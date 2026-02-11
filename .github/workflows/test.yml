@@ -12,32 +12,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      mailpit:
-        image: axllent/mailpit
-        ports:
-          - 1025:1025
-          - 8025:8025
-        options: >-
-          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:8025/readyz"
-          --health-interval 5s
-          --health-timeout 10s
-          --health-retries 3
-
-      pocketbase:
-        image: ghcr.io/muchobien/pocketbase:latest
-        ports:
-          - 8090:8090
-        env:
-          PB_ADMIN_EMAIL: admin@example.com
-          PB_ADMIN_PASSWORD: test1234567890
-        options: >-
-          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:8090/api/health"
-          --health-interval 5s
-          --health-timeout 10s
-          --health-retries 3
-          --health-start-period 30s
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -71,40 +45,60 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Configure PocketBase
+      - name: Start test services
         run: |
-          # Wait for PocketBase to be ready and configure it
-          timeout=60
-          counter=0
-          while ! curl -f http://localhost:8090/api/health >/dev/null 2>&1; do
-            if [ $counter -ge $timeout ]; then
-              echo "Timeout waiting for PocketBase"
-              exit 1
+          # Start Mailpit
+          docker run -d --name mailpit -p 1025:1025 -p 8025:8025 axllent/mailpit
+
+          # Start PocketBase with volume mounts for hooks and migrations
+          docker run -d --name pocketbase \
+            -p 8090:8090 \
+            -e PB_ADMIN_EMAIL=admin@example.com \
+            -e PB_ADMIN_PASSWORD=test1234567890 \
+            -v ${{ github.workspace }}/db/pb_hooks:/pb_hooks \
+            -v ${{ github.workspace }}/db/pb_migrations:/pb_migrations \
+            ghcr.io/muchobien/pocketbase:latest
+
+          # Wait for services to be ready
+          echo "Waiting for Mailpit..."
+          for i in {1..30}; do
+            if curl -f http://localhost:8025 >/dev/null 2>&1; then
+              echo "Mailpit is ready"
+              break
             fi
-            counter=$((counter + 1))
-            sleep 1
+            sleep 2
           done
 
-          # Authenticate and configure PocketBase
-          PB_TOKEN=$(curl -s http://localhost:8090/api/collections/_superusers/auth-with-password \
-            -X POST -H "Content-Type: application/json" \
-            -d '{"identity":"admin@example.com","password":"test1234567890"}' | \
-            python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))" 2>/dev/null)
+          echo "Waiting for PocketBase..."
+          for i in {1..60}; do
+            if curl -f http://localhost:8090/api/health >/dev/null 2>&1; then
+              echo "PocketBase is ready"
+              
+              # Configure PocketBase settings
+              PB_TOKEN=$(curl -s http://localhost:8090/api/collections/_superusers/auth-with-password \
+                -X POST -H "Content-Type: application/json" \
+                -d '{"identity":"admin@example.com","password":"test1234567890"}' | \
+                python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))" 2>/dev/null)
 
-          if [ -n "$PB_TOKEN" ]; then
-            curl -sf http://localhost:8090/api/settings -X PATCH \
-              -H "Authorization: Bearer $PB_TOKEN" \
-              -H "Content-Type: application/json" \
-              -d '{
-                "smtp": {"enabled":true,"port":1025,"host":"mailpit","username":"","authMethod":"PLAIN","tls":false,"localName":""},
-                "meta": {"appName":"RocketBase","appURL":"http://localhost:3000","senderName":"RocketBase","senderAddress":"no-reply@rocketbase.local","hideControls":false},
-                "rateLimits": {"enabled":false},
-                "batch": {"enabled":true,"maxRequests":50,"timeout":3,"maxBodySize":0},
-                "logs": {"maxDays":5,"minLevel":0,"logIP":true,"logAuthId":false}
-              }' > /dev/null && echo "PocketBase settings configured." || echo "Warning: Failed to configure PocketBase settings"
-          else
-            echo "Warning: Could not authenticate with PocketBase superuser"
-          fi
+              if [ -n "$PB_TOKEN" ]; then
+                curl -sf http://localhost:8090/api/settings -X PATCH \
+                  -H "Authorization: Bearer $PB_TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d '{
+                    "smtp": {"enabled":true,"port":1025,"host":"mailpit","username":"","authMethod":"PLAIN","tls":false,"localName":""},
+                    "meta": {"appName":"RocketBase","appURL":"http://localhost:3000","senderName":"RocketBase","senderAddress":"no-reply@rocketbase.local","hideControls":false},
+                    "rateLimits": {"enabled":false},
+                    "batch": {"enabled":true,"maxRequests":50,"timeout":3,"maxBodySize":0},
+                    "logs": {"maxDays":5,"minLevel":0,"logIP":true,"logAuthId":false}
+                  }' > /dev/null && echo "PocketBase settings configured." || echo "Warning: Failed to configure PocketBase settings"
+              else
+                echo "Warning: Could not authenticate with PocketBase superuser"
+              fi
+              
+              break
+            fi
+            sleep 2
+          done
 
       - name: Build application
         run: cd app && pnpm build

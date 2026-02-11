@@ -107,7 +107,7 @@ jobs:
         run: cd app && pnpm run test:unit -- --coverage
 
       - name: Install Playwright browsers
-        run: cd app && pnpm exec playwright install --with-deps
+        run: cd app && pnpm exec playwright install --with-deps chromium
 
       - name: Run e2e tests
         run: cd app && pnpm run test:e2e

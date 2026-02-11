@@ -203,8 +203,9 @@ export const actions: Actions = {
         passwordConfirm: form.data.passwordConfirm,
       });
 
-      // Refresh auth to maintain session
-      await locals.pb.collection('users').authRefresh();
+      // Refresh auth to maintain session with new password
+      // Password update clears auth, so we need to re-authenticate
+      await locals.pb.collection('users').authWithPassword(locals.user.email, form.data.password);
       locals.user = locals.pb.authStore.record as any;
 
       return {

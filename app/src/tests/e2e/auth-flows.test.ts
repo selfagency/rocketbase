@@ -259,121 +259,6 @@ async function extractVerificationLinkFromEmail(email: string): Promise<string |
   return null;
 }
 
-// PocketBase Admin API cleanup helper
-async function deleteUserByEmail(email: string) {
-  try {
-    // Use API_KEY with impersonation token for cleanup
-    const apiKey = process.env.API_KEY;
-
-    if (!apiKey) {
-      console.debug('No API_KEY set, skipping cleanup for:', email);
-      return;
-    }
-
-    const token = apiKey;
-
-    // Build headers with API_KEY using User impersonation format
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Authorization: `User ${token}`,
-    };
-
-    // Use perPage to ensure we fetch enough records in one call
-    const searchFilter = `email="${email}"`;
-    const searchUrl = `http://localhost:8090/api/collections/users/records?filter=${encodeURIComponent(
-      searchFilter
-    )}&perPage=50`;
-    console.debug('Attempting to find users for cleanup at', searchUrl);
-
-    let searchResponse;
-    try {
-      searchResponse = await fetch(searchUrl, {
-        method: 'GET',
-        headers,
-      });
-    } catch (err) {
-      console.debug('User search request failed during cleanup:', err);
-      return;
-    }
-
-    if (!searchResponse.ok) {
-      const bodyText = await searchResponse.text().catch(() => '<no body>');
-      console.debug('User search failed during cleanup, status:', searchResponse.status, 'body:', bodyText);
-      return;
-    }
-
-    const searchData = await searchResponse.json();
-    const items = searchData?.items || searchData || [];
-    // If search returned no items, try an unfiltered fetch and scan client-side.
-    if (!items || items.length === 0) {
-      console.debug('Filtered search returned no items; trying unfiltered fetch to scan for matches');
-      try {
-        const allRes = await fetch(`http://localhost:8090/api/collections/users/records?perPage=100`, {
-          method: 'GET',
-          headers,
-        });
-        if (allRes.ok) {
-          const allData = await allRes.json();
-          const allItems = allData?.items || allData || [];
-          const matches = (allItems || []).filter((it: any) => {
-            const e = (it?.email || it?.Email || it?.emailAddress || '').toString().toLowerCase();
-            return e === email.toLowerCase();
-          });
-          if (matches.length > 0) {
-            console.debug('Found', matches.length, 'matching user(s) via unfiltered scan');
-            for (const item of matches) {
-              const id = item?.id || item?.ID || item?._id;
-              if (!id) continue;
-              const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
-              console.debug('Deleting user (fallback) ', id, 'via', deleteUrl);
-              try {
-                const delRes = await fetch(deleteUrl, { method: 'DELETE', headers });
-                if (!delRes.ok) {
-                  const delBody = await delRes.text().catch(() => '<no body>');
-                  console.debug('Failed deleting user (fallback)', id, 'status:', delRes.status, 'body:', delBody);
-                }
-              } catch (err) {
-                console.debug('Error deleting user (fallback)', id, err);
-              }
-            }
-            return;
-          }
-        } else {
-          console.debug('Unfiltered fetch failed during cleanup, status:', allRes.status);
-        }
-      } catch (err) {
-        console.debug('Unfiltered fetch error during cleanup:', err);
-      }
-    }
-    if (items && items.length > 0) {
-      console.debug('Found', items.length, 'user(s) to delete');
-      // Delete each user record found
-      for (const item of items) {
-        const id = item?.id || item?.ID || item?._id;
-        if (!id) continue;
-        const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
-        console.debug('Deleting user', id, 'via', deleteUrl);
-        try {
-          const delRes = await fetch(deleteUrl, {
-            method: 'DELETE',
-            headers,
-          });
-          if (!delRes.ok) {
-            const delBody = await delRes.text().catch(() => '<no body>');
-            console.debug('Failed deleting user', id, 'status:', delRes.status, 'body:', delBody);
-          }
-        } catch (err) {
-          console.debug('Error deleting user', id, err);
-        }
-      }
-    } else {
-      console.debug('No users found for', email);
-    }
-  } catch (err) {
-    // Silently fail if cleanup doesn't work - tests should still pass
-  }
-}
-
 /**
  * Bulk delete all test users from @example.com domain
  */
@@ -464,7 +349,7 @@ test.describe('Authentication Flows', () => {
         await page.waitForTimeout(2000);
 
         // Check if there's an error message
-        const errorAlert = page.locator('[role="alert"]');
+        const errorAlert = page.locator('[data-slot="alert"]');
         if (await errorAlert.isVisible()) {
           const errorText = await errorAlert.textContent();
           console.error('Registration error shown on page:', errorText);
@@ -572,10 +457,10 @@ test.describe('Authentication Flows', () => {
         // Now login with password
         await page.fill('input[name="email"]', email);
         await page.fill('input[name="password"]', password);
-        await page.click('button[type="submit"]');
+        await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
 
         // Should show alert indicating MFA code is required
-        await expect(page.locator('[role="alert"]')).toBeVisible({ timeout: 3000 });
+        await expect(page.locator('[data-slot="alert"]')).toBeVisible({ timeout: 3000 });
 
         // Code input should now be visible (conditionally shown when mfaId is set)
         await expect(page.locator('[data-testid="mfa-code-input"]')).toBeVisible({ timeout: 3000 });
@@ -615,7 +500,7 @@ test.describe('Authentication Flows', () => {
         await test.step('Login and enable 2FA', async () => {
           await page.fill('input[name="email"]', email);
           await page.fill('input[name="password"]', password);
-          await page.click('button[type="submit"]');
+          await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
           await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
 
           await page.goto('/account');
@@ -644,7 +529,7 @@ test.describe('Authentication Flows', () => {
         await page.locator('[data-testid="mfa-verify-button"]').click();
 
         // Should show error in an alert
-        await expect(page.locator('[role="alert"]')).toBeVisible({ timeout: 3000 });
+        await expect(page.locator('[data-slot="alert"]')).toBeVisible({ timeout: 3000 });
       } finally {
         // Cleanup handled in bulk via test.afterAll
       }
@@ -672,7 +557,7 @@ test.describe('Authentication Flows', () => {
         // Now login
         await page.fill('input[name="email"]', email);
         await page.fill('input[name="password"]', password);
-        await page.click('button[type="submit"]');
+        await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
         await expect(page).toHaveURL('/?login=success');
 
         // Go to account page
@@ -746,7 +631,7 @@ test.describe('Authentication Flows', () => {
         await test.step('Login with credentials', async () => {
           await page.fill('input[name="email"]', uniqueEmail);
           await page.fill('input[name="password"]', 'Password123!');
-          await page.click('button[type="submit"]');
+          await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
 
           // Should redirect to home with login success
           await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
@@ -759,21 +644,35 @@ test.describe('Authentication Flows', () => {
     });
 
     test('should show error for invalid credentials', async ({ page }) => {
+      // Listen for network requests to debug form submission
+      const requests: string[] = [];
+      page.on('request', request => {
+        if (request.url().includes('/login') && request.method() === 'POST') {
+          requests.push(`${request.method()} ${request.url()}`);
+        }
+      });
+
       await page.goto('/login');
 
       await page.fill('input[name="email"]', 'nonexistent@example.com');
       await page.fill('input[name="password"]', 'WrongPassword123!');
 
-      await page.click('button[type="submit"]');
+      // Click the login button (not the MFA button)
+      await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
 
-      // Wait for form to process - stay on same page with error
-      await page.waitForLoadState('load');
+      // Wait for form submission to complete (AJAX request, not page load)
+      await page.waitForTimeout(1000); // Give time for the AJAX request to complete
+
+      console.log('Network requests made:', requests);
+
+      // Check if we're still on the login page (error should keep us here)
+      await expect(page).toHaveURL('/login');
 
       // Wait for the error message in the alert
-      await expect(page.locator('[role="alert"]')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('[data-slot="alert"]')).toBeVisible({ timeout: 5000 });
 
       // Verify the alert contains an error message
-      const alertText = await page.locator('[role="alert"]').textContent();
+      const alertText = await page.locator('[data-slot="alert"]').textContent();
       expect(alertText).toBeTruthy();
     });
 
@@ -814,7 +713,7 @@ test.describe('Authentication Flows', () => {
       await page.fill('input[name="password"]', 'Password123!');
 
       // Click login and wait for redirect
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
       await page.waitForURL('/?login=success', { timeout: 15000 });
 
       // Navigate to account page
@@ -855,7 +754,7 @@ test.describe('Authentication Flows', () => {
         await test.step('Login', async () => {
           await page.fill('input[name="email"]', uniqueEmail);
           await page.fill('input[name="password"]', 'Password123!');
-          await page.click('button[type="submit"]');
+          await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
           await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
         });
 
@@ -972,12 +871,17 @@ test.describe('Authentication Flows', () => {
         await page.fill('input[name="passwordConfirm"]', newPassword);
 
         // Submit password change and wait for response
-        await Promise.all([page.waitForLoadState('networkidle'), page.click('button:has-text("Change Password")')]);
+        await page.click('button:has-text("Change Password")');
 
-        // The password change should show a success message
-        await expect(page.locator('text=/password changed successfully/i')).toBeVisible({
-          timeout: 3000,
-        });
+        // Wait for form submission to complete
+        await page.waitForLoadState('networkidle');
+
+        // Success is shown via toast (not DOM text), so check for NO error alert
+        const errorAlerts = await page
+          .locator('[data-slot="alert"]')
+          .filter({ hasText: /error|invalid|failed/i })
+          .count();
+        expect(errorAlerts).toBe(0);
 
         // Navigate to home to logout (in case we're still logged in)
         await page.goto('/', { waitUntil: 'networkidle' });
@@ -986,22 +890,24 @@ test.describe('Authentication Flows', () => {
         const logoutButton = page.locator('[data-testid="logout-button"]');
         if (await logoutButton.isVisible({ timeout: 1000 }).catch(() => false)) {
           await page.click('[data-testid="logout-button"]');
-        } else {
-          // Already logged out, navigate to login
-          await page.goto('/login');
+          // Wait for logout redirect
+          await page.waitForURL('/?logout=success', { timeout: 5000 });
         }
+
+        // Navigate to login page
+        await page.goto('/login');
 
         // Try login with old password - should fail
         await page.fill('input[name="email"]', uniqueEmail);
         await page.fill('input[name="password"]', oldPassword);
-        await page.click('button[type="submit"]');
+        await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
 
         await expect(page.locator('text=/invalid email or password/i')).toBeVisible();
 
         // Login with new password - should succeed
         await page.fill('input[name="email"]', uniqueEmail);
         await page.fill('input[name="password"]', newPassword);
-        await page.click('button[type="submit"]');
+        await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
 
         await expect(page).toHaveURL('/?login=success');
       } finally {
@@ -1089,7 +995,7 @@ test.describe('Authentication Flows', () => {
           await page.fill('input[name="password"]', 'Password123!');
 
           // Click login and wait for redirect
-          await page.click('button[type="submit"]');
+          await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
           await page.waitForURL('/?login=success', { timeout: 15000 });
 
           // Logout

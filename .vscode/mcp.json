@@ -1,68 +1,47 @@
 {
-  "servers": {
-    "pocketbaseServer": {
-      "type": "stdio",
-      "command": "node",
-      "args": [
-        "~/Developer/opt/pocketbase-mcp/build/index.js"
-      ],
-      "env": {
-        "POCKETBASE_URL": "http://127.0.0.1:8090",
-        "POCKETBASE_ADMIN_EMAIL": "${input:pocketbase-admin-email}",
-        "POCKETBASE_ADMIN_PASSWORD": "${input:pocketbase-admin-password}"
-      }
-    },
-    "Sveltekit": {
-      "type": "stdio",
-      "command": "pnpx",
-      "args": [
-        "@sveltejs/mcp",
-      ]
-    },
-    "shadcn-svelte": {
-      "type": "stdio",
-      "command": "pnpx",
-      "args": [
-        "mcp-remote",
-        "https://shadcn-svelte.mastra.cloud/api/mcp/shadcn/mcp"
-      ]
-    },
-    "beads": {
-      "type": "stdio",
-      "env": {
-        "BEADS_WORKING_DIR": "${workspaceFolder}"
-      },
-      "command": "uv",
-      "args": [
-        "--directory",
-        "~/Developer/opt/beads/integrations/beads-mcp",
-        "run",
-        "beads-mcp"
-      ]
-    },
-    "io.github.ChromeDevTools/chrome-devtools-mcp": {
-      "type": "stdio",
-      "command": "pnpx",
-      "args": [
-        "chrome-devtools-mcp@0.12.1",
-        "--remote-debugging-port=9222",
-        "--executablePath=\"${workspaceFolder}/app/chrome/mac_arm-145.0.7632.46/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing\"",
-        "--isolated"
-      ]
-    },
-  },
-  "inputs": [
-    {
-      "type": "promptString",
-      "id": "pocketbase-admin-email",
-      "description": "PocketBase Admin Email",
-      "password": false
-    },
-    {
-      "type": "promptString",
-      "id": "pocketbase-admin-password",
-      "description": "PocketBase Admin Password",
-      "password": true
-    }
-  ]
+	"servers": {
+		"Sveltekit": {
+			"type": "stdio",
+			"command": "pnpx",
+			"args": [
+				"@sveltejs/mcp"
+			]
+		},
+		"shadcn-svelte": {
+			"type": "stdio",
+			"command": "pnpx",
+			"args": [
+				"mcp-remote",
+				"https://shadcn-svelte.mastra.cloud/api/mcp/shadcn/mcp"
+			]
+		},
+		"beads": {
+			"type": "stdio",
+			"env": {
+				"BEADS_WORKING_DIR": "${workspaceFolder}"
+			},
+			"command": "uv",
+			"args": [
+				"--directory",
+				"~/Developer/opt/beads/integrations/beads-mcp",
+				"run",
+				"beads-mcp"
+			]
+		},
+		"io.github.ChromeDevTools/chrome-devtools-mcp": {
+			"type": "stdio",
+			"command": "pnpx",
+			"args": [
+				"chrome-devtools-mcp@0.12.1",
+				"--remote-debugging-port=9222",
+				"--executablePath=\"${workspaceFolder}/app/chrome/mac_arm-145.0.7632.46/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing\"",
+				"--isolated"
+			]
+		},
+		"Advanced PocketBase Server": {
+			"type": "http",
+			"url": "https://server.smithery.ai/pocketbase-server"
+		}
+	},
+	"inputs": []
 }

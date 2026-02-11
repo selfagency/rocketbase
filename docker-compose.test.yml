@@ -1,0 +1,56 @@
+services:
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - e2e
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8025/readyz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    container_name: pocketbase
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./db/pb_hooks:/pb_hooks
+      - ./db/pb_migrations:/pb_migrations
+    environment:
+      - PB_ADMIN_EMAIL=admin@example.com
+      - PB_ADMIN_PASSWORD=test1234567890
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      mailpit:
+        condition: service_healthy
+    networks:
+      - e2e
+
+  rocketbase:
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile
+    container_name: rocketbase
+    ports:
+      - "3000:3000"
+    environment:
+      - PUBLIC_POCKETBASE_URL=http://pocketbase:8090
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+
+networks:
+  e2e:
+    driver: bridge

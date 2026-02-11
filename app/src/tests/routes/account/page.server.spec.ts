@@ -193,8 +193,12 @@ describe('Account Server Actions', () => {
         body: formData,
       });
 
-      // Mock successful password update (PocketBase validates oldPassword internally)
+      // Mock successful password update and re-authentication
       mockCollection.update.mockResolvedValue(mockUser);
+      mockCollection.authWithPassword.mockResolvedValue({
+        token: 'test-token',
+        record: mockUser,
+      });
 
       const result: any = await actions.changePassword(mockEvent as any);
 
@@ -207,6 +211,11 @@ describe('Account Server Actions', () => {
           password: 'newPassword123',
           passwordConfirm: 'newPassword123',
         })
+      );
+      // After password update, should re-authenticate with new password
+      expect(mockCollection.authWithPassword).toHaveBeenCalledWith(
+        'test@example.com',
+        'newPassword123'
       );
     });
 

@@ -1,0 +1,150 @@
+version: 2
+
+updates:
+  # npm (pnpm) — root workspace
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - patch
+    open-pull-requests-limit: 10
+
+  # npm (pnpm) — app
+  - package-ecosystem: npm
+    directory: /app
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      svelte-ecosystem:
+        patterns:
+          - "@sveltejs/*"
+          - "svelte"
+          - "svelte-*"
+          - "sveltekit-*"
+      ui-components:
+        patterns:
+          - "bits-ui"
+          - "tailwind*"
+          - "@tailwindcss/*"
+          - "@lucide/*"
+          - "shadcn-*"
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "playwright"
+          - "@playwright/*"
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+        exclude-patterns:
+          - "@sveltejs/*"
+          - "svelte"
+          - "svelte-*"
+          - "sveltekit-*"
+          - "bits-ui"
+          - "tailwind*"
+          - "@tailwindcss/*"
+          - "@lucide/*"
+          - "shadcn-*"
+          - "vitest"
+          - "@vitest/*"
+          - "playwright"
+          - "@playwright/*"
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - patch
+    open-pull-requests-limit: 10
+
+  # npm (pnpm) — cli
+  - package-ecosystem: npm
+    directory: /cli
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - patch
+    open-pull-requests-limit: 5
+
+  # npm (pnpm) — sidecar
+  - package-ecosystem: npm
+    directory: /sidecar
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - patch
+    open-pull-requests-limit: 5
+
+  # Docker — app
+  - package-ecosystem: docker
+    directory: /app
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+
+  # Docker — otel-proxy
+  - package-ecosystem: docker
+    directory: /docker/otel-proxy
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+
+  # Go — otel-proxy
+  - package-ecosystem: gomod
+    directory: /docker/otel-proxy
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      all-go-deps:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    open-pull-requests-limit: 5
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 3

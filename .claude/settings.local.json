@@ -2,9 +2,9 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:loglayer.dev)",
-      "Bash(bd list:*)",
-      "Bash(bd close:*)",
-      "Bash(bd create:*)",
+      "Bash(beans list:*)",
+      "Bash(beans close:*)",
+      "Bash(beans create:*)",
       "Bash(docker exec:*)",
       "Bash(docker ps:*)",
       "Bash(docker-compose:*)",
@@ -27,6 +27,28 @@
       "Bash(docker pull:*)",
       "Bash(pnpm test:e2e:*)",
       "Bash(PATH=\"/Users/daniel/.npm-packages/bin:$PATH\" /Users/daniel/.npm-packages/bin/pnpm test:e2e:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "beans prime"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "beans prime"
+          }
+        ]
+      }
     ]
   }
 }

@@ -26,20 +26,20 @@
 
 ---
 
-## Issue Tracking with Beads
+## Issue Tracking with Beans
 
-This project uses **bd** (beads) for issue tracking. All work should be tracked through beads.
+This project uses the `beans` CLI (Beans) for issue tracking. All work should be tracked using Beans and the `.beans/` directory.
 
-### Mandatory Beads + Commits Policy
+### Mandatory Beans + Commits Policy
 
 **Every feature, bug fix, chore, refactor, or documentation change MUST:**
 
-1. **Create a beads issue first** (or link to an existing one)
+1. **Create a bean first** (or link to an existing one)
 2. **Move it to in_progress** before coding
 3. **Close it with a descriptive reason** when done
-4. **Create a commit** that includes the beads ID in the message
+4. **Create a commit** that includes the bean ID in the message
 
-**No exceptions.** If you cannot use beads or create a commit, stop and ask the user to decide how to proceed.
+**No exceptions.** If you cannot use Beans or create a commit, stop and ask the user to decide how to proceed.
 
 ### Instruction Sources
 
@@ -48,36 +48,36 @@ Always consult the relevant task-specific instruction files in `.github/instruct
 ### Quick Reference
 
 ```bash
-bd onboard            # First-time setup and introduction
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --status in_progress  # Claim work
-bd close <id> --reason "Description"  # Complete work
-bd sync               # Force sync with git
+beans init            # Initialize Beans in this repository
+beans list            # List available beans (work)
+beans show <id>       # View bean details
+beans update <id>     # Update a bean's properties (e.g. mark in_progress)
+beans create "..."   # Create a new bean
+beans prime           # Output agent instructions / sync context for coding agents
 ```
 
 ### Workflow
 
-1. **Find work**: `bd ready --json`
-2. **Claim issue**: `bd update bd-XXX --status in_progress --json`
-3. **Read details**: `bd show bd-XXX --json`
+1. **Find work**: `beans list`
+2. **Claim work**: `beans update <id>` (set status or add an assignee as needed)
+3. **Read details**: `beans show <id>`
 4. **Implement**: Build the feature/fix
-5. **Close issue**: `bd close bd-XXX --reason "Implemented feature X" --json`
-6. **Commit**: `git commit -m "feat: add feature X (bd-XXX)"`
-7. **Sync**: `bd sync` (at end of session)
+5. **Close bean**: `beans update <id>` (set status=done or archive)
+6. **Commit**: `git commit -m "feat: add feature X (bean-<id>)"`
+7. **Prime agents / push**: run `beans prime`, then commit and push the `.beans/` directory so agents see changes
 
 ### Example Sequence (Required)
 
 ```bash
-bd create "Add 2FA opt-in toggle" -t task -p 2 --json
-bd update bd-123 --status in_progress --json
-bd show bd-123 --json
+beans create "Add 2FA opt-in toggle"
+beans update <id> --set status=in_progress
+beans show <id>
 
 # implement changes
 
-bd close bd-123 --reason "Added 2FA opt-in toggle to account page" --json
-git commit -m "feat: add 2FA opt-in toggle (bd-123)"
-bd sync
+beans update <id> --set status=done
+git add .beans && git commit -m "feat: add 2FA opt-in toggle (bean-<id>)"
+beans prime
 ```
 
 ### Landing the Plane (Session Completion)
@@ -86,7 +86,7 @@ bd sync
 
 **MANDATORY WORKFLOW:**
 
-1. **File issues for remaining work** - Create beads issues for any follow-up tasks
+1. **File issues for remaining work** - Create beans for any follow-up tasks (e.g. `beans create "Add integration tests for X"`).
 2. **Run quality gates** (if code changed):
 
    ```bash
@@ -99,16 +99,18 @@ bd sync
 3. **Update issue status** - Close finished work, update in-progress items
 4. **PUSH TO REMOTE** - This is MANDATORY:
 
-   ```bash
-   git pull --rebase
-   bd sync
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
+```bash
+git pull --rebase
+beans prime   # refresh agent context / prime payloads
+git add .beans
+git commit -m "chore: update beans"
+git push
+git status  # MUST show "up to date with origin"
+```
 
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
+1. **Clean up** - Clear stashes, prune remote branches
+2. **Verify** - All changes committed AND pushed
+3. **Hand off** - Provide context for next session
 
 **CRITICAL RULES:**
 
@@ -642,9 +644,9 @@ When working with this project, **always prefer using MCP servers** for document
    - Use for collection management, record operations, and auth workflows
    - Prefer this over generic documentation when working with PocketBase
 
-4. **beads MCP Server** (`mcp_beads_*`)
-   - Available for issue tracking and workflow management
-   - Provides programmatic access to beads operations
+4. **Beans integration**
+
+- Use the `beans` CLI and `beans prime` for agent integration and programmatic access
 
 ### MCP Workflow
 
@@ -848,25 +850,25 @@ Maintain `CHANGELOG.md` with an **Unreleased** section during development. Move 
 
 ### Adding a New CLI Command
 
-1. Create beads issue: `bd create "Add command X" -t task -p 2`
+1. Create a bean: `beans create "Add command X"`
 2. Implement in `cli/src/commands/`
 3. Update CLI argument parser
 4. Add tests in `cli/tests/`
 5. Update documentation
-6. Close issue and commit: `git commit -m "feat: add command X (bd-XXX)"`
+6. Close issue and commit: `git commit -m "feat: add command X (bean-<id>)"`
 
 ### Adding a Template Feature
 
-1. Create beads issue: `bd create "Add feature Y to template" -t task -p 2`
+1. Create a bean: `beans create "Add feature Y to template"`
 2. Implement in `template/src/`
 3. Test locally: `cd template && pnpm dev`
 4. Add tests (unit or e2e)
 5. Update template documentation (`template/LLM_INSTRUCTIONS.md`)
-6. Close issue and commit: `git commit -m "feat: add feature Y to template (bd-XXX)"`
+6. Close issue and commit: `git commit -m "feat: add feature Y to template (bean-<id>)"`
 
 ### Updating Dependencies
 
-1. Create beads issue: `bd create "Update dependencies" -t chore -p 3`
+1. Create a bean: `beans create "Update dependencies"`
 2. Update in both `cli/` and `template/`
 3. Test functionality in both projects
 4. Run quality gates (lint, test, build)
@@ -876,15 +878,15 @@ Maintain `CHANGELOG.md` with an **Unreleased** section during development. Move 
 
 ## Quality Checklist
 
-Before closing any beads issue and pushing:
+Before closing any bean and pushing:
 
 - [ ] Code follows project conventions
 - [ ] Tests pass: `pnpm test`
 - [ ] Linter passes: `pnpm lint`
 - [ ] Build succeeds: `pnpm build`
 - [ ] Documentation updated (README.md, LLM_INSTRUCTIONS.md)
-- [ ] Beads issue closed with descriptive reason
-- [ ] Commit includes issue ID: `(bd-XXX)`
+- [ ] Bean closed with descriptive reason
+- [ ] Commit includes issue ID: `(bean-<id>)`
 - [ ] Changes pushed to remote: `git push`
 - [ ] Verified `git status` shows "up to date with origin"
 
@@ -899,7 +901,7 @@ Before closing any beads issue and pushing:
 - **Tailwind CSS**: <https://tailwindcss.com/docs>
 - **Vitest**: <https://vitest.dev/>
 - **Playwright**: <https://playwright.dev/>
-- **beads**: Use `bd onboard` for introduction
+- **beans**: Use `beans init` for introduction
 
 ---
 
@@ -907,8 +909,8 @@ Before closing any beads issue and pushing:
 
 For issues or questions:
 
-1. Check existing beads issues: `bd list`
-2. Create new beads issue: `bd create "Question: ..." -t task -p 2`
+1. Check existing beans: `beans list`
+2. Create new bean: `beans create "Question: ..."`
 3. Reference project documentation:
    - CLI development: This file
    - Template development: `template/LLM_INSTRUCTIONS.md`
@@ -916,4 +918,5 @@ For issues or questions:
    - **SvelteKit**: `mcp_sveltekit_list-sections` then `mcp_sveltekit_get-documentation`
    - **shadcn-svelte**: `mcp_shadcn-svelte_shadcnSvelteSearchTool`
    - **PocketBase**: Use `mcp_pocketbaseser_*` tools
-   - **beads**: Use `mcp_beads_*` tools for programmatic access
+
+- **beans**: Use the `beans` CLI and `beans prime` for programmatic access

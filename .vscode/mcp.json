@@ -15,19 +15,7 @@
 				"https://shadcn-svelte.mastra.cloud/api/mcp/shadcn/mcp"
 			]
 		},
-		"beads": {
-			"type": "stdio",
-			"env": {
-				"BEADS_WORKING_DIR": "${workspaceFolder}"
-			},
-			"command": "uv",
-			"args": [
-				"--directory",
-				"~/Developer/opt/beads/integrations/beads-mcp",
-				"run",
-				"beads-mcp"
-			]
-		},
+		// Beans uses a CLI (beans prime) rather than an MCP server — do not configure an MCP entry for it.
 		"io.github.ChromeDevTools/chrome-devtools-mcp": {
 			"type": "stdio",
 			"command": "pnpx",

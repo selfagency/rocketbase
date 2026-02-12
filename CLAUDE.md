@@ -24,54 +24,54 @@
 
 ---
 
-## Issue Tracking with Beads
+## Issue Tracking with Beans
 
-This project uses **bd** (beads) for issue tracking. All work should be tracked through beads.
+This project uses the `beans` CLI (Beans) for issue tracking. All work should be tracked using Beans and the `.beans/` directory.
 
-### Mandatory Beads + Commits Policy
+### Mandatory Beans + Commits Policy
 
 **Every feature, bug fix, chore, refactor, or documentation change MUST:**
 
-1. **Create a beads issue first** (or link to an existing one)
+1. **Create a beans issue first** (or link to an existing one)
 2. **Move it to in_progress** before coding
 3. **Close it with a descriptive reason** when done
-4. **Create a commit** that includes the beads ID in the message
+4. **Create a commit** that includes the bean ID in the message
 
-**No exceptions.** If you cannot use beads or create a commit, stop and ask the user to decide how to proceed.
+**No exceptions.** If you cannot use beans or create a commit, stop and ask the user to decide how to proceed.
 
 ### Quick Reference
 
 ```bash
-bd onboard            # First-time setup and introduction
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --status in_progress  # Claim work
-bd close <id> --reason "Description"  # Complete work
-bd sync               # Force sync with git
+beans init            # Initialize Beans in this repository
+beans list            # List available beans (work)
+beans show <id>       # View bean details
+beans update <id>     # Update a bean's properties (e.g. mark in_progress)
+beans create "..."   # Create a new bean
+beans prime           # Output agent instructions / sync context for coding agents
 ```
 
 ### Workflow
 
-1. **Find work**: `bd ready --json`
-2. **Claim issue**: `bd update bd-XXX --status in_progress --json`
-3. **Read details**: `bd show bd-XXX --json`
+1. **Find work**: `beans list`
+2. **Claim work**: `beans update <id>` (set status or add an assignee as needed)
+3. **Read details**: `beans show <id>`
 4. **Implement**: Build the feature/fix
-5. **Close issue**: `bd close bd-XXX --reason "Implemented feature X" --json`
-6. **Commit**: `git commit -m "feat: add feature X (bd-XXX)"`
-7. **Sync**: `bd sync` (at end of session)
+5. **Close bean**: `beans update <id>` (set status=done or archive)
+6. **Commit**: `git commit -m "feat: add feature X (bean-<id>)"`
+7. **Prime agents / push**: run `beans prime`, then commit and push the `.beans/` directory so agents see changes
 
 ### Example Sequence (Required)
 
 ```bash
-bd create "Add 2FA opt-in toggle" -t task -p 2 --json
-bd update bd-123 --status in_progress --json
-bd show bd-123 --json
+beans create "Add 2FA opt-in toggle"
+beans update <id> --set status=in_progress
+beans show <id>
 
 # implement changes
 
-bd close bd-123 --reason "Added 2FA opt-in toggle to account page" --json
-git commit -m "feat: add 2FA opt-in toggle (bd-123)"
-bd sync
+beans update <id> --set status=done
+git add .beans && git commit -m "feat: add 2FA opt-in toggle (bean-<id>)"
+beans prime
 ```
 
 ### Landing the Plane (Session Completion)
@@ -80,43 +80,43 @@ bd sync
 
 **MANDATORY WORKFLOW:**
 
-1. **File issues for remaining work** - Create beads issues for any follow-up tasks
-2. **Run quality gates** (if code changed):
-   ```bash
-   pnpm lint
-   pnpm test
-   cd cli && pnpm build
-   cd template && pnpm build
-   ```
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd sync
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
+1. Run quality gates (if code changed):
+
+  ```bash
+  pnpm lint
+  pnpm test
+  cd cli && pnpm build
+  cd template && pnpm build
+  ```
+
+1. Update issue status — close finished work, update in-progress items.
+
+1. PUSH TO REMOTE — This is MANDATORY:
+
+  ```bash
+  git pull --rebase
+  beans prime   # refresh agent context / prime payloads
+  git add .beans
+  git commit -m "chore: update beans"
+  git push
+  git status  # MUST show "up to date with origin"
+  ```
+
+1. Clean up — clear stashes, prune remote branches.
+
+1. Verify — all changes committed AND pushed.
 
 **CRITICAL RULES:**
 
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-
----
-
-## CLI Development (TypeScript/Node.js)
+- Work is NOT complete until `git push` succeeds.
+- NEVER stop before pushing — that leaves work stranded locally.
+- NEVER say "ready to push when you are" — YOU must push.
+- If push fails, resolve and retry until it succeeds.
 
 The CLI tool (in `cli/`) is the scaffolding engine that creates new Rocketbase projects.
 
 ### Toolchain
 
-- **tsx** — Development execution and watch mode
-- **tsup** — Production build
 - **oxlint** / **oxfmt** — Fast linting and formatting
 - **vitest** — Unit testing
 - **consola** — Beautiful logging
@@ -124,24 +124,35 @@ The CLI tool (in `cli/`) is the scaffolding engine that creates new Rocketbase p
 - **prompts** — Interactive user input
 - **ora** — Progress spinners
 
-### Development Workflow
+### Run CLI in development
 
 ```bash
-# Run CLI in development
 cd cli
 tsx src/index.ts
+```
 
-# Watch mode
+### Watch mode
+
+```bash
 tsx watch src/index.ts
+```
 
-# Build for production
+### Build for production
+
+```bash
 pnpm build
+```
 
-# Lint and format
+### Lint and format
+
+```bash
 pnpm lint
 pnpm lint:fix
+```
 
-# Test
+### Test
+
+```bash
 pnpm test
 pnpm test:watch
 ```
@@ -149,10 +160,6 @@ pnpm test:watch
 ### CLI Implementation Patterns
 
 **Always:**
-
-- Use **consola** for all output (info, success, error, warn)
-- Use **execa** or **$** for shell command execution
-- Use **prompts** for user input
 - Use **ora** for long-running tasks with spinners
 - Handle errors with clear messages and non-zero exit codes
 - Validate all user inputs
@@ -179,16 +186,9 @@ const spinner = ora("Installing dependencies...").start();
 try {
   await execa("pnpm", ["install"], { cwd: projectPath });
   spinner.succeed("Dependencies installed");
-} catch (error) {
-  spinner.fail("Failed to install dependencies");
-  consola.error(error);
-  process.exit(1);
 }
-```
 
----
-
-## Template Development (SvelteKit + PocketBase)
+``` 
 
 The template (in `template/`) is the **source of truth** for all scaffolded projects. The CLI copies these files and applies final configuration.
 
@@ -245,34 +245,18 @@ The template (in `template/`) is the **source of truth** for all scaffolded proj
 
 ### Template File Structure
 
-```
+````
 template/
 ├── src/
 │   ├── lib/
 │   │   ├── components/ui/     # shadcn-svelte components
-│   │   ├── server/
-│   │   │   └── pocketbase.ts  # PocketBase client instance
-│   │   ├── stores/            # Svelte stores
-│   │   └── utils/             # Utility functions
-│   ├── routes/                # SvelteKit routes
 │   │   ├── +page.svelte       # Home page
 │   │   ├── +layout.svelte     # Root layout
 │   │   └── api/
-│   │       └── pb/[...path]/+server.ts  # PocketBase API proxy
-│   ├── app.css                # Global styles (Tailwind)
-│   ├── app.html               # HTML template
-│   └── hooks.server.ts        # SvelteKit server hooks
-├── static/                     # Static assets
 ├── tests/                      # Playwright tests
 ├── pb_data/                    # PocketBase data (git-ignored)
 ├── package.json
-├── svelte.config.js           # SvelteKit configuration
-├── vite.config.ts             # Vite configuration
-├── tailwind.config.js         # Tailwind configuration
-└── tsconfig.json              # TypeScript configuration
-```
 
-### SvelteKit Scaffolding (Template Source)
 
 When rebuilding the template, use `pnpx sv create` with these choices:
 
@@ -300,38 +284,17 @@ export default {
     adapter: adapter(),
   },
 };
-```
-
-**2. SVG Plugin** (`vite.config.ts`):
+````
 
 ```typescript
 import { sveltekit } from "@sveltejs/kit/vite";
 import svg from "@poppa/sveltekit-svg";
 import { defineConfig } from "vite";
-
-export default defineConfig({
-  plugins: [sveltekit(), svg()],
-});
-```
-
-**3. pnpm Native Dependencies** (`package.json`):
-
-```json
 {
-  "pnpm": {
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",
       "core-js",
-      "esbuild",
-      "sqlite3"
-    ]
-  }
-}
-```
 
-**4. Package Scripts** (`package.json`):
-
-```json
 {
   "scripts": {
     "dev": "vite dev",
@@ -608,22 +571,26 @@ When working with this project, **always prefer using MCP servers** for document
 ### Available MCP Servers
 
 1. **SvelteKit MCP Server** (`mcp_sveltekit_*`)
+
    - Use `mcp_sveltekit_list-sections` to discover documentation
    - Use `mcp_sveltekit_get-documentation` to fetch specific sections
    - Use `mcp_sveltekit_svelte-autofixer` to validate Svelte code before returning it
 
 2. **shadcn-svelte MCP Server** (`mcp_shadcn-svelte_*`)
+
    - Use `mcp_shadcn-svelte_shadcnSvelteGetTool` for component documentation
    - Use `mcp_shadcn-svelte_shadcnSvelteListTool` to list available components
    - Use `mcp_shadcn-svelte_shadcnSvelteSearchTool` to search for specific components
 
 3. **PocketBase MCP Server** (`mcp_pocketbaseser_*`)
+
    - Use for collection management, record operations, and auth workflows
    - Prefer this over generic documentation when working with PocketBase
 
-4. **beads MCP Server** (`mcp_beads_*`)
-   - Available for issue tracking and workflow management
-   - Provides programmatic access to beads operations
+4. **(No MCP server for Beans)**
+
+- Beans does not provide an MCP server. Use the `beans` CLI and commit `.beans/` into the repo.
+- For agent integration, run `beans prime` to emit agent instructions instead of relying on an MCP server.
 
 ### MCP Workflow
 
@@ -701,7 +668,7 @@ git commit -m "chore: add pb_data to gitignore"
 - Prompt for admin email and password
 - Validate email format
 - Create superuser: `pocketbase superuser create <email> <password>`
-- Display admin URL: http://127.0.0.1:8090/_/
+- Display admin URL: <http://127.0.0.1:8090/_/>
 
 ### 7. Install Dependencies
 
@@ -823,29 +790,29 @@ Maintain `CHANGELOG.md` with an **Unreleased** section during development. Move 
 
 ---
 
-## Common Tasks
+### Common Tasks
 
 ### Adding a New CLI Command
 
-1. Create beads issue: `bd create "Add command X" -t task -p 2`
+1. Create a bean: `beans create "Add command X" -t task -p 2`
 2. Implement in `cli/src/commands/`
 3. Update CLI argument parser
 4. Add tests in `cli/tests/`
 5. Update documentation
-6. Close issue and commit: `git commit -m "feat: add command X (bd-XXX)"`
+6. Close issue and commit: `git commit -m "feat: add command X (bean-<id>)"`
 
 ### Adding a Template Feature
 
-1. Create beads issue: `bd create "Add feature Y to template" -t task -p 2`
+1. Create a bean: `beans create "Add feature Y to template" -t task -p 2`
 2. Implement in `template/src/`
 3. Test locally: `cd template && pnpm dev`
 4. Add tests (unit or e2e)
 5. Update template documentation
-6. Close issue and commit: `git commit -m "feat: add feature Y to template (bd-XXX)"`
+6. Close issue and commit: `git commit -m "feat: add feature Y to template (bean-<id>)"`
 
 ### Updating Dependencies
 
-1. Create beads issue: `bd create "Update dependencies" -t chore -p 3`
+1. Create a bean: `beans create "Update dependencies" -t chore -p 3`
 2. Update in both `cli/` and `template/`
 3. Test functionality in both projects
 4. Run quality gates (lint, test, build)
@@ -855,15 +822,15 @@ Maintain `CHANGELOG.md` with an **Unreleased** section during development. Move 
 
 ## Quality Checklist
 
-Before closing any beads issue and pushing:
+Before closing any beans issue and pushing:
 
 - [ ] Code follows project conventions
 - [ ] Tests pass: `pnpm test`
 - [ ] Linter passes: `pnpm lint`
 - [ ] Build succeeds: `pnpm build`
 - [ ] Documentation updated
-- [ ] Beads issue closed with descriptive reason
-- [ ] Commit includes issue ID: `(bd-XXX)`
+- [ ] Bean closed with descriptive reason
+- [ ] Commit includes issue ID: `(bean-<id>)`
 - [ ] Changes pushed to remote: `git push`
 - [ ] Verified `git status` shows "up to date with origin"
 
@@ -871,14 +838,14 @@ Before closing any beads issue and pushing:
 
 ## Resources
 
-- **SvelteKit**: https://svelte.dev/docs/kit
-- **PocketBase**: https://pocketbase.io/docs/
-- **shadcn-svelte**: https://www.shadcn-svelte.com/
-- **sveltekit-superforms**: https://superforms.rocks/
-- **Tailwind CSS**: https://tailwindcss.com/docs
-- **Vitest**: https://vitest.dev/
-- **Playwright**: https://playwright.dev/
-- **beads**: Use `bd onboard` for introduction
+- **SvelteKit**: <https://svelte.dev/docs/kit>
+- **PocketBase**: <https://pocketbase.io/docs/>
+- **shadcn-svelte**: <https://www.shadcn-svelte.com/>
+- **sveltekit-superforms**: <https://superforms.rocks/>
+- **Tailwind CSS**: <https://tailwindcss.com/docs>
+- **Vitest**: <https://vitest.dev/>
+- **Playwright**: <https://playwright.dev/>
+- **beans**: Use `beans init` for introduction
 
 ---
 
@@ -886,7 +853,7 @@ Before closing any beads issue and pushing:
 
 For issues or questions:
 
-1. Check existing beads issues: `bd list`
-2. Create new beads issue: `bd create "Question: ..." -t task -p 2`
+1. Check existing beans issues: `beans list`
+2. Create new bean: `beans create "Question: ..." -t task -p 2`
 3. Reference project documentation
 4. Use MCP servers for framework-specific questions

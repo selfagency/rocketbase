@@ -45,11 +45,14 @@ jobs:
 
       - name: Start test services
         run: |
+          # Create a shared network so containers can reach each other by name
+          docker network create test-net
+
           # Start Mailpit
-          docker run -d --name mailpit -p 1025:1025 -p 8025:8025 axllent/mailpit
+          docker run -d --name mailpit --network test-net -p 1025:1025 -p 8025:8025 axllent/mailpit
 
           # Start PocketBase with volume mounts for hooks and migrations
-          docker run -d --name pocketbase \
+          docker run -d --name pocketbase --network test-net \
             -p 8090:8090 \
             -e PB_ADMIN_EMAIL=admin@example.com \
             -e PB_ADMIN_PASSWORD=test1234567890 \

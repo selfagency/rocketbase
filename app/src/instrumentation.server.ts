@@ -4,13 +4,14 @@
 // tracing is enabled via the ENABLE_TRACING env var.
 
 const enabled = process.env.ENABLE_TRACING === '1' || process.env.ENABLE_TRACING === 'true';
+import logger from '$lib/server/logger';
 
 if (!enabled) {
   // Keep a tiny, non-throwing footprint when tracing is disabled
   // eslint-disable-next-line no-console
-  console.log('OpenTelemetry tracing is disabled (ENABLE_TRACING not set)');
+  logger.info('OpenTelemetry tracing is disabled (ENABLE_TRACING not set)');
 } else {
-  (async () => {
+  void (async () => {
     try {
       // Ensure auto-instrumentation hooks are registered prior to any imports
       const { createAddHookMessageChannel } = await import('import-in-the-middle');
@@ -48,7 +49,7 @@ if (!enabled) {
         try {
           const cp = await import('node:child_process');
           gitCommit = String(cp.execSync('git rev-parse --short HEAD')).trim();
-        } catch (e) {
+        } catch {
           // ignore if git not available
         }
       }
@@ -85,16 +86,16 @@ if (!enabled) {
         instrumentations: [getNodeAutoInstrumentations()],
       });
 
-      await sdk.start();
+      sdk.start();
       // eslint-disable-next-line no-console
-      console.log(`OpenTelemetry started; exporting to ${zipkinUrl} as ${serviceName}`);
+      logger.info(`OpenTelemetry started; exporting to ${zipkinUrl} as ${serviceName}`);
 
       process.on('exit', () => {
         sdk.shutdown().catch(() => {});
       });
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('Failed to initialize OpenTelemetry tracing', err);
+      logger.withMetadata(err as Error).error('Failed to initialize OpenTelemetry tracing');
     }
   })();
 }

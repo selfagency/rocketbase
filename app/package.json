@@ -75,7 +75,7 @@
 		"radashi": "^12.7.1",
 		"runed": "^0.37.1",
 		"sqlite3": "^5.1.7",
-		"svelte": "^5.50.1",
+		"svelte": "^5.50.2",
 		"svelte-check": "^4.3.6",
 		"svelte-meta-tags": "^4.5.0",
 		"svelte-sonner": "^1.0.7",

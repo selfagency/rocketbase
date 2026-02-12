@@ -27,7 +27,13 @@
       "Bash(docker pull:*)",
       "Bash(pnpm test:e2e:*)",
       "Bash(PATH=\"/Users/daniel/.npm-packages/bin:$PATH\" /Users/daniel/.npm-packages/bin/pnpm test:e2e:*)",
-      "Bash(beans update:*)"
+      "Bash(beans update:*)",
+      "Bash(beans show:*)",
+      "Bash(act:*)",
+      "Bash(tee:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:docs.github.com)",
+      "WebFetch(domain:dev.to)"
     ]
   },
   "hooks": {

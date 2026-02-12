@@ -113,6 +113,18 @@
 
 	const { form: mfaForm, enhance: mfaEnhance } = mfaFormObj;
 
+	let mfaFormElement: HTMLFormElement | undefined = $state();
+	let previousMfaOptIn = $state($mfaForm.mfaOptIn);
+
+	$effect(() => {
+		const current = $mfaForm.mfaOptIn;
+		if (current !== previousMfaOptIn) {
+			console.log('MFA form submission triggered, current mfaOptIn:', current);
+			mfaFormElement?.requestSubmit();
+		}
+		previousMfaOptIn = current;
+	});
+
 	let verificationEmailSent = $state(false);
 
 	// Check for email verification success on mount
@@ -380,12 +392,22 @@
 						{$mfaForm.mfaOptIn ? m['account.2fa_opted_in_info']() : m['account.2fa_opt_in_info']()}
 					</AlertDescription>
 				</Alert>
-				<form method="POST" action="?/toggleMfaOptIn" use:mfaEnhance class="mt-4">
+				<form
+					bind:this={mfaFormElement}
+					method="POST"
+					action="?/toggleMfaOptIn"
+					use:mfaEnhance
+					class="mt-4"
+				>
 					<Form.Field form={mfaFormObj} name="mfaOptIn">
 						<Form.Control>
-							{#snippet children({ props })}
+							{#snippet children({ props: _props })}
 								<div class="flex items-center gap-3">
-									<Switch {...props} id="mfa-opt-in" bind:checked={$mfaForm.mfaOptIn} />
+									<Switch
+										{..._props}
+										id="mfa-opt-in"
+										bind:checked={$mfaForm.mfaOptIn}
+									/>
 									<Label for="mfa-opt-in">
 										{$mfaForm.mfaOptIn
 											? m['account.2fa_disable_button']()

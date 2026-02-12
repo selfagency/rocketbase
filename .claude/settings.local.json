@@ -26,7 +26,8 @@
       "Bash(export PATH:*)",
       "Bash(docker pull:*)",
       "Bash(pnpm test:e2e:*)",
-      "Bash(PATH=\"/Users/daniel/.npm-packages/bin:$PATH\" /Users/daniel/.npm-packages/bin/pnpm test:e2e:*)"
+      "Bash(PATH=\"/Users/daniel/.npm-packages/bin:$PATH\" /Users/daniel/.npm-packages/bin/pnpm test:e2e:*)",
+      "Bash(beans update:*)"
     ]
   },
   "hooks": {

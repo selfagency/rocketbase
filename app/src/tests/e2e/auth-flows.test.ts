@@ -474,6 +474,9 @@ test.describe('Authentication Flows', () => {
         await page.fill('input[name="password"]', password);
         await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
 
+        // Wait for form submission to complete
+        await page.waitForLoadState('networkidle');
+
         // Should show alert indicating MFA code is required
         await expect(page.locator('[data-slot="alert"]')).toBeVisible({ timeout: 3000 });
 
@@ -535,6 +538,9 @@ test.describe('Authentication Flows', () => {
         await page.fill('input[name="email"]', email);
         await page.fill('input[name="password"]', password);
         await page.click('button[type="submit"]');
+
+        // Wait for form submission to complete
+        await page.waitForLoadState('networkidle');
 
         // MFA code input should now be visible
         await expect(page.locator('[data-testid="mfa-code-input"]')).toBeVisible({ timeout: 3000 });

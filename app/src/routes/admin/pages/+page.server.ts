@@ -12,25 +12,84 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const perPage = parseInt(url.searchParams.get('perPage') || '10');
 	const search = url.searchParams.get('search') || '';
-	const sort = url.searchParams.get('sort') || '-created';
+	const status = url.searchParams.get('status') || 'all';
+	const sort = url.searchParams.get('sort') || 'order,created';
 
-	// Build filter for search
-	const filter = search
-		? `title ~ "${search}" || slug ~ "${search}"`
-		: '';
+	// Build filter for search and status
+	const filters: string[] = [];
 
-	const result = await locals.pb.collection('pages').getList<PagesResponse>(page, perPage, {
+	if (search) {
+		filters.push(`title ~ "${search}" || slug ~ "${search}"`);
+	}
+
+	if (status === 'draft') {
+		filters.push('published = false');
+	} else if (status === 'published') {
+		filters.push('published = true');
+	}
+
+	const filter = filters.length > 0 ? filters.join(' && ') : '';
+
+	// Fetch all pages to build hierarchical structure
+	const result = await locals.pb.collection('pages').getList<PagesResponse>(1, 500, {
 		sort,
 		filter,
-		fields: 'id,title,slug,published,order,created,updated'
+		expand: 'author',
+		fields:
+			'id,title,slug,published,visible,order,parent,image,created,updated,expand.author.name,expand.author.email'
 	});
 
+	// Build hierarchical structure: organize pages with children under parents
+	type PageWithChildren = PagesResponse & { children: PageWithChildren[] };
+
+	const pageMap = new Map<string, PageWithChildren>();
+	const rootPages: PageWithChildren[] = [];
+
+	// First pass: create map and add children array
+	for (const pageItem of result.items) {
+		pageMap.set(pageItem.id, { ...pageItem, children: [] } as PageWithChildren);
+	}
+
+	// Second pass: build tree structure
+	for (const pageItem of result.items) {
+		const page = pageMap.get(pageItem.id)!;
+		if (pageItem.parent && pageMap.has(pageItem.parent)) {
+			pageMap.get(pageItem.parent)!.children.push(page);
+		} else {
+			rootPages.push(page);
+		}
+	}
+
+	// Flatten tree in display order (parents followed by indented children)
+	function flattenPages(pages: PageWithChildren[]): PagesResponse[] {
+		const flat: PagesResponse[] = [];
+		for (const page of pages) {
+			const { children, ...pageData } = page;
+			flat.push(pageData as PagesResponse);
+			if (children.length > 0) {
+				// Sort children by order
+				children.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+				flat.push(...flattenPages(children));
+			}
+		}
+		return flat;
+	}
+
+	const flatPages = flattenPages(rootPages);
+
+	// Apply pagination to flattened list
+	const startIndex = (page - 1) * perPage;
+	const endIndex = startIndex + perPage;
+	const paginatedPages = flatPages.slice(startIndex, endIndex);
+	const totalPages = Math.ceil(flatPages.length / perPage);
+
 	return {
-		pages: result.items,
-		totalPages: result.totalPages,
-		page: result.page,
-		perPage: result.perPage,
-		totalItems: result.totalItems
+		pages: paginatedPages,
+		totalPages,
+		page,
+		perPage,
+		totalItems: flatPages.length,
+		status
 	};
 };
 

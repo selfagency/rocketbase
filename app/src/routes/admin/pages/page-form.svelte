@@ -9,13 +9,16 @@
 	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { toast } from '$lib/stores/toast';
+	import { generateSlug as createSlug } from './slug-utils';
 
 	let {
 		data,
-		isEdit = false
+		isEdit = false,
+		parentSlug = null
 	}: {
 		data: { form: SuperValidated<Infer<PageSchema>> };
 		isEdit?: boolean;
+		parentSlug?: string | null;
 	} = $props();
 
 	const form = superForm(data.form, {
@@ -32,13 +35,10 @@
 
 	const { form: formData, enhance } = form;
 
-	// Generate slug from title
+	// Generate slug from title using stopword removal and snake case
 	function generateSlug() {
 		if ($formData.title && !$formData.slug) {
-			$formData.slug = $formData.title
-				.toLowerCase()
-				.replace(/[^a-z0-9]+/g, '-')
-				.replace(/^-+|-+$/g, '');
+			$formData.slug = createSlug($formData.title);
 		}
 	}
 </script>
@@ -67,7 +67,24 @@
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Slug</Form.Label>
-					<Input {...props} bind:value={$formData.slug} type="text" placeholder="page-slug" />
+					{#if parentSlug}
+						<div class="relative">
+							<span
+								class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+							>
+								{parentSlug}/
+							</span>
+							<Input
+								{...props}
+								bind:value={$formData.slug}
+								type="text"
+								placeholder="page-slug"
+								class="pl-[calc(1ch*{parentSlug.length}+2rem)]"
+							/>
+						</div>
+					{:else}
+						<Input {...props} bind:value={$formData.slug} type="text" placeholder="page-slug" />
+					{/if}
 				{/snippet}
 			</Form.Control>
 			<Form.Description>URL-friendly identifier (lowercase, numbers, hyphens)</Form.Description>
@@ -107,6 +124,22 @@
 			<Form.FieldErrors />
 		</Form.Field>
 
+		<!-- Collection -->
+		<Form.Field {form} name="collection">
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>Collection</Form.Label>
+					<select {...props} bind:value={$formData.collection} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+						<option value="">None</option>
+						<option value="posts">Posts</option>
+						<option value="tags">Tags</option>
+					</select>
+				{/snippet}
+			</Form.Control>
+			<Form.Description>Assign this page to a collection</Form.Description>
+			<Form.FieldErrors />
+		</Form.Field>
+
 		<!-- Order -->
 		<Form.Field {form} name="order">
 			<Form.Control>
@@ -129,6 +162,18 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
+
+		<!-- Media Upload (Multiple) -->
+		<Form.Field {form} name="media" class="md:col-span-2">
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>Media Files</Form.Label>
+					<Input {...props} type="file" accept="image/*,video/*,audio/*" multiple />
+				{/snippet}
+			</Form.Control>
+			<Form.Description>Upload multiple media files</Form.Description>
+			<Form.FieldErrors />
+		</Form.Field>
 	</div>
 
 	<!-- Switches Section -->
@@ -145,6 +190,19 @@
 				{/snippet}
 			</Form.Control>
 			<Form.Description>Make this page visible to the public</Form.Description>
+			<Form.FieldErrors />
+		</Form.Field>
+
+		<Form.Field {form} name="visible">
+			<Form.Control>
+				{#snippet children({ props })}
+					<div class="flex items-center gap-3">
+						<Switch {...props} id="visible" bind:checked={$formData.visible} />
+						<Label for="visible">Visible</Label>
+					</div>
+				{/snippet}
+			</Form.Control>
+			<Form.Description>Show this page in navigation/listings</Form.Description>
 			<Form.FieldErrors />
 		</Form.Field>
 

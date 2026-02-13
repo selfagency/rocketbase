@@ -4,6 +4,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
+	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { type ColumnDef, getCoreRowModel } from '@tanstack/table-core';
 
@@ -13,20 +14,30 @@
 		currentPage: number;
 		totalPages: number;
 		totalItems: number;
+		status: string;
 	};
 
-	let { data, columns, currentPage, totalPages, totalItems }: DataTableProps<TData, TValue> =
-		$props();
+	let {
+		data,
+		columns,
+		currentPage,
+		totalPages,
+		totalItems,
+		status
+	}: DataTableProps<TData, TValue> = $props();
 
 	// Get current search from URL
 	let searchValue = $state(page.url.searchParams.get('search') || '');
+	const statusValue = $derived(status);
 	let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	const table = createSvelteTable({
 		get data() {
 			return data;
 		},
-		columns,
+		get columns() {
+			return columns;
+		},
 		getCoreRowModel: getCoreRowModel()
 	});
 
@@ -52,6 +63,20 @@
 		params.set('page', pageNum.toString());
 		goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
 	}
+
+	// Watch for status changes
+	$effect(() => {
+		if (statusValue !== status) {
+			const params = new URLSearchParams(page.url.searchParams);
+			if (statusValue && statusValue !== 'all') {
+				params.set('status', statusValue);
+			} else {
+				params.delete('status');
+			}
+			params.set('page', '1'); // Reset to first page on filter change
+			goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
+		}
+	});
 </script>
 
 <div class="w-full">
@@ -62,6 +87,16 @@
 			oninput={(e) => handleSearch(e.currentTarget.value)}
 			class="max-w-sm"
 		/>
+		<Select.Root type="single" bind:value={statusValue}>
+			<Select.Trigger class="w-45">
+				{statusValue === 'draft' ? 'Draft' : statusValue === 'published' ? 'Published' : 'All'}
+			</Select.Trigger>
+			<Select.Content>
+				<Select.Item value="all">All</Select.Item>
+				<Select.Item value="draft">Draft</Select.Item>
+				<Select.Item value="published">Published</Select.Item>
+			</Select.Content>
+		</Select.Root>
 		<Button href="/admin/pages/new" class="ms-auto">Create Page</Button>
 	</div>
 

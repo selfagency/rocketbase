@@ -41,7 +41,10 @@
       "mcp__shadcn-svelte__shadcnSvelteSearchTool",
       "mcp__shadcn-svelte__shadcnSvelteGetTool",
       "Bash(pnpm run check:*)",
-      "Bash(pnpm -C app lint:*)"
+      "Bash(pnpm -C app lint:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm -C app add:*)",
+      "Bash(pnpm build:*)"
     ]
   },
   "hooks": {

@@ -114,6 +114,17 @@
 						>
 							{m['nav.account_settings']()}
 						</DropdownMenu.Item>
+						{#if page?.data?.user?.role === 'admin' || page?.data?.user?.role === 'editor' || page?.data?.user?.role === 'contributor'}
+							<DropdownMenu.Separator />
+							<DropdownMenu.Item
+								onSelect={() => {
+									dropdownOpen = false;
+									goto('/admin/pages');
+								}}
+							>
+								Admin
+							</DropdownMenu.Item>
+						{/if}
 						<DropdownMenu.Separator />
 						<DropdownMenu.Item
 							variant="destructive"

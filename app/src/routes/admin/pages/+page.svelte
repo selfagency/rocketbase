@@ -18,5 +18,6 @@
 		currentPage={data.page}
 		totalPages={data.totalPages}
 		totalItems={data.totalItems}
+		status={data.status}
 	/>
 </div>

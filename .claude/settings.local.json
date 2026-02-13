@@ -48,7 +48,9 @@
       "Bash(git reset:*)",
       "Bash(git restore:*)",
       "Bash(ls:*)",
-      "Bash(pnpm oxlint:*)"
+      "Bash(pnpm oxlint:*)",
+      "Bash(pnpx @inlang/paraglide-js compile:*)",
+      "Bash(pnpx paraglide-js compile:*)"
     ]
   },
   "hooks": {

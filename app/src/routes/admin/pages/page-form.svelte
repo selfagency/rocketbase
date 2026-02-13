@@ -1,14 +1,14 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Form from '$lib/components/ui/form/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
-	import { Textarea } from '$lib/components/ui/textarea/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Switch } from '$lib/components/ui/switch/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	import { pageSchema, type PageSchema } from './schema';
-	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
+	import { Switch } from '$lib/components/ui/switch/index.js';
+	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import { toast } from '$lib/stores/toast';
+	import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
+	import { pageSchema, type PageSchema } from './schema';
 	import { generateSlug as createSlug } from './slug-utils';
 
 	let {
@@ -21,6 +21,7 @@
 		parentSlug?: string | null;
 	} = $props();
 
+	// svelte-ignore state_referenced_locally
 	const form = superForm(data.form, {
 		validators: zod4Client(pageSchema),
 		resetForm: false,
@@ -70,7 +71,7 @@
 					{#if parentSlug}
 						<div class="relative">
 							<span
-								class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+								class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground"
 							>
 								{parentSlug}/
 							</span>
@@ -129,7 +130,11 @@
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Collection</Form.Label>
-					<select {...props} bind:value={$formData.collection} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+					<select
+						{...props}
+						bind:value={$formData.collection}
+						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					>
 						<option value="">None</option>
 						<option value="posts">Posts</option>
 						<option value="tags">Tags</option>

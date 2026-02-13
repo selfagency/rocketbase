@@ -33,7 +33,15 @@
       "Bash(tee:*)",
       "Bash(git push:*)",
       "WebFetch(domain:docs.github.com)",
-      "WebFetch(domain:dev.to)"
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:superforms.rocks)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm check:*)",
+      "Bash(git pull:*)",
+      "mcp__shadcn-svelte__shadcnSvelteSearchTool",
+      "mcp__shadcn-svelte__shadcnSvelteGetTool",
+      "Bash(pnpm run check:*)",
+      "Bash(pnpm -C app lint:*)"
     ]
   },
   "hooks": {

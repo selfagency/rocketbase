@@ -42,6 +42,62 @@
 		getCoreRowModel: getCoreRowModel()
 	});
 
+	let draggingId: string | null = null;
+
+	function onDragStart(e: DragEvent, id: string) {
+		draggingId = id;
+		e.dataTransfer?.setData('text/plain', id);
+		e.dataTransfer?.setData('application/my-app', id);
+		e.dataTransfer!.effectAllowed = 'move';
+	}
+
+	function onDragOver(e: DragEvent) {
+		e.preventDefault();
+		const tr = (e.currentTarget as HTMLElement);
+		tr.classList.add('drag-over');
+	}
+
+	function onDragLeave(e: DragEvent) {
+		const tr = (e.currentTarget as HTMLElement);
+		tr.classList.remove('drag-over');
+	}
+
+	async function onDrop(e: DragEvent, targetId: string) {
+		e.preventDefault();
+		const tr = (e.currentTarget as HTMLElement);
+		tr.classList.remove('drag-over');
+		const sourceId = e.dataTransfer?.getData('text/plain') || draggingId;
+		if (!sourceId || sourceId === targetId) return;
+
+		// build new order by reading DOM row order
+		const rows = Array.from(document.querySelectorAll('[data-id]')) as HTMLElement[];
+		const ids = rows.map((r) => r.getAttribute('data-id') || '');
+
+		// move sourceId before targetId
+		const srcIndex = ids.indexOf(sourceId);
+		const tgtIndex = ids.indexOf(targetId);
+		if (srcIndex === -1 || tgtIndex === -1) return;
+		ids.splice(srcIndex, 1);
+		ids.splice(tgtIndex, 0, sourceId);
+
+		// send order to server
+		try {
+			const res = await fetch('/admin/pages/reorder', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ order: ids })
+			});
+			if (res.ok) {
+				// reload to reflect server-side ordering
+				location.reload();
+			} else {
+				console.error('Failed to save order', await res.text());
+			}
+		} catch (err) {
+			console.error('Failed to save order', err);
+		}
+	}
+
 	function handleSearch(value: string) {
 		searchValue = value;
 
@@ -121,13 +177,17 @@
 			</Table.Header>
 			<Table.Body>
 				{#each table.getRowModel().rows as row (row.id)}
-					<Table.Row>
+						<Table.Row data-id={(row as any).original?.id || (row as any).id} draggable="true"
+							ondragstart={(e) => onDragStart(e, (row as any).original?.id || (row as any).id)}
+							ondragover={onDragOver}
+							ondragleave={onDragLeave}
+							ondrop={(e) => onDrop(e, (row as any).original?.id || (row as any).id)}>
 						{#each row.getVisibleCells() as cell (cell.id)}
 							<Table.Cell>
 								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
 							</Table.Cell>
 						{/each}
-					</Table.Row>
+						</Table.Row>
 				{:else}
 					<Table.Row>
 						<Table.Cell colspan={columns.length} class="h-24 text-center">

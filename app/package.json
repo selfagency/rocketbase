@@ -28,6 +28,7 @@
 		"test:unit": "pnpm run test:node && pnpm run test:browser"
 	},
 	"devDependencies": {
+		"@dnd-kit-svelte/svelte": "^0.1.6",
 		"@formkit/tempo": "^1.0.0",
 		"@inlang/paraglide-js": "^2.11.0",
 		"@internationalized/date": "^3.11.0",

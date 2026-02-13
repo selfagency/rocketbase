@@ -47,7 +47,8 @@
       "Bash(pnpm build:*)",
       "Bash(git reset:*)",
       "Bash(git restore:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(pnpm oxlint:*)"
     ]
   },
   "hooks": {

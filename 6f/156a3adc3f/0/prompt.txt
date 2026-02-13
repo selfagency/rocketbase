@@ -1,0 +1,5 @@
+reevaluate the project directory structure, available mcp servers and skills, and update the CLAUDE.md file with the lastest most accurate representation
+
+---
+
+apply all fixes now

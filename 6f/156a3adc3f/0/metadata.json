@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "6f156a3adc3f",
+  "session_id": "9ece9d1c-3cb4-4028-9c92-695b74b8f71a",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-13T17:39:02.840549Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "CLAUDE.md",
+    "CLAUDE_UPDATE_SUMMARY.md"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 1480,
+    "cache_creation_tokens": 163010,
+    "cache_read_tokens": 1635212,
+    "output_tokens": 37,
+    "api_call_count": 24
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-13T17:39:02.664938Z",
+    "agent_lines": 0,
+    "human_added": 0,
+    "human_modified": 277,
+    "human_removed": 94,
+    "total_committed": 83,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-daniel-Developer-rocketbase/9ece9d1c-3cb4-4028-9c92-695b74b8f71a.jsonl"
+}

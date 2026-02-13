@@ -71,36 +71,7 @@
 											</NavigationMenu.Link>
 										{/each}
 
-										{#if page?.data?.user && (page?.data?.user?.role === 'admin' || page?.data?.user?.role === 'editor' || page?.data?.user?.role === 'contributor')}
-											<!-- Admin dropdown shown at the end of the primary nav list -->
-											<NavigationMenu.Item>
-												<NavigationMenu.Trigger class={navigationMenuTriggerStyle()} href="/admin">
-													{m['nav.admin'] ? m['nav.admin']() : 'Admin'}
-												</NavigationMenu.Trigger>
-												<NavigationMenu.Content>
-													<ul class="grid w-56 gap-2 p-2">
-														<li>
-															<NavigationMenu.Link href="/admin">
-																<div class="font-medium">
-																	{m['nav.admin_dashboard']
-																		? m['nav.admin_dashboard']()
-																		: 'Dashboard'}
-																</div>
-															</NavigationMenu.Link>
-														</li>
-														{#if page?.data?.user?.role === 'admin' || page?.data?.user?.role === 'editor'}
-															<li>
-																<NavigationMenu.Link href="/admin/pages">
-																	<div class="font-medium">
-																		{m['nav.pages'] ? m['nav.pages']() : 'Pages'}
-																	</div>
-																</NavigationMenu.Link>
-															</li>
-														{/if}
-													</ul>
-												</NavigationMenu.Content>
-											</NavigationMenu.Item>
-										{/if}
+										{#if page?.data?.user && (page?.data?.user?.role === 'admin' || page?.data?.user?.role === 'editor' || page?.data?.user?.role === 'contributor')}{/if}
 									</li>
 								</ul>
 							</NavigationMenu.Content>
@@ -114,6 +85,33 @@
 						</NavigationMenu.Item>
 					{/if}
 				{/each}
+
+				<!-- Admin menu appended as its own top-level item so it doesn't appear inside other menus -->
+				{#if page?.data?.user && (page?.data?.user?.role === 'admin' || page?.data?.user?.role === 'editor' || page?.data?.user?.role === 'contributor')}
+					<NavigationMenu.Item>
+						<NavigationMenu.Trigger class={navigationMenuTriggerStyle()} href="/admin">
+							{m['nav.admin'] ? m['nav.admin']() : 'Admin'}
+						</NavigationMenu.Trigger>
+						<NavigationMenu.Content>
+							<ul class="grid w-56 gap-2 p-2">
+								<li>
+									<NavigationMenu.Link href="/admin">
+										<div class="font-medium">
+											{m['nav.admin_dashboard'] ? m['nav.admin_dashboard']() : 'Dashboard'}
+										</div>
+									</NavigationMenu.Link>
+								</li>
+								{#if page?.data?.user?.role === 'admin' || page?.data?.user?.role === 'editor'}
+									<li>
+										<NavigationMenu.Link href="/admin/pages">
+											<div class="font-medium">{m['nav.pages'] ? m['nav.pages']() : 'Pages'}</div>
+										</NavigationMenu.Link>
+									</li>
+								{/if}
+							</ul>
+						</NavigationMenu.Content>
+					</NavigationMenu.Item>
+				{/if}
 			</NavigationMenu.List>
 		</NavigationMenu.Root>
 

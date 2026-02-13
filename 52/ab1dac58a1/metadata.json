@@ -1,0 +1,37 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "52ab1dac58a1",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "app/src/lib/components/global/Nav.svelte",
+    "app/src/routes/admin/pages/+page.server.ts",
+    "app/src/routes/admin/pages/+page.svelte",
+    "app/src/routes/admin/pages/[id]/+page.server.ts",
+    "app/src/routes/admin/pages/[id]/+page.svelte",
+    "app/src/routes/admin/pages/columns.ts",
+    "app/src/routes/admin/pages/data-table-actions.svelte",
+    "app/src/routes/admin/pages/data-table.svelte",
+    "app/src/routes/admin/pages/new/+page.server.ts",
+    "app/src/routes/admin/pages/page-form.svelte",
+    "app/src/routes/admin/pages/schema.ts",
+    "app/src/routes/admin/pages/slug-utils.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/52/ab1dac58a1/0/metadata.json",
+      "transcript": "/52/ab1dac58a1/0/full.jsonl",
+      "context": "/52/ab1dac58a1/0/context.md",
+      "content_hash": "/52/ab1dac58a1/0/content_hash.txt",
+      "prompt": "/52/ab1dac58a1/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 760,
+    "cache_creation_tokens": 196390,
+    "cache_read_tokens": 9002958,
+    "output_tokens": 171,
+    "api_call_count": 93
+  }
+}

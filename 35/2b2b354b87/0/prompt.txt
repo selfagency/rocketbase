@@ -1,0 +1,29 @@
+what shall we work on
+
+---
+
+let's do 3
+
+---
+
+let's move on to four. use the pocketbase mcp to look at the necessary fields. use the shadcn-svelte mcp to look at the directions for the data table component for the page index and the form component to build the create/edit form.
+
+---
+
+[Request interrupted by user]
+
+---
+
+you should be working in the app directory, not in the root workspace
+
+---
+
+[Request interrupted by user]
+
+---
+
+ok continue sorry
+
+---
+
+that layout server file is unneeded as that can be done in the page.server.ts file

@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "96000fe695f4",
+  "session_id": "2a6a48de-c30f-4a69-9092-c19fa8211fe9",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-13T20:23:36.44732Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "app/src/lib/components/ui/combobox/combobox.svelte",
+    "app/src/routes/admin/pages/+page.server.ts",
+    "app/src/routes/admin/pages/data-table.svelte"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 466,
+    "cache_creation_tokens": 96861,
+    "cache_read_tokens": 4420256,
+    "output_tokens": 129,
+    "api_call_count": 58
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-13T20:23:36.300532Z",
+    "agent_lines": 0,
+    "human_added": 886,
+    "human_modified": 443,
+    "human_removed": 0,
+    "total_committed": 895,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-daniel-Developer-rocketbase/2a6a48de-c30f-4a69-9092-c19fa8211fe9.jsonl"
+}

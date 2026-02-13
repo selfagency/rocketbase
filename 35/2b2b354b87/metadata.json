@@ -1,0 +1,48 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "352b2b354b87",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "app/src/lib/components/ui/data-table/data-table.svelte.ts",
+    "app/src/lib/components/ui/data-table/flex-render.svelte",
+    "app/src/lib/components/ui/data-table/index.ts",
+    "app/src/lib/components/ui/data-table/render-helpers.ts",
+    "app/src/lib/components/ui/table/index.ts",
+    "app/src/lib/components/ui/table/table-body.svelte",
+    "app/src/lib/components/ui/table/table-caption.svelte",
+    "app/src/lib/components/ui/table/table-cell.svelte",
+    "app/src/lib/components/ui/table/table-footer.svelte",
+    "app/src/lib/components/ui/table/table-head.svelte",
+    "app/src/lib/components/ui/table/table-header.svelte",
+    "app/src/lib/components/ui/table/table-row.svelte",
+    "app/src/lib/components/ui/table/table.svelte",
+    "app/src/routes/admin/pages/+layout.server.ts",
+    "app/src/routes/admin/pages/+page.server.ts",
+    "app/src/routes/admin/pages/+page.svelte",
+    "app/src/routes/admin/pages/[id]/+page.server.ts",
+    "app/src/routes/admin/pages/[id]/+page.svelte",
+    "app/src/routes/admin/pages/data-table-actions.svelte",
+    "app/src/routes/admin/pages/data-table.svelte",
+    "app/src/routes/admin/pages/new/+page.server.ts",
+    "app/src/routes/admin/pages/new/+page.svelte",
+    "app/src/routes/admin/pages/page-form.svelte"
+  ],
+  "sessions": [
+    {
+      "metadata": "/35/2b2b354b87/0/metadata.json",
+      "transcript": "/35/2b2b354b87/0/full.jsonl",
+      "context": "/35/2b2b354b87/0/context.md",
+      "content_hash": "/35/2b2b354b87/0/content_hash.txt",
+      "prompt": "/35/2b2b354b87/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 780,
+    "cache_creation_tokens": 251237,
+    "cache_read_tokens": 10254290,
+    "output_tokens": 164,
+    "api_call_count": 87
+  }
+}

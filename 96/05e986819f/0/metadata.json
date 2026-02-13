@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "9605e986819f",
+  "session_id": "14e0f514-4de5-4a3c-846f-e07355591ea0",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-13T15:38:33.507072Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "app/src/routes/account/+page.svelte",
+    "app/src/routes/login/+page.svelte"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "10dd142e-a66b-4b29-a07f-8c91ded01cba",
+  "token_usage": {
+    "input_tokens": 324,
+    "cache_creation_tokens": 103464,
+    "cache_read_tokens": 2496423,
+    "output_tokens": 94,
+    "api_call_count": 40
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-13T15:38:33.354537Z",
+    "agent_lines": 15,
+    "human_added": 21,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 36,
+    "agent_percentage": 41.66666666666667
+  },
+  "transcript_path": ".claude/projects/-Users-daniel-Developer-rocketbase/14e0f514-4de5-4a3c-846f-e07355591ea0.jsonl"
+}

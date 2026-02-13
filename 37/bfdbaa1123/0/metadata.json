@@ -1,0 +1,40 @@
+{
+  "cli_version": "0.4.3",
+  "checkpoint_id": "37bfdbaa1123",
+  "session_id": "64cf9421-2f47-406d-aee8-ff9a95ad88b1",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-13T23:55:53.347482Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".beans/rocketbase-mu0c--treat-post-tags-as-hashtags.md",
+    "app/src/lib/components/global/PostCard.svelte",
+    "app/src/lib/components/global/PostHeader.svelte",
+    "app/src/lib/components/global/PostList.svelte",
+    "app/src/routes/posts/+page.svelte",
+    "app/src/routes/posts/[slug]/+page.svelte",
+    "app/src/routes/tags/+page.server.ts",
+    "app/src/routes/tags/+page.svelte",
+    "app/src/routes/tags/[slug]/+page.server.ts",
+    "app/src/routes/tags/[slug]/+page.svelte"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "38a98292-4ca3-4e99-9d70-57ccf7a70dc2",
+  "token_usage": {
+    "input_tokens": 390,
+    "cache_creation_tokens": 127257,
+    "cache_read_tokens": 2958980,
+    "output_tokens": 88,
+    "api_call_count": 48
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-13T23:55:53.239444Z",
+    "agent_lines": 249,
+    "human_added": 294,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 543,
+    "agent_percentage": 45.85635359116022
+  },
+  "transcript_path": ".claude/projects/-Users-daniel-Developer-rocketbase/64cf9421-2f47-406d-aee8-ff9a95ad88b1.jsonl"
+}

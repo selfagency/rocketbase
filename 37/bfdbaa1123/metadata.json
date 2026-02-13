@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.3",
+  "checkpoint_id": "37bfdbaa1123",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".beans/rocketbase-mu0c--treat-post-tags-as-hashtags.md",
+    "app/src/lib/components/global/PostCard.svelte",
+    "app/src/lib/components/global/PostHeader.svelte",
+    "app/src/lib/components/global/PostList.svelte",
+    "app/src/routes/posts/+page.svelte",
+    "app/src/routes/posts/[slug]/+page.svelte",
+    "app/src/routes/tags/+page.server.ts",
+    "app/src/routes/tags/+page.svelte",
+    "app/src/routes/tags/[slug]/+page.server.ts",
+    "app/src/routes/tags/[slug]/+page.svelte"
+  ],
+  "sessions": [
+    {
+      "metadata": "/37/bfdbaa1123/0/metadata.json",
+      "transcript": "/37/bfdbaa1123/0/full.jsonl",
+      "context": "/37/bfdbaa1123/0/context.md",
+      "content_hash": "/37/bfdbaa1123/0/content_hash.txt",
+      "prompt": "/37/bfdbaa1123/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 390,
+    "cache_creation_tokens": 127257,
+    "cache_read_tokens": 2958980,
+    "output_tokens": 88,
+    "api_call_count": 48
+  }
+}

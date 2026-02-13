@@ -4,23 +4,26 @@
 
 ## Project Overview
 
-**Rocketbase** is a TypeScript/Node.js CLI tool that rapidly scaffolds production-ready full-stack applications using **PocketBase** (backend) and **SvelteKit** (frontend). It automates the entire setup process from dependency installation to development environment configuration.
+**Rocketbase** is a production-ready full-stack web application built with **PocketBase** (backend) and **SvelteKit** (frontend). It provides a complete foundation for content management, user authentication, admin dashboards, and background job processing.
 
 ### Project Goals
 
-- **Zero-config setup**: Production-ready PocketBase + SvelteKit app in minutes
-- **Best practices**: Modern tooling, type safety, and excellent developer experience
-- **Platform-aware**: Auto-detect and install correct PocketBase binary for user's platform
-- **Interactive**: Guide users through setup with prompts and progress indicators
-- **Git-ready**: Initialize repository and create first commit automatically
+- **Production-ready foundation**: Full-stack app with auth, CMS, admin panels, and background jobs
+- **Best practices**: Modern tooling, type safety, comprehensive testing, and excellent DX
+- **Scalable architecture**: Monorepo with separate frontend, backend, CLI tools, and sidecar services
+- **Developer experience**: Fast development with hot reload, type safety, and excellent tooling
 
 ### Repository Structure
 
-- `cli/` — CLI source code (TypeScript/Node.js)
-- `template/` — SvelteKit project template (source of truth for scaffolded projects)
-- `.github/` — CI/CD and documentation
+- `app/` — SvelteKit frontend application (main web app with pages, posts, admin routes)
+- `cli/` — CLI tooling for project management, scaffolding, and utilities
+- `db/` — PocketBase database, migrations, hooks, and TypeScript type definitions
+- `sidecar/` — Background services for queue processing, email, and scheduled tasks
+- `docker/` — Docker configuration for development services (OpenTelemetry proxy, etc.)
+- `.beans/` — Issue tracking and task management with beans
+- `.github/` — CI/CD workflows and documentation
 
-**Critical Rule:** Never build routes/components directly in generated projects. Build them in `template/`, then the CLI copies them into new projects.
+**Development Philosophy:** This is a working full-stack application. Build features in `app/`, backend logic in `db/`, and background services in `sidecar/`. The CLI tools are for project management, not scaffolding.
 
 ---
 
@@ -82,25 +85,27 @@ beans prime
 
 1. Run quality gates (if code changed):
 
-  ```bash
-  pnpm lint
-  pnpm test
-  cd cli && pnpm build
-  cd template && pnpm build
-  ```
+```bash
+pnpm lint
+pnpm test
+cd cli && pnpm build
+cd app && pnpm build
+# If sidecar code changed
+cd sidecar && pnpm build  # if changed
+```
 
 1. Update issue status — close finished work, update in-progress items.
 
 1. PUSH TO REMOTE — This is MANDATORY:
 
-  ```bash
-  git pull --rebase
-  beans prime   # refresh agent context / prime payloads
-  git add .beans
-  git commit -m "chore: update beans"
-  git push
-  git status  # MUST show "up to date with origin"
-  ```
+```bash
+git pull --rebase
+beans prime   # refresh agent context / prime payloads
+git add .beans
+git commit -m "chore: update beans"
+git push
+git status  # MUST show "up to date with origin"
+```
 
 1. Clean up — clear stashes, prune remote branches.
 
@@ -113,162 +118,169 @@ beans prime
 - NEVER say "ready to push when you are" — YOU must push.
 - If push fails, resolve and retry until it succeeds.
 
-The CLI tool (in `cli/`) is the scaffolding engine that creates new Rocketbase projects.
+---
 
-### Toolchain
+## Application Architecture
 
-- **oxlint** / **oxfmt** — Fast linting and formatting
-- **vitest** — Unit testing
-- **consola** — Beautiful logging
-- **execa** — Process execution
-- **prompts** — Interactive user input
-- **ora** — Progress spinners
+### Frontend Application (`app/`)
 
-### Run CLI in development
+The SvelteKit application contains all frontend code, routes, components, and UI.
 
-```bash
-cd cli
-tsx src/index.ts
-```
+**Key Directories:**
 
-### Watch mode
+- `src/lib/components/` — Reusable components (shadcn-svelte UI components, global components)
+- `src/lib/components/ui/` — shadcn-svelte component library, avoid editing as much as possible (Button, Form, Table, etc.)
+- `src/lib/components/global/` — Global components (Nav, Toaster)
+- `src/lib/server/` — Server-only code (PocketBase client, logging)
+- `src/lib/stores/` — Svelte stores (screen state, toast notifications)
+- `src/lib/types/` — TypeScript type definitions (PocketBase types, app types)
+- `src/routes/` — SvelteKit file-based routes
 
-```bash
-tsx watch src/index.ts
-```
+**Current Routes:**
 
-### Build for production
+- `/` — Home page
+- `/login`, `/register`, `/logout` — Authentication
+- `/forgot-password`, `/verify-email/[token]` — Password reset and email verification
+- `/account` — User account settings (profile, password, MFA)
+- `/posts` — Blog posts index
+- `/posts/[slug]` — Individual post pages
+- `/admin/pages` — Admin dashboard for page management (CRUD operations)
+- `/[...slug]` — Dynamic page rendering (catch-all for CMS pages)
 
-```bash
-pnpm build
-```
+**Implemented Features:**
 
-### Lint and format
+- User authentication with email verification
+- Password reset flow
+- Account settings with multiple forms
+- Admin page management with hierarchical display
+- Dynamic page routing with SEO metadata
+- Dark mode support (mode-watcher)
+- Toast notifications (svelte-sonner)
+- Internationalization (Paraglide)
 
-```bash
-pnpm lint
-pnpm lint:fix
-```
+### Backend (`db/`)
 
-### Test
+PocketBase handles all backend operations including database, auth, file storage, and real-time subscriptions.
 
-```bash
-pnpm test
-pnpm test:watch
-```
+**Structure:**
 
-### CLI Implementation Patterns
+- `pb_data/` — SQLite database and uploaded files (git-ignored)
+- `pb_migrations/` — Database schema migrations
+- `pb_hooks/` — Server-side hooks for audit logging, type generation, and business logic
+- `types.d.ts` — Generated TypeScript types from PocketBase schema
 
-**Always:**
-- Use **ora** for long-running tasks with spinners
-- Handle errors with clear messages and non-zero exit codes
-- Validate all user inputs
-- Test platform-specific code on macOS, Linux, and Windows
+**Collections:**
 
-**Example:**
+- `users` — User accounts with roles, MFA, and profile data
+- `pages` — CMS pages with hierarchy, SEO metadata, and publishing workflow
+- `posts` — Blog posts with tags, metadata, and author relationships
+- `metadata` — Site-wide metadata (title, description, OpenGraph data)
+- `tags` — Taxonomy for posts
+- `redirects` — URL redirect management
+- `audit_logs` — Comprehensive audit trail
+- `queue_*` — Background job queue collections
 
-```typescript
-import consola from "consola";
-import { execa } from "execa";
-import prompts from "prompts";
-import ora from "ora";
+**Hooks:**
 
-// User input
-const response = await prompts({
-  type: "text",
-  name: "projectName",
-  message: "What would you like to name your project?",
-  initial: "my-app",
-});
+- `01-generate-types.pb.js` — Auto-generate TypeScript types on schema changes
+- `02-08-audit-*.pb.js` — Audit logging for create, update, delete, and auth events
 
-// Long-running task
-const spinner = ora("Installing dependencies...").start();
-try {
-  await execa("pnpm", ["install"], { cwd: projectPath });
-  spinner.succeed("Dependencies installed");
-}
+### Sidecar Services (`sidecar/`)
 
-``` 
+Background services for asynchronous task processing.
 
-The template (in `template/`) is the **source of truth** for all scaffolded projects. The CLI copies these files and applies final configuration.
+**Services:**
+
+- Queue processing using `pocketbase-queue`
+- Email sending via SMTP (using `@upyo/smtp`)
+- tRPC API for inter-service communication
+- Scheduled task execution
+
+**Tech Stack:**
+
+- TypeScript with Node.js
+- tRPC for type-safe API calls
+- LogLayer for structured logging
+- Consola for beautiful console output
+
+### CLI Tools (`cli/`)
+
+**Future Development:** A CLI will be developed later to assist with project configuration, installation, scaffolding, and common development tasks.
 
 ### Tech Stack
 
-**Core Framework:**
+**Frontend:**
 
-- **SvelteKit** - Full-stack web framework with SSR, file-based routing, and API routes
-- **TypeScript** - Type-safe development
-- **Vite** - Fast build tool
-
-**Backend:**
-
-- **PocketBase** - Embedded backend with SQLite, real-time subscriptions, auth, and file storage
-- **pocketbase-typegen** - Generate TypeScript types from PocketBase schema
+- SvelteKit 2.x, Svelte 5.x, TypeScript (strict), Vite 7.x
 
 **UI & Styling:**
 
-- **Tailwind CSS** - Utility-first CSS framework
-- **shadcn-svelte** - Copy-paste component library (neutral base color)
-- **@lucide/svelte** - Icon library
-- **tailwindcss-animate** - Animation utilities
-- **@tailwindcss/forms** - Better form styling
-- **@tailwindcss/typography** - Prose styling
-- **@tailwindcss/aspect-ratio** - Aspect ratio utilities
+- Tailwind CSS 4.x
+- shadcn-svelte (Bits UI primitives)
+- Lucide icons (`@lucide/svelte`)
 
 **Forms & Validation:**
 
-- **zod** - Schema validation
-- **sveltekit-superforms** - Form handling with validation
-- **@formkit/tempo** - Date/time utilities
-
-**Utilities:**
-
-- **radashi** - Modern utility library (Lodash alternative)
-- **consola** - Beautiful logging
-- **cookie** - Cookie parsing
-- **sveltekit-helmet** - SEO meta tags
-
-**SVG Support:**
-
-- **@poppa/sveltekit-svg** - Import SVGs as components
+- Zod 4.x
+- sveltekit-superforms 2.x
+- formsnap (where used)
 
 **Testing:**
 
-- **vitest** - Unit testing
-- **playwright** - E2E testing
+- Vitest 4.x (unit)
+- Playwright (E2E)
+- vitest-browser-svelte for browser/SSR component tests
 
-**Development Tools:**
+**Observability:**
 
-- **oxlint** - Fast Rust-based linter
-- **oxfmt** - Fast Rust-based formatter
-- **oxlint-tsgolint** - TypeScript-specific lint rules
+- OpenTelemetry (traces/metrics)
+- LogLayer for structured logging
+- Pino for server logs
 
-### Template File Structure
+**Backend:**
 
-````
-template/
-├── src/
-│   ├── lib/
-│   │   ├── components/ui/     # shadcn-svelte components
-│   │   ├── +page.svelte       # Home page
-│   │   ├── +layout.svelte     # Root layout
-│   │   └── api/
-├── tests/                      # Playwright tests
-├── pb_data/                    # PocketBase data (git-ignored)
-├── package.json
+- PocketBase 0.26.x
+- pocketbase-typegen for TS types
+- sqlite3 for storage
 
+**Sidecar / Services:**
 
-When rebuilding the template, use `pnpx sv create` with these choices:
+- Node.js (LTS)
+- @trpc/server for RPC endpoints
+- pocketbase-queue for background jobs
+- @upyo/smtp (email)
 
-- **Template**: minimal
-- **Type checking**: TypeScript
-- **Add-ons**:
-  - `devtools-json` - DevTools integration
-  - `svelte-mcp` - MCP integration
-  - `paraglide` - i18n
-  - `playwright` - E2E testing
-  - `tailwindcss` - CSS framework
-  - `vitest` - Unit testing
+**Utilities & Dev Tools:**
+
+- radashi, consola, @formkit/tempo
+- oxfmt / oxlint for formatting & linting
+- pnpm workspace (monorepo)
+
+This section lists the primary, production-intended stack and recommended versions used across the repository.
+
+### Application File Structure
+
+A concise view of the actual repository layout and the purpose of each top-level application folder:
+
+```txt
+app/         # SvelteKit frontend application (pages, routes, components, tests)
+  ├─ src/
+  │  ├─ lib/           # shared components, server helpers, stores, types
+  │  ├─ routes/        # SvelteKit routes (+page.svelte, +server.ts files)
+  ├─ tests/            # Vitest and Playwright tests for the app
+  ├─ package.json
+
+db/          # PocketBase backend data, migrations, hooks, and generated types
+  ├─ pb_data/          # SQLite database + uploads (git-ignored)
+  ├─ pb_hooks/         # PocketBase hooks (audit, typegen, etc.)
+  ├─ pb_migrations/    # Schema migrations
+
+sidecar/     # Background services (queue processors, email, scheduled tasks)
+  ├─ src/
+  ├─ package.json
+```
+
+The `app/` folder is the primary frontend application. Use `app/` when referring to application code and `cli/` for project tooling.
 
 ### Required Configuration
 
@@ -284,7 +296,7 @@ export default {
     adapter: adapter(),
   },
 };
-````
+```
 
 ```typescript
 import { sveltekit } from "@sveltejs/kit/vite";
@@ -355,7 +367,7 @@ async function proxyRequest(
   method: string,
   path: string,
   request: Request,
-  cookies: any
+  cookies: any,
 ): Promise<Response> {
   const url = `${POCKETBASE_URL}/api/${path}`;
   const headers = new Headers(request.headers);
@@ -493,35 +505,79 @@ import { Button } from '$lib/components/ui/button';
 <img src={IconUrl} alt="Icon" />
 ```
 
-### Template Development Workflow
+### Development Workflow
+
+Start the local development environment across the services (suggested three terminals):
 
 ```bash
-# Start SvelteKit dev server
-cd template
-pnpm dev
+# Terminal 1: PocketBase (db)
+pnpm db
 
-# Start PocketBase (in another terminal)
-cd template
-pocketbase serve
+# Terminal 2: SvelteKit app
+cd app && pnpm dev
 
-# Run tests
-pnpm test
-pnpm test:e2e
-
-# Build
-pnpm build
-pnpm preview
+# Terminal 3: Optional sidecar services
+cd sidecar && pnpm dev
 ```
 
 ### Environment Variables
 
-Create `.env` in template (for reference):
+Create a `.env` in `app/` (example). This project does not use a separate "SECRET_API_KEY" variable — the expected variables are listed below:
 
-```bash
-PUBLIC_POCKETBASE_URL=http://127.0.0.1:8090
-PUBLIC_SITE_URL=http://localhost:5173
-SECRET_API_KEY=your-secret-key
+```dotenv
+PUBLIC_POCKETBASE_URL="http://localhost:8090"
+API_KEY="<your-api-key-or-jwt>"
+ZIPKIN_URL=http://localhost:9411/api/v2/spans
+SERVICE_NAME=rocketbase-app
 ```
+
+### Docker Compose (dev & test) and local services
+
+There are two docker-compose files at the repo root used for local development and test runs:
+
+- `docker-compose.dev.yml` — used to bring up supporting development services (detached):
+  - mailpit (SMTP + UI)
+  - pocketbase (uses `ghcr.io/muchobien/pocketbase:latest`, mounts `db/pb_*` folders)
+  - zipkin and an OpenTelemetry collector (for traces)
+  - run with `docker-compose -f docker-compose.dev.yml up -d` (healthchecks are configured)
+
+- `docker-compose.test.yml` — used for test CI/local test runs and includes:
+  - mailpit
+  - pocketbase (with admin creds set via environment)
+  - rocketbase (built from `app/Dockerfile`, exposed on port 3000)
+  - run with `docker-compose -f docker-compose.test.yml up --build`
+
+Notes:
+
+- pocketbase uses the `muchobien` image which runs HTTP on port 8090 (recommended for tests).
+- `docker-compose.dev.yml` also exposes Zipkin/collector for tracing during development.
+
+### app/ pnpm scripts (quick reference)
+
+Key scripts defined in `app/package.json`:
+
+- `pnpm dev` — start the dev server (Vite) for the SvelteKit app.
+- `pnpm dev:services` — start supporting dev services in background via `docker-compose -f ../docker-compose.dev.yml up -d`.
+- `pnpm dev:services:down` — stop those services.
+- `pnpm dev:trace` — enable tracing and run the dev server (sets `ENABLE_TRACING=1`).
+- `pnpm build` — build the frontend for production (Vite build).
+- `pnpm build:types` — generate PocketBase types with `pocketbase-typegen` (uses `../db/pb_data/data.db`).
+- `pnpm preview` — run `vite preview` to serve a production build locally.
+- `pnpm check` / `pnpm check:watch` — run `svelte-kit sync` + `svelte-check` (static checks and types).
+- `pnpm format` — run `oxfmt` and `prettier` to format code.
+- `pnpm lint` / `pnpm lint:fix` — run `oxlint` (and fix) across the app.
+
+- Testing helpers:
+  - `pnpm test` — runs node/browser/e2e test suites (`test:node`, `test:browser`, `test:e2e`).
+  - `pnpm test:setup` — starts test services (`./util/start-test-services.sh`).
+  - `pnpm test:cleanup` — cleans up test users via `util/cleanup-test-users.js`.
+  - `pnpm test:node` / `pnpm test:browser` — run vitest for node and browser configs.
+  - `pnpm test:e2e` — run Playwright tests.
+
+- Utility:
+  - `pnpm add-ui` — helper to add shadcn-svelte components (`pnpx shadcn-svelte@latest add`).
+
+These are the most commonly used scripts during development and CI; consult `app/package.json` for the full list.
 
 ### .gitignore Additions
 
@@ -551,7 +607,7 @@ build
 1. **For Svelte/SvelteKit**: Always use `mcp_sveltekit_list-sections` and `mcp_sveltekit_get-documentation`
 2. **For shadcn-svelte**: Use `mcp_shadcn-svelte_shadcnSvelteSearchTool` to verify components exist
 3. **For PocketBase**: Use `mcp_pocketbaseser_*` tools or check official docs
-4. **For other libraries**: Use MCP servers if available, otherwise fetch docs with tools
+4. **For other libraries**: Use MCP servers `cognitionai/deepwiki`, `context7`, and `exa` to search for directions
 
 ### Examples of Common Hallucinations
 
@@ -566,173 +622,31 @@ build
 
 ## MCP Server Preferences
 
-When working with this project, **always prefer using MCP servers** for documentation and implementation guidance:
+When working with this project, prefer using the available MCP servers and tools for accurate, up-to-date documentation and code guidance. The project integrates with several MCP toolsets — call the specific tool name when you need to retrieve docs or validate code.
 
-### Available MCP Servers
+### Available MCP servers / tools
 
-1. **SvelteKit MCP Server** (`mcp_sveltekit_*`)
+- `mcp__Sveltekit__*` — SvelteKit documentation and helpers (use list-sections, get-documentation, svelte-autofixer)
+- `mcp__shadcn-svelte__*` — shadcn-svelte component docs, search and get tools
+- `mcp__Context7__*` — Context7 documentation retrieval for popular libraries
+- `mcp__microsoftdocs_mcp__*` — Microsoft docs MCP accessors
+- `mcp__io_github_ChromeDevTools_chrome-devtools-mcp__*` — Chrome DevTools / browser instrumentation docs
+- `mcp__plugin_playwright_playwright__*` — Playwright documentation and test guidance
+- `mcp__cognitionai_deepwiki__*` — DeepWiki / repository docs (question answering)
+- `mcp__Calculator__calculate` — Calculator/evaluator for simple expressions
 
-   - Use `mcp_sveltekit_list-sections` to discover documentation
-   - Use `mcp_sveltekit_get-documentation` to fetch specific sections
-   - Use `mcp_sveltekit_svelte-autofixer` to validate Svelte code before returning it
+Notes:
 
-2. **shadcn-svelte MCP Server** (`mcp_shadcn-svelte_*`)
+- Beans has no MCP server — use the `beans` CLI for issue management and commit `.beans/` into the repo for agent integration (`beans prime`).
 
-   - Use `mcp_shadcn-svelte_shadcnSvelteGetTool` for component documentation
-   - Use `mcp_shadcn-svelte_shadcnSvelteListTool` to list available components
-   - Use `mcp_shadcn-svelte_shadcnSvelteSearchTool` to search for specific components
+### Typical MCP workflow
 
-3. **PocketBase MCP Server** (`mcp_pocketbaseser_*`)
+1. Identify the domain (SvelteKit, shadcn-svelte, PocketBase, Playwright, etc.)
+2. Call the corresponding MCP tool (e.g. `mcp__Sveltekit__*` or `mcp__shadcn-svelte__*`) to fetch docs or validate code
+3. Implement using the official guidance
+4. Validate Svelte files with the Svelte autofixer and run tests
 
-   - Use for collection management, record operations, and auth workflows
-   - Prefer this over generic documentation when working with PocketBase
-
-4. **(No MCP server for Beans)**
-
-- Beans does not provide an MCP server. Use the `beans` CLI and commit `.beans/` into the repo.
-- For agent integration, run `beans prime` to emit agent instructions instead of relying on an MCP server.
-
-### MCP Workflow
-
-**When implementing SvelteKit features:**
-
-1. Run `mcp_sveltekit_list-sections` first to see available docs
-2. Identify relevant sections based on the feature
-3. Fetch documentation with `mcp_sveltekit_get-documentation`
-4. Implement the feature
-5. Validate with `mcp_sveltekit_svelte-autofixer` before committing
-
-**When adding UI components:**
-
-1. Search with `mcp_shadcn-svelte_shadcnSvelteSearchTool`
-2. Get component details with `mcp_shadcn-svelte_shadcnSvelteGetTool`
-3. Follow the documentation to add the component to the template
-
-**When working with PocketBase:**
-
-1. Use PocketBase MCP server for collection operations
-2. Reference the server-side patterns documented above
-3. Test with the development PocketBase instance
-
----
-
-## CLI Scaffolding Workflow
-
-The CLI performs these steps when creating a new project:
-
-### 1. Check/Install PocketBase Binary
-
-- Detect platform (macOS, Linux, Windows) and architecture (arm64, amd64)
-- Check if `pocketbase` is in PATH
-- If not found, download from GitHub releases and install
-- Verify installation
-- Download URL pattern: `https://github.com/pocketbase/pocketbase/releases/download/vX.X.X/pocketbase_X.X.X_{platform}_{arch}.zip`
-
-### 2. Prompt for Project Name
-
-- Ask user for project directory name
-- Validate directory name (allow `-`, `_`, alphanumeric)
-- Default: `my-app`
-
-### 3. Scaffold SvelteKit Project
-
-```bash
-pnpx sv create <project-name>
-```
-
-- Template: minimal
-- Type checking: TypeScript
-- Add-ons: devtools-json, svelte-mcp, paraglide, playwright, tailwindcss, vitest
-
-### 4. Initialize Git
-
-```bash
-cd <project-name>
-git init
-git add .
-git commit -m "chore: initial commit from rocketbase"
-```
-
-### 5. Initialize PocketBase
-
-```bash
-pocketbase serve  # Start to create pb_data
-# Stop after initialization
-echo "pb_data" >> .gitignore
-git add .gitignore
-git commit -m "chore: add pb_data to gitignore"
-```
-
-### 6. Create PocketBase Admin User
-
-- Prompt for admin email and password
-- Validate email format
-- Create superuser: `pocketbase superuser create <email> <password>`
-- Display admin URL: <http://127.0.0.1:8090/_/>
-
-### 7. Install Dependencies
-
-```bash
-# Development tools
-pnpm add -D oxlint oxfmt oxlint-tsgolint
-
-# Template dependencies
-pnpm add -D @poppa/sveltekit-svg @tailwindcss/aspect-ratio \
-  @tailwindcss/forms @tailwindcss/typography pocketbase-typegen \
-  @lucide/svelte zod sveltekit-superforms @formkit/tempo \
-  consola cookie radashi sveltekit-helmet
-
-# Production dependencies
-pnpm add pocketbase sqlite3
-```
-
-### 8. Configure shadcn-svelte
-
-```bash
-pnpm dlx shadcn-svelte@latest init -c . --base-color neutral --css ./src/app.css
-pnpm add -D tailwindcss-animate
-```
-
-### 9. Configure Adapters and Plugins
-
-- Update `svelte.config.js` with adapter-node
-- Update `vite.config.ts` with SVG plugin
-- Add pnpm native dependencies config to `package.json`
-- Update package scripts for linting: `oxlint && oxfmt`
-
-### 10. Add PocketBase API Proxy
-
-- Create `src/routes/api/pb/[...path]/+server.ts`
-- Create `src/lib/server/pocketbase.ts`
-- Create `src/hooks.server.ts`
-
-### 11. Final Commit
-
-```bash
-git add .
-git commit -m "chore: complete rocketbase initialization"
-```
-
-### 12. Display Success Message
-
-```
-🚀 Rocketbase project initialized successfully!
-
-Project: <project-name>
-PocketBase Admin: http://127.0.0.1:8090/_/
-
-Next steps:
-  cd <project-name>
-  pnpm dev              # Start SvelteKit (localhost:5173)
-  pocketbase serve      # Start PocketBase (in another terminal)
-
-Your app will be running at:
-  Frontend: http://localhost:5173
-  Backend:  http://127.0.0.1:8090
-  Admin:    http://127.0.0.1:8090/_/
-```
-
----
+<!-- CLI scaffolding workflow removed: this repository is the application itself, not a standalone scaffolding CLI. -->
 
 ## Versioning & Releases
 
@@ -740,8 +654,8 @@ Follow **Semantic Versioning**, **Conventional Commits**, and **Keep a Changelog
 
 ### Conventional Commits
 
-```
-feat: add new template scaffolding step
+```txt
+feat: add new app feature
 fix(cli): handle missing pocketbase binary
 chore(deps): update oxlint
 docs: update README with new features
@@ -772,7 +686,7 @@ Maintain `CHANGELOG.md` with an **Unreleased** section during development. Move 
 - Verify output formatting
 - Use vitest for unit tests
 
-### Template Tests
+### App Tests
 
 - Unit tests with Vitest
 - E2E tests with Playwright
@@ -801,20 +715,20 @@ Maintain `CHANGELOG.md` with an **Unreleased** section during development. Move 
 5. Update documentation
 6. Close issue and commit: `git commit -m "feat: add command X (bean-<id>)"`
 
-### Adding a Template Feature
+### Adding an App Feature
 
-1. Create a bean: `beans create "Add feature Y to template" -t task -p 2`
-2. Implement in `template/src/`
-3. Test locally: `cd template && pnpm dev`
+1. Create a bean: `beans create "Add feature Y to app" -t task -p 2`
+2. Implement in `app/src/`
+3. Test locally: `cd app && pnpm dev`
 4. Add tests (unit or e2e)
-5. Update template documentation
-6. Close issue and commit: `git commit -m "feat: add feature Y to template (bean-<id>)"`
+5. Update app documentation
+6. Close issue and commit: `git commit -m "feat: add feature Y to app (bean-<id>)"`
 
 ### Updating Dependencies
 
 1. Create a bean: `beans create "Update dependencies" -t chore -p 3`
-2. Update in both `cli/` and `template/`
-3. Test functionality in both projects
+2. Update in both `cli/` and `app/` (and `sidecar/` if relevant)
+3. Test functionality in updated projects
 4. Run quality gates (lint, test, build)
 5. Close issue and commit
 
@@ -833,6 +747,22 @@ Before closing any beans issue and pushing:
 - [ ] Commit includes issue ID: `(bean-<id>)`
 - [ ] Changes pushed to remote: `git push`
 - [ ] Verified `git status` shows "up to date with origin"
+
+---
+
+## Skills Available
+
+This repository exposes 100+ agent skills for SvelteKit, PocketBase, UI, testing, and developer workflows. Notable examples include:
+
+- `svelte-expert`, `svelte-code-writer`, `svelte-components`
+- `sveltekit-data-flow`, `sveltekit-remote-functions`
+- `pocketbase` — Comprehensive PocketBase development skill
+- `ui-styling`, `ui-ux-pro-max`
+- `typescript-advanced-types`
+- `test-driven-development`, `systematic-debugging`
+- `superpowers:*` — Meta skills for workflow management
+
+Use these skills when working on domain-specific tasks (component creation, form handling, PocketBase schema changes, testing, and debugging).
 
 ---
 

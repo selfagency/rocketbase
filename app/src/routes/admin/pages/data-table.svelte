@@ -28,7 +28,8 @@
 
 	// Get current search from URL
 	let searchValue = $state(page.url.searchParams.get('search') || '');
-	const statusValue = $derived(status);
+	// svelte-ignore state_referenced_locally
+	let statusValue = $state(status);
 	let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	const table = createSvelteTable({

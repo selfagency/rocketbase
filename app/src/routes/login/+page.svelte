@@ -34,7 +34,10 @@
 		validators: zod4Client(loginSchema)
 	});
 
-	const { form, enhance, message } = superFormObj;
+	const { form, enhance, message, capture, restore } = superFormObj;
+
+	// Use Superforms snapshot support for browser navigation state preservation
+	export const snapshot = { capture, restore };
 
 	// Wrap enhance to log submissions for debugging (Playwright captures console)
 	// function enhanceWithLogging(node: HTMLFormElement) {

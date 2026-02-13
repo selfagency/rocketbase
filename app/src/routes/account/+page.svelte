@@ -73,7 +73,13 @@
 		}
 	});
 
-	const { form, enhance: profileEnhance, message: profileMessage } = superFormObj;
+	const {
+		form,
+		enhance: profileEnhance,
+		message: profileMessage,
+		capture: captureProfile,
+		restore: restoreProfile
+	} = superFormObj;
 
 	// Password change form
 	// svelte-ignore state_referenced_locally
@@ -126,6 +132,10 @@
 	});
 
 	let verificationEmailSent = $state(false);
+
+	// Use Superforms snapshot support for browser navigation state preservation
+	// Only preserve profile form state; passwords and 2FA shouldn't be preserved
+	export const snapshot = { capture: captureProfile, restore: restoreProfile };
 
 	// Check for email verification success on mount
 	onMount(() => {

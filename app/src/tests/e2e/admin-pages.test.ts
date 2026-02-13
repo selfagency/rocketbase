@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const API_BASE = process.env.POCKETBASE_URL || 'http://localhost:8090';
 const ADMIN_TOKEN = process.env.API_KEY;
@@ -9,9 +9,9 @@ async function createUser(role: string, email: string, password: string, name = 
     method: 'POST',
     headers: {
       Authorization: `Bearer ${ADMIN_TOKEN}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password, passwordConfirm: password, name, role })
+    body: JSON.stringify({ email, password, passwordConfirm: password, name, role }),
   });
   if (!res.ok) {
     const txt = await res.text();
@@ -23,7 +23,9 @@ async function createUser(role: string, email: string, password: string, name = 
 async function cleanupTestUsers() {
   if (!ADMIN_TOKEN) return;
   const headers = { Authorization: `Bearer ${ADMIN_TOKEN}` };
-  const listRes = await fetch(`${API_BASE}/api/collections/users/records?filter=email~"@example.com"&perPage=500`, { headers });
+  const listRes = await fetch(`${API_BASE}/api/collections/users/records?filter=email~"@example.com"&perPage=500`, {
+    headers,
+  });
   if (!listRes.ok) return;
   const data = await listRes.json();
   const items = data?.items || data || [];
@@ -34,6 +36,27 @@ async function cleanupTestUsers() {
   }
 }
 
+async function browserLogin(page: any, email: string, password: string) {
+  const res = await page.request.post('/login', {
+    form: { email, password, action: 'login' },
+    maxRedirects: 0,
+    headers: {
+      Origin: 'http://localhost:3000',
+      Referer: 'http://localhost:3000/login',
+    },
+  });
+  const raw = res.headers()['set-cookie'];
+  if (raw) {
+    const first = raw.split(',')[0];
+    const pair = first.split(';')[0].trim();
+    const [name, ...rest] = pair.split('=');
+    const value = rest.join('=');
+    await page.context().addCookies([{ name, value, domain: 'localhost', path: '/' }]);
+  } else {
+    const body = await res.text();
+    throw new Error(`Login did not return Set-Cookie header, status=${res.status()}, body=${body}`);
+  }
+}
 
 test.describe('Admin Pages - create and edit', () => {
   test.afterEach(async () => {
@@ -48,12 +71,12 @@ test.describe('Admin Pages - create and edit', () => {
       await createUser('editor', email, password, 'Pages Editor');
     });
 
-    await test.step('login', async () => {
+    await test.step('login via UI', async () => {
       await page.goto('/login');
-      await page.fill('input[name="email"]', email);
-      await page.fill('input[name="password"]', password);
+      await page.locator('input[name="email"]').fill(email);
+      await page.locator('input[name="password"]').fill(password);
       await page.click('button[type="submit"]');
-      await expect(page).toHaveURL(/\/?login=success|\//, { timeout: 15000 });
+      await page.waitForURL(/\//, { timeout: 15000 });
     });
 
     await test.step('navigate to admin pages and create new page', async () => {

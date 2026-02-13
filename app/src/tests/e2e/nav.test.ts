@@ -37,6 +37,34 @@ async function cleanupTestUsers() {
   }
 }
 
+// Helper: perform server-side login and set auth cookie in the browser context
+async function browserLogin(page: any, email: string, password: string) {
+  // Post form to the login action so server sets the auth cookie
+  const res = await page.request.post('/login', {
+    form: { email, password, action: 'login' },
+    // don't auto-follow to capture set-cookie
+    maxRedirects: 0,
+    headers: {
+      Origin: 'http://localhost:3000',
+      Referer: 'http://localhost:3000/login',
+    },
+  });
+
+  // Get Set-Cookie header and add to browser context
+  const raw = res.headers()['set-cookie'];
+  if (raw) {
+    // take first cookie pair before ';'
+    const first = raw.split(',')[0];
+    const pair = first.split(';')[0].trim();
+    const [name, ...rest] = pair.split('=');
+    const value = rest.join('=');
+    await page.context().addCookies([{ name, value, domain: 'localhost', path: '/' }]);
+  } else {
+    const body = await res.text();
+    throw new Error(`Login did not return Set-Cookie header, status=${res.status()}, body=${body}`);
+  }
+}
+
 test.describe('Navigation: Admin dropdown', () => {
   test.afterEach(async () => {
     await cleanupTestUsers();
@@ -53,12 +81,14 @@ test.describe('Navigation: Admin dropdown', () => {
       await createUser('admin', email, password, 'Nav Admin');
     });
 
-    await test.step('login', async () => {
+    await test.step('login via UI', async () => {
       await page.goto('/login');
-      await page.fill('input[name="email"]', email);
-      await page.fill('input[name="password"]', password);
+      // Fill login form
+      await page.locator('input[name="email"]').fill(email);
+      await page.locator('input[name="password"]').fill(password);
       await page.click('button[type="submit"]');
-      await expect(page).toHaveURL(/\/?login=success|\//, { timeout: 15000 });
+      // After login redirect to home
+      await page.waitForURL(/\//, { timeout: 15000 });
     });
 
     await test.step('assert admin dropdown exists and positioned after About', async () => {

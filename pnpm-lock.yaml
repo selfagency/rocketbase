@@ -26,8 +26,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0(pino@10.3.1)
       '@lucide/svelte':
-        specifier: ^0.564.0
-        version: 0.564.0(svelte@5.50.3)
+        specifier: ^0.561.0
+        version: 0.561.0(svelte@5.50.3)
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -700,8 +700,8 @@ packages:
     resolution: {integrity: sha512-Wp7EzfRJpqPU/folJAL49d0cbvPay1NcYxbO7Auoh9brsK9epK5kzJUK+7yMZ3wX0Dp5gl9v5W/arhrlh78xAg==}
     engines: {node: '>=18'}
 
-  '@lucide/svelte@0.564.0':
-    resolution: {integrity: sha512-jODK/wHX3lKi1CsLgx9wXspsDQ5/WbsNmBqecdTCbaH1Cy3C/n2g3WM1a59sokjq+81eZDFUi/7Yg4rVI3kyow==}
+  '@lucide/svelte@0.561.0':
+    resolution: {integrity: sha512-vofKV2UFVrKE6I4ewKJ3dfCXSV6iP6nWVmiM83MLjsU91EeJcEg7LoWUABLp/aOTxj1HQNbJD1f3g3L0JQgH9A==}
     peerDependencies:
       svelte: ^5
 
@@ -5503,7 +5503,7 @@ snapshots:
     dependencies:
       '@loglayer/shared': 4.0.0
 
-  '@lucide/svelte@0.564.0(svelte@5.50.3)':
+  '@lucide/svelte@0.561.0(svelte@5.50.3)':
     dependencies:
       svelte: 5.50.3
 

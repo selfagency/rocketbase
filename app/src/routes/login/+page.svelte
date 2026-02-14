@@ -28,7 +28,7 @@
 			description: 'Sign in to your account'
 		},
 		twitter: {
-			cardType: 'summary',
+			cardType: 'summary' as const,
 			title: 'Login',
 			description: 'Sign in to your account'
 		}

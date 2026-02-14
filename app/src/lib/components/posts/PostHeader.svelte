@@ -4,6 +4,7 @@
 	import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 	import { getFileUrl } from '$lib/utils';
 	import LinkIcon from '@lucide/svelte/icons/link';
+	import UsersIcon from '@lucide/svelte/icons/users';
 
 	interface Props {
 		post: PostsResponseWithExpanded;
@@ -43,7 +44,7 @@
 		{#if post.author && post.author.length > 0}
 			<div class="flex items-center gap-2">
 				<span class="sr-only">Authors:</span>
-				<span aria-hidden="true" title="Authors">👤</span>
+				<UsersIcon class="h-4 w-4" aria-hidden="true" />
 				<div class="flex -space-x-2">
 					{#each post.author as author}
 						<a href={`/authors/${author.id}`} class="p-author u-category h-card" rel="author">

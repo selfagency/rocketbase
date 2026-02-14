@@ -61,15 +61,13 @@
 				: []
 		},
 		additionalMetaTags: [
-			{
-				property: 'fediverse:creator',
-				content: data.metadata?.fediverse_handle
-			},
-			{
-				name: 'bluesky:actor',
-				content: data.metadata?.bluesky_handle
-			}
-		].filter((tag) => tag.content),
+			...(data.metadata?.fediverse_handle
+				? [{ property: 'fediverse:creator', content: data.metadata.fediverse_handle }]
+				: []),
+			...(data.metadata?.bluesky_handle
+				? [{ name: 'bluesky:actor', content: data.metadata.bluesky_handle }]
+				: [])
+		],
 		additionalLink: [
 			{
 				rel: 'alternate',

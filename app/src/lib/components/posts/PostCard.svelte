@@ -5,6 +5,7 @@
 	import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 	import { getFileUrl } from '$lib/utils';
 	import { format } from '@formkit/tempo';
+	import UsersIcon from '@lucide/svelte/icons/users';
 
 	interface Props {
 		post: PostsResponseWithExpanded;
@@ -55,7 +56,7 @@
 		{#if showAuthor}
 			<div class="mb-4 flex items-center gap-3">
 				<span class="sr-only">Authors:</span>
-				<span aria-hidden="true" class="text-muted-foreground" title="Authors">👤</span>
+				<UsersIcon class="h-4 w-4 text-muted-foreground" aria-hidden="true" />
 				{#if post.author && post.author.length > 0}
 					<div class="flex -space-x-2">
 						{#each post.author as author, i}

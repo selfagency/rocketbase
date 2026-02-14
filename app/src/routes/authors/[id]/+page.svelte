@@ -3,6 +3,7 @@
 	import PostList from '$lib/components/posts/PostList.svelte';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 	import { getFileUrl } from '$lib/utils';
+	import UserIcon from '@lucide/svelte/icons/user';
 	import { MetaTags } from 'svelte-meta-tags';
 	import type { PageData } from './$types';
 
@@ -77,8 +78,8 @@
 				{getAuthorInitials(data.author.name, data.author.email)}
 			</AvatarFallback>
 		</Avatar>
-		<h1 class="p-name mb-2 text-4xl font-bold">
-			<span aria-hidden="true" class="mr-2 opacity-70">👤</span>
+		<h1 class="p-name mb-2 flex items-center text-4xl font-bold">
+			<UserIcon class="mr-2 h-8 w-8 opacity-70" aria-hidden="true" />
 			{data.author.name || data.author.email}
 		</h1>
 		<data class="u-url hidden" value={`${page.url.origin}/authors/${data.author.id}`}></data>

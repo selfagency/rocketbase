@@ -6,7 +6,7 @@
 	let { data }: { data: PageData } = $props();
 </script>
 
-<MetaTags title={`Edit Page: ${data.page.title} | Admin`} noindex={true} nofollow={true} />
+<MetaTags title={`Edit Page: ${data.page.title} | Admin`} robots="noindex, nofollow" />
 
 <div class="container mx-auto max-w-4xl py-8">
 	<div class="mb-8">

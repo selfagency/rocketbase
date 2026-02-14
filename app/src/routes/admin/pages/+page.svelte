@@ -11,8 +11,7 @@
 <MetaTags
 	title={m['admin.pages.title']()}
 	description={m['admin.pages.description']()}
-	noindex={true}
-	nofollow={true}
+	robots="noindex, nofollow"
 />
 
 <div class="container mx-auto py-8">

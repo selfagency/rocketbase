@@ -2,7 +2,7 @@
   import { onNavigate } from '$app/navigation';
   import Nav from '$lib/components/global/Nav.svelte';
   import Toaster from '$lib/components/global/Toaster.svelte';
-  import { getLocale } from '$lib/paraglide/runtime.js';
+  import { getLocale } from '$lib/paraglide/runtime';
   import { setScreenSize } from '$lib/stores/screen';
   import type { Snippet } from 'svelte';
   import { MetaTags } from 'svelte-meta-tags';

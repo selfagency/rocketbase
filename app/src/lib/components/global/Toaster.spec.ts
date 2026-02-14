@@ -1,4 +1,4 @@
-import { toasts } from '$lib/stores/toast.js';
+import { toasts } from '$lib/stores/toast';
 import { toast } from 'svelte-sonner';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';

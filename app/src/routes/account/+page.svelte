@@ -4,7 +4,7 @@
   import PasswordCard from '$lib/components/account/PasswordCard.svelte';
   import ProfileCard from '$lib/components/account/ProfileCard.svelte';
   import * as m from '$lib/paraglide/messages';
-  import { mfaSchema, passwordSchema, profileSchema } from '$lib/schemas/account.js';
+  import { mfaSchema, passwordSchema, profileSchema } from '$lib/schemas/account';
   import { toast } from '$lib/stores/toast';
   import { onMount } from 'svelte';
   import { MetaTags } from 'svelte-meta-tags';

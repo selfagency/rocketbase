@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Toaster } from '$lib/components/ui/sonner';
-  import { toasts } from '$lib/stores/toast.js';
+  import { toasts } from '$lib/stores/toast';
   import { toast } from 'svelte-sonner';
   import { SvelteSet } from 'svelte/reactivity';
 

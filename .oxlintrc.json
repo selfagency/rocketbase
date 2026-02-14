@@ -1,6 +1,10 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["unicorn", "typescript", "oxc"],
+  "plugins": [
+    "unicorn",
+    "typescript",
+    "oxc"
+  ],
   "categories": {},
   "rules": {},
   "settings": {
@@ -24,6 +28,8 @@
     "**/dist/",
     "**/pb_data/",
     "**/src/lib/paraglide",
-    "**/project.inlang/cache/"
+    "**/project.inlang/cache/",
+    "**/__screenshots__/",
+    "**/coverage/"
   ]
 }

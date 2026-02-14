@@ -1,13 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { get } from 'svelte/store';
-import {
-  isMobile,
-  isTablet,
-  isDesktop,
-  screenWidth,
-  screenHeight,
-  setScreenSize,
-} from '../../../lib/stores/screen';
+import { isMobile, isTablet, isDesktop, screenWidth, screenHeight, setScreenSize } from '../../../lib/stores/screen';
 
 describe('screen store', () => {
   describe('setScreenSize', () => {

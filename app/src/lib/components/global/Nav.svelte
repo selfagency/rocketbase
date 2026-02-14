@@ -9,8 +9,8 @@
   import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
   import * as m from '$lib/paraglide/messages';
   import { isMobile } from '$lib/stores/screen';
+  import type { NavItem } from '$lib/types';
   import { getDisplayName, getPocketBaseAvatarUrl, getUserInitials } from '$lib/utils/user-profile';
-  import type { NavItem } from '../../types';
 
   let { navItems = [] }: { navItems?: NavItem[] } = $props();
 
@@ -29,22 +29,6 @@
           <NavigationMenu.Link href="/" class={navigationMenuTriggerStyle()}>
             {m['nav.brand']()}
           </NavigationMenu.Link>
-        </NavigationMenu.Item>
-
-        <NavigationMenu.Item>
-          <NavigationMenu.Link href="/posts" class={navigationMenuTriggerStyle()}>
-            {m['nav.posts'] ? m['nav.posts']() : 'Posts'}
-          </NavigationMenu.Link>
-        </NavigationMenu.Item>
-
-        <NavigationMenu.Item>
-          <NavigationMenu.Link href="/tags" class={navigationMenuTriggerStyle()}>
-            {m['nav.tags'] ? m['nav.tags']() : 'Tags'}
-          </NavigationMenu.Link>
-        </NavigationMenu.Item>
-
-        <NavigationMenu.Item>
-          <NavigationMenu.Link href="/authors" class={navigationMenuTriggerStyle()}>Authors</NavigationMenu.Link>
         </NavigationMenu.Item>
 
         {#each navItems as item (item.id)}

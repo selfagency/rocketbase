@@ -21,7 +21,8 @@
   "chat.tools.terminal.autoApprove": {
     "pnpm": true,
     "timeout": true,
-    "docker run": true
+    "docker run": true,
+    "mv": true
   },
   "oxc.fmt.configPath": ""
 }

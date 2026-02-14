@@ -6,8 +6,8 @@
   import { Switch } from '$lib/components/ui/switch';
   import { Textarea } from '$lib/components/ui/textarea';
   import { pageSchema, type PageSchema } from '$lib/schemas/page';
-  import { generateSlug as createSlug } from '$lib/server/slug-utils';
   import { toast } from '$lib/stores/toast';
+  import { generateSlug as createSlug } from '$lib/utils/slug-utils';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
 

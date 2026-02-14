@@ -24,6 +24,8 @@
     "**/dist/",
     "**/pb_data/",
     "**/src/lib/paraglide",
-    "**/project.inlang/cache/"
+    "**/project.inlang/cache/",
+    "**/__screenshots__/",
+    "**/coverage/"
   ]
 }

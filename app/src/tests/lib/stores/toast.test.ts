@@ -83,9 +83,7 @@ describe('toast store', () => {
       expect(toasts.current[0].timestamp).toBeInstanceOf(Date);
       expect(toasts.current[1].timestamp).toBeInstanceOf(Date);
       // Timestamps should be close but not necessarily different due to test speed
-      expect(toasts.current[0].timestamp.getTime()).toBeLessThanOrEqual(
-        toasts.current[1].timestamp.getTime()
-      );
+      expect(toasts.current[0].timestamp.getTime()).toBeLessThanOrEqual(toasts.current[1].timestamp.getTime());
     });
   });
 });

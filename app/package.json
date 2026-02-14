@@ -14,7 +14,7 @@
     "dev:services": "docker-compose -f ../docker-compose.dev.yml up -d",
     "dev:services:down": "docker-compose -f ../docker-compose.dev.yml down",
     "dev:trace": "ENABLE_TRACING=1 pnpm run dev",
-    "format": "oxfmt --write . && prettier --write .",
+    "format": "prettier --write . && oxfmt --write src",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "prepare": "svelte-kit sync || echo ''",

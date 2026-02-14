@@ -2,13 +2,10 @@
 	import { page } from '$app/state';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 	import { Badge } from '$lib/components/ui/badge';
-	import type { PostsResponse } from '$lib/types/pocketbase';
+	import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 
 	interface Props {
-		post: PostsResponse<{
-			author: { id: string; name?: string; email: string; avatar?: string }[];
-			tags: { id: string; tag: string; slug: string }[];
-		}>;
+		post: PostsResponseWithExpanded;
 	}
 
 	let { post }: Props = $props();
@@ -34,8 +31,8 @@
 	{/if}
 
 	<div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-		{#if post.expand?.author && post.expand.author.length > 0}
-			{@const author = post.expand.author[0]}
+		{#if post.author && post.author.length > 0}
+			{@const author = post.author[0]}
 			<div class="flex items-center gap-2">
 				<Avatar class="h-6 w-6">
 					{#if author.avatar}
@@ -62,11 +59,14 @@
 			</time>
 		{/if}
 
-		{#if post.expand?.tags && post.expand.tags.length > 0}
-			<div class="flex flex-wrap gap-1">
-				{#each post.expand.tags as tag}
+		{#if post.tags && post.tags.length > 0}
+			<div class="mt-4 flex flex-wrap gap-2">
+				{#each post.tags as tag}
 					<a href={`/tags/${tag.slug}`}>
-						<Badge variant="secondary" class="text-xs transition-colors hover:bg-primary hover:text-primary-foreground">
+						<Badge
+							variant="secondary"
+							class="text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
+						>
 							#{tag.tag}
 						</Badge>
 					</a>

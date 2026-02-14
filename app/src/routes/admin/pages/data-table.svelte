@@ -7,9 +7,14 @@
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table';
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import * as m from '$lib/paraglide/messages.js';
+	import ArrowDown01Icon from '@lucide/svelte/icons/arrow-down-0-1';
+	import ArrowDown10Icon from '@lucide/svelte/icons/arrow-down-1-0';
 	import ArrowDownUpIcon from '@lucide/svelte/icons/arrow-down-up';
 	import GripVerticalIcon from '@lucide/svelte/icons/grip-vertical';
 	import { type ColumnDef, getCoreRowModel } from '@tanstack/table-core';
+	import { fade } from 'svelte/transition';
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
@@ -45,12 +50,16 @@
 
 		return (data || []).map((item: any) => {
 			const out = { ...item } as any;
-			out.expand = out.expand ?? {};
-			// Augment if expand.author doesn't exist OR if it exists but lacks name
-			if (out.author && (!out.expand.author || !out.expand.author.name)) {
+			// Augment if author doesn't have name (was not expanded or incomplete)
+			if (out.author && typeof out.author === 'string') {
 				const found = authorsMap.get(out.author);
 				if (found) {
-					out.expand.author = { id: found.id, name: found.name };
+					out.author = { id: found.id, name: found.name };
+				}
+			} else if (out.author && !out.author.name) {
+				const found = authorsMap.get(out.author.id);
+				if (found) {
+					out.author = { id: found.id, name: found.name };
 				}
 			}
 			return out;
@@ -193,15 +202,15 @@
 <div class="w-full">
 	<div class="flex items-center gap-4 py-4">
 		<Input
-			placeholder="Search by title or slug..."
+			placeholder={m.admin_pages_search_placeholder()}
 			value={searchValue}
 			oninput={(e) => handleSearch(e.currentTarget.value)}
 			class="max-w-sm"
 		/>
 		<Combobox.Root
-			options={[{ id: '', name: 'All authors' }, ...authors]}
+			options={[{ id: '', name: m.admin_pages_all_authors() }, ...authors]}
 			value={authorValue}
-			placeholder="Select author..."
+			placeholder={m.admin_pages_select_author()}
 			onchange={handleAuthorSearch}
 		/>
 
@@ -213,7 +222,7 @@
 					statusValue = 'all';
 				}}
 			>
-				All
+				{m.admin_pages_all()}
 			</Button>
 			<Button
 				variant={statusValue === 'draft' ? 'default' : 'ghost'}
@@ -222,7 +231,7 @@
 					statusValue = 'draft';
 				}}
 			>
-				Drafts
+				{m.admin_pages_drafts()}
 			</Button>
 			<Button
 				variant={statusValue === 'published' ? 'default' : 'ghost'}
@@ -231,11 +240,11 @@
 					statusValue = 'published';
 				}}
 			>
-				Published
+				{m.admin_pages_published()}
 			</Button>
 		</ButtonGroup.Root>
 
-		<Button href="/admin/pages/new" class="ms-auto">Create Page</Button>
+		<Button href="/admin/pages/new" class="ms-auto">{m.admin_pages_create_page()}</Button>
 	</div>
 
 	<div class="rounded-md border">
@@ -249,19 +258,97 @@
 							<Table.Head>
 								{#if !header.isPlaceholder}
 									{#if (header.column.columnDef as any)?.meta?.sortKey}
-										<button
-										class="flex items-center gap-2 hover:text-foreground transition-colors"
-										onclick={() => navigateToSort((header.column.columnDef as any).meta.sortKey)}
-									>
-										<FlexRender
-											content={header.column.columnDef.header}
-											context={header.getContext()}
-										/>
-										<ArrowDownUpIcon
-											class="w-4 h-4 {isSortState((header.column.columnDef as any).meta.sortKey).asc || isSortState((header.column.columnDef as any).meta.sortKey).desc ? 'text-foreground' : 'text-muted-foreground'}"
-											aria-hidden="true"
-										/>
-										</button>
+										{@const tooltip = (header.column.columnDef as any)?.meta?.tooltip}
+										{#if tooltip}
+											<Tooltip.Root>
+												<Tooltip.Trigger>
+													<button
+														class="flex items-center gap-2 transition-colors hover:text-foreground"
+														onclick={() =>
+															navigateToSort((header.column.columnDef as any).meta.sortKey)}
+													>
+														<FlexRender
+															content={header.column.columnDef.header}
+															context={header.getContext()}
+														/>
+														{#if (header.column.columnDef as any).meta.sortKey === 'order'}
+															{@const sortState = isSortState(
+																(header.column.columnDef as any).meta.sortKey
+															)}
+															{#if sortState.desc}
+																<span transition:fade={{ duration: 150 }}>
+																	<ArrowDown10Icon
+																		class="h-4 w-4 text-foreground"
+																		aria-hidden="true"
+																	/>
+																</span>
+															{:else}
+																<span transition:fade={{ duration: 150 }}>
+																	<ArrowDown01Icon
+																		class="h-4 w-4 {sortState.asc
+																			? 'text-foreground'
+																			: 'text-muted-foreground'}"
+																		aria-hidden="true"
+																	/>
+																</span>
+															{/if}
+														{:else}
+															<ArrowDownUpIcon
+																class="h-4 w-4 {isSortState(
+																	(header.column.columnDef as any).meta.sortKey
+																).asc ||
+																isSortState((header.column.columnDef as any).meta.sortKey).desc
+																	? 'text-foreground'
+																	: 'text-muted-foreground'}"
+																aria-hidden="true"
+															/>
+														{/if}
+													</button>
+												</Tooltip.Trigger>
+												<Tooltip.Content>
+													<p>{tooltip}</p>
+												</Tooltip.Content>
+											</Tooltip.Root>
+										{:else}
+											<button
+												class="flex items-center gap-2 transition-colors hover:text-foreground"
+												onclick={() =>
+													navigateToSort((header.column.columnDef as any).meta.sortKey)}
+											>
+												<FlexRender
+													content={header.column.columnDef.header}
+													context={header.getContext()}
+												/>
+												{#if (header.column.columnDef as any).meta.sortKey === 'order'}
+													{@const sortState = isSortState(
+														(header.column.columnDef as any).meta.sortKey
+													)}
+													{#if sortState.desc}
+														<span transition:fade={{ duration: 150 }}>
+															<ArrowDown10Icon class="h-4 w-4 text-foreground" aria-hidden="true" />
+														</span>
+													{:else}
+														<span transition:fade={{ duration: 150 }}>
+															<ArrowDown01Icon
+																class="h-4 w-4 {sortState.asc
+																	? 'text-foreground'
+																	: 'text-muted-foreground'}"
+																aria-hidden="true"
+															/>
+														</span>
+													{/if}
+												{:else}
+													<ArrowDownUpIcon
+														class="h-4 w-4 {isSortState(
+															(header.column.columnDef as any).meta.sortKey
+														).asc || isSortState((header.column.columnDef as any).meta.sortKey).desc
+															? 'text-foreground'
+															: 'text-muted-foreground'}"
+														aria-hidden="true"
+													/>
+												{/if}
+											</button>
+										{/if}
 									{:else}
 										<FlexRender
 											content={header.column.columnDef.header}
@@ -274,7 +361,7 @@
 					</Table.Row>
 				{/each}
 			</Table.Header>
-			<Table.Body>
+			<Table.Body class="bg-white">
 				{#each table.getRowModel().rows as row (row.id)}
 					{@const rowId = (row as any).original?.id || (row as any).id}
 					<tr

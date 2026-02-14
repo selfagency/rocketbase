@@ -1,5 +1,5 @@
+import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 import { error } from '@sveltejs/kit';
-import type { PostsResponse } from '../../../lib/types/pocketbase';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, url, locals }) => {
@@ -14,12 +14,7 @@ export const load: PageServerLoad = async ({ params, url, locals }) => {
 		const tag = await pb.collection('tags').getFirstListItem(`slug = "${params.slug}"`);
 
 		// Fetch paginated posts with this tag
-		const result = await pb.collection('posts').getList<
-			PostsResponse<{
-				author: { id: string; name?: string; email: string; avatar?: string }[];
-				tags: { id: string; tag: string; slug: string }[];
-			}>
-		>(page, perPage, {
+		const result = await pb.collection('posts').getList<PostsResponseWithExpanded>(page, perPage, {
 			filter: `published = true && tags.id ?= "${tag.id}"`,
 			sort: '-created',
 			expand: 'author,tags'

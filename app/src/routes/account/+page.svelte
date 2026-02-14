@@ -413,11 +413,7 @@
 						<Form.Control>
 							{#snippet children({ props: _props })}
 								<div class="flex items-center gap-3">
-									<Switch
-										{..._props}
-										id="mfa-opt-in"
-										bind:checked={$mfaForm.mfaOptIn}
-									/>
+									<Switch {..._props} id="mfa-opt-in" bind:checked={$mfaForm.mfaOptIn} />
 									<Label for="mfa-opt-in">
 										{$mfaForm.mfaOptIn
 											? m['account.2fa_disable_button']()

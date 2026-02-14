@@ -8,7 +8,7 @@
 <div class="container mx-auto max-w-4xl py-8">
 	<div class="mb-8">
 		<h1 class="text-3xl font-bold">Edit Page</h1>
-		<p class="text-muted-foreground mt-2">Update "{data.page.title || 'Untitled'}"</p>
+		<p class="mt-2 text-muted-foreground">Update "{data.page.title || 'Untitled'}"</p>
 	</div>
 
 	<PageForm {data} isEdit={true} parentSlug={data.parentSlug} />

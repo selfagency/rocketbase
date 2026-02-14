@@ -16,7 +16,8 @@
 		<h1 class="mb-4 text-4xl font-bold tracking-tight">Tags</h1>
 		{#if data.tags.length > 0}
 			<p class="text-muted-foreground">
-				Browse posts by tag ({data.tags.length} {data.tags.length === 1 ? 'tag' : 'tags'})
+				Browse posts by tag ({data.tags.length}
+				{data.tags.length === 1 ? 'tag' : 'tags'})
 			</p>
 		{/if}
 	</div>
@@ -30,7 +31,7 @@
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{#each data.tags as tag (tag.id)}
 				<a href={`/tags/${tag.slug}`}>
-					<Card.Root class="transition-all hover:shadow-md hover:border-primary">
+					<Card.Root class="transition-all hover:border-primary hover:shadow-md">
 						<Card.Content class="p-6">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-2">
@@ -39,7 +40,8 @@
 									</Badge>
 								</div>
 								<div class="text-sm text-muted-foreground">
-									{tag.postCount} {tag.postCount === 1 ? 'post' : 'posts'}
+									{tag.postCount}
+									{tag.postCount === 1 ? 'post' : 'posts'}
 								</div>
 							</div>
 						</Card.Content>

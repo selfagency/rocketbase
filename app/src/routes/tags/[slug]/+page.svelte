@@ -22,7 +22,8 @@
 		</div>
 		{#if data.pagination.totalItems > 0}
 			<p class="text-muted-foreground">
-				{data.pagination.totalItems} {data.pagination.totalItems === 1 ? 'post' : 'posts'}
+				{data.pagination.totalItems}
+				{data.pagination.totalItems === 1 ? 'post' : 'posts'}
 			</p>
 		{/if}
 	</div>

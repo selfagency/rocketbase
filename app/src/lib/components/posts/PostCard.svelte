@@ -2,14 +2,11 @@
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
-	import type { PostsResponse } from '$lib/types/pocketbase';
+	import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 	import { format } from '@formkit/tempo';
 
 	interface Props {
-		post: PostsResponse<{
-			author: { id: string; name?: string; email: string; avatar?: string }[];
-			tags: { id: string; tag: string; slug: string }[];
-		}>;
+		post: PostsResponseWithExpanded;
 	}
 
 	let { post }: Props = $props();
@@ -53,8 +50,8 @@
 		</div>
 
 		<div class="mb-4 flex items-center gap-3">
-			{#if post.expand?.author && post.expand.author.length > 0}
-				{@const author = post.expand.author[0]}
+			{#if post.author && post.author.length > 0}
+				{@const author = post.author[0]}
 				<Avatar class="h-8 w-8">
 					{#if author.avatar}
 						<AvatarImage
@@ -79,11 +76,14 @@
 			{/if}
 		</div>
 
-		{#if post.expand?.tags && post.expand.tags.length > 0}
-			<div class="flex flex-wrap gap-2">
-				{#each post.expand.tags as tag}
+		{#if post.tags && post.tags.length > 0}
+			<div class="mt-4 flex flex-wrap gap-2">
+				{#each post.tags as tag}
 					<a href={`/tags/${tag.slug}`}>
-						<Badge variant="secondary" class="text-xs transition-colors hover:bg-primary hover:text-primary-foreground">
+						<Badge
+							variant="secondary"
+							class="text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
+						>
 							#{tag.tag}
 						</Badge>
 					</a>

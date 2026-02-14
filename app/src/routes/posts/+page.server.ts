@@ -1,4 +1,4 @@
-import type { PostsResponse } from '../../lib/types/pocketbase';
+import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
@@ -10,12 +10,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
 	try {
 		// Fetch paginated posts
-		const result = await pb.collection('posts').getList<
-			PostsResponse<{
-				author: { id: string; name?: string; email: string; avatar?: string }[];
-				tags: { id: string; tag: string; slug: string }[];
-			}>
-		>(page, perPage, {
+		const result = await pb.collection('posts').getList<PostsResponseWithExpanded>(page, perPage, {
 			filter: 'published = true',
 			sort: '-created',
 			expand: 'author,tags'

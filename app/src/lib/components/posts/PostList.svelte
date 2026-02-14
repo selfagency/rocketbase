@@ -2,14 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import * as Pagination from '$lib/components/ui/pagination';
-	import type { PostsResponse } from '$lib/types/pocketbase';
+	import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 	import PostCard from './PostCard.svelte';
 
 	interface Props {
-		posts: PostsResponse<{
-			author: { id: string; name?: string; email: string; avatar?: string }[];
-			tags: { id: string; tag: string; slug: string }[];
-		}>[];
+		posts: PostsResponseWithExpanded[];
 		pagination: {
 			page: number;
 			perPage: number;
@@ -20,7 +17,12 @@
 		emptyDescription?: string;
 	}
 
-	let { posts, pagination, emptyTitle = 'No posts found', emptyDescription = 'There are no posts to display.' }: Props = $props();
+	let {
+		posts,
+		pagination,
+		emptyTitle = 'No posts found',
+		emptyDescription = 'There are no posts to display.'
+	}: Props = $props();
 
 	function handlePageChange(pageNum: number) {
 		const url = new URL(page.url);

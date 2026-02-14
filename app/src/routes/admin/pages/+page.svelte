@@ -9,8 +9,8 @@
 
 <div class="container mx-auto py-8">
 	<div class="mb-8">
-		<h1 class="text-3xl font-bold">{m.admin_pages_title()}</h1>
-		<p class="mt-2 text-muted-foreground">{m.admin_pages_description()}</p>
+		<h1 class="text-3xl font-bold">{m['admin.pages.title']()}</h1>
+		<p class="mt-2 text-muted-foreground">{m['admin.pages.description']()}</p>
 	</div>
 
 	<DataTable

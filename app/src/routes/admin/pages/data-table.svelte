@@ -199,117 +199,67 @@
 	});
 </script>
 
-<div class="w-full">
-	<div class="flex items-center gap-4 py-4">
-		<Input
-			placeholder={m.admin_pages_search_placeholder()}
-			value={searchValue}
-			oninput={(e) => handleSearch(e.currentTarget.value)}
-			class="max-w-sm"
-		/>
-		<Combobox.Root
-			options={[{ id: '', name: m.admin_pages_all_authors() }, ...authors]}
-			value={authorValue}
-			placeholder={m.admin_pages_select_author()}
-			onchange={handleAuthorSearch}
-		/>
+<Tooltip.Provider>
+	<div class="w-full">
+		<div class="flex items-center gap-4 py-4">
+			<Input
+				placeholder={m['admin.pages.search_placeholder']()}
+				value={searchValue}
+				oninput={(e) => handleSearch(e.currentTarget.value)}
+				class="max-w-sm"
+			/>
+			<Combobox.Root
+				options={[{ id: '', name: m['admin.pages.all_authors']() }, ...authors]}
+				value={authorValue}
+				placeholder={m['admin.pages.select_author']()}
+				onchange={handleAuthorSearch}
+			/>
 
-		<ButtonGroup.Root class="rounded-lg border bg-white">
-			<Button
-				variant={statusValue === 'all' ? 'default' : 'ghost'}
-				size="sm"
-				onclick={() => {
-					statusValue = 'all';
-				}}
-			>
-				{m.admin_pages_all()}
-			</Button>
-			<Button
-				variant={statusValue === 'draft' ? 'default' : 'ghost'}
-				size="sm"
-				onclick={() => {
-					statusValue = 'draft';
-				}}
-			>
-				{m.admin_pages_drafts()}
-			</Button>
-			<Button
-				variant={statusValue === 'published' ? 'default' : 'ghost'}
-				size="sm"
-				onclick={() => {
-					statusValue = 'published';
-				}}
-			>
-				{m.admin_pages_published()}
-			</Button>
-		</ButtonGroup.Root>
+			<ButtonGroup.Root class="rounded-lg border bg-white">
+				<Button
+					variant={statusValue === 'all' ? 'default' : 'ghost'}
+					size="sm"
+					onclick={() => {
+						statusValue = 'all';
+					}}
+				>
+					{m['admin.pages.all']()}
+				</Button>
+				<Button
+					variant={statusValue === 'draft' ? 'default' : 'ghost'}
+					size="sm"
+					onclick={() => {
+						statusValue = 'draft';
+					}}
+				>
+					{m['admin.pages.drafts']()}
+				</Button>
+				<Button
+					variant={statusValue === 'published' ? 'default' : 'ghost'}
+					size="sm"
+					onclick={() => {
+						statusValue = 'published';
+					}}
+				>
+					{m['admin.pages.published']()}
+				</Button>
+			</ButtonGroup.Root>
 
-		<Button href="/admin/pages/new" class="ms-auto">{m.admin_pages_create_page()}</Button>
-	</div>
+			<Button href="/admin/pages/new" class="ms-auto">{m['admin.pages.create_page']()}</Button>
+		</div>
 
-	<div class="rounded-md border">
-		<Table.Root>
-			<Table.Header>
-				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-					<Table.Row>
-						<!-- Drag handle header cell to align with body drag handle -->
-						<Table.Head class="w-8"></Table.Head>
-						{#each headerGroup.headers as header (header.id)}
-							<Table.Head>
-								{#if !header.isPlaceholder}
-									{#if (header.column.columnDef as any)?.meta?.sortKey}
-										{@const tooltip = (header.column.columnDef as any)?.meta?.tooltip}
-										{#if tooltip}
-											<Tooltip.Root>
-												<Tooltip.Trigger>
-													<button
-														class="flex items-center gap-2 transition-colors hover:text-foreground"
-														onclick={() =>
-															navigateToSort((header.column.columnDef as any).meta.sortKey)}
-													>
-														<FlexRender
-															content={header.column.columnDef.header}
-															context={header.getContext()}
-														/>
-														{#if (header.column.columnDef as any).meta.sortKey === 'order'}
-															{@const sortState = isSortState(
-																(header.column.columnDef as any).meta.sortKey
-															)}
-															{#if sortState.desc}
-																<span transition:fade={{ duration: 150 }}>
-																	<ArrowDown10Icon
-																		class="h-4 w-4 text-foreground"
-																		aria-hidden="true"
-																	/>
-																</span>
-															{:else}
-																<span transition:fade={{ duration: 150 }}>
-																	<ArrowDown01Icon
-																		class="h-4 w-4 {sortState.asc
-																			? 'text-foreground'
-																			: 'text-muted-foreground'}"
-																		aria-hidden="true"
-																	/>
-																</span>
-															{/if}
-														{:else}
-															<ArrowDownUpIcon
-																class="h-4 w-4 {isSortState(
-																	(header.column.columnDef as any).meta.sortKey
-																).asc ||
-																isSortState((header.column.columnDef as any).meta.sortKey).desc
-																	? 'text-foreground'
-																	: 'text-muted-foreground'}"
-																aria-hidden="true"
-															/>
-														{/if}
-													</button>
-												</Tooltip.Trigger>
-												<Tooltip.Content>
-													<p>{tooltip}</p>
-												</Tooltip.Content>
-											</Tooltip.Root>
-										{:else}
+		<div class="rounded-md border">
+			<Table.Root>
+				<Table.Header>
+					{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+						<Table.Row>
+							<!-- Drag handle header cell to align with body drag handle -->
+							<Table.Head class="w-8"></Table.Head>
+							{#each headerGroup.headers as header (header.id)}
+								<Table.Head>
+									{#if !header.isPlaceholder}
+										{#if (header.column.columnDef as any)?.meta?.sortKey}
+											{@const tooltip = (header.column.columnDef as any)?.meta?.tooltip}
 											<button
 												class="flex items-center gap-2 transition-colors hover:text-foreground"
 												onclick={() =>
@@ -319,24 +269,82 @@
 													content={header.column.columnDef.header}
 													context={header.getContext()}
 												/>
-												{#if (header.column.columnDef as any).meta.sortKey === 'order'}
+												{#if tooltip}
+													<Tooltip.Root>
+														<Tooltip.Trigger>
+															{#snippet child({ props })}
+																<span {...props} class="inline-flex items-center gap-2">
+																	{#if (header.column.columnDef as any).meta.sortKey === 'order'}
+																		{@const sortState = isSortState(
+																			(header.column.columnDef as any).meta.sortKey
+																		)}
+																		<div class="relative h-4 w-4">
+																			{#if sortState.desc}
+																				<span
+																					class="absolute inset-0"
+																					transition:fade={{ duration: 150 }}
+																				>
+																					<ArrowDown10Icon
+																						class="h-4 w-4 text-foreground"
+																						aria-hidden="true"
+																					/>
+																				</span>
+																			{:else}
+																				<span
+																					class="absolute inset-0"
+																					transition:fade={{ duration: 150 }}
+																				>
+																					<ArrowDown01Icon
+																						class="h-4 w-4 {sortState.asc
+																							? 'text-foreground'
+																							: 'text-muted-foreground'}"
+																						aria-hidden="true"
+																					/>
+																				</span>
+																			{/if}
+																		</div>
+																	{:else}
+																		<ArrowDownUpIcon
+																			class="h-4 w-4 {isSortState(
+																				(header.column.columnDef as any).meta.sortKey
+																			).asc ||
+																			isSortState((header.column.columnDef as any).meta.sortKey)
+																				.desc
+																				? 'text-foreground'
+																				: 'text-muted-foreground'}"
+																			aria-hidden="true"
+																		/>
+																	{/if}
+																</span>
+															{/snippet}
+														</Tooltip.Trigger>
+														<Tooltip.Content>
+															<p>{tooltip}</p>
+														</Tooltip.Content>
+													</Tooltip.Root>
+												{:else if (header.column.columnDef as any).meta.sortKey === 'order'}
 													{@const sortState = isSortState(
 														(header.column.columnDef as any).meta.sortKey
 													)}
-													{#if sortState.desc}
-														<span transition:fade={{ duration: 150 }}>
-															<ArrowDown10Icon class="h-4 w-4 text-foreground" aria-hidden="true" />
-														</span>
-													{:else}
-														<span transition:fade={{ duration: 150 }}>
-															<ArrowDown01Icon
-																class="h-4 w-4 {sortState.asc
-																	? 'text-foreground'
-																	: 'text-muted-foreground'}"
-																aria-hidden="true"
-															/>
-														</span>
-													{/if}
+													<div class="relative h-4 w-4">
+														{#if sortState.desc}
+															<span class="absolute inset-0" transition:fade={{ duration: 150 }}>
+																<ArrowDown10Icon
+																	class="h-4 w-4 text-foreground"
+																	aria-hidden="true"
+																/>
+															</span>
+														{:else}
+															<span class="absolute inset-0" transition:fade={{ duration: 150 }}>
+																<ArrowDown01Icon
+																	class="h-4 w-4 {sortState.asc
+																		? 'text-foreground'
+																		: 'text-muted-foreground'}"
+																	aria-hidden="true"
+																/>
+															</span>
+														{/if}
+													</div>
 												{:else}
 													<ArrowDownUpIcon
 														class="h-4 w-4 {isSortState(
@@ -348,79 +356,79 @@
 													/>
 												{/if}
 											</button>
+										{:else}
+											<FlexRender
+												content={header.column.columnDef.header}
+												context={header.getContext()}
+											/>
 										{/if}
-									{:else}
-										<FlexRender
-											content={header.column.columnDef.header}
-											context={header.getContext()}
-										/>
 									{/if}
-								{/if}
-							</Table.Head>
-						{/each}
-					</Table.Row>
-				{/each}
-			</Table.Header>
-			<Table.Body class="bg-white">
-				{#each table.getRowModel().rows as row (row.id)}
-					{@const rowId = (row as any).original?.id || (row as any).id}
-					<tr
-						data-id={rowId}
-						draggable="true"
-						ondragstart={(e) => onDragStart(e as DragEvent, rowId)}
-						ondragover={(e) => onDragOver(e as DragEvent)}
-						ondragleave={(e) => onDragLeave(e as DragEvent)}
-						ondrop={(e) => onDrop(e as DragEvent, rowId)}
-						class:cursor-grabbing={draggingId === rowId}
-					>
-						<!-- Drag handle cell -->
-						<Table.Cell class="w-8 text-center">
-							<button
-								class="text-muted-foreground hover:text-foreground"
-								aria-label="Drag to reorder"
-								title="Drag to reorder"
-							>
-								<GripVerticalIcon class="h-4 w-4 text-gray-400" aria-hidden="true" />
-							</button>
-						</Table.Cell>
-						{#each row.getVisibleCells() as cell (cell.id)}
-							<Table.Cell>
-								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+								</Table.Head>
+							{/each}
+						</Table.Row>
+					{/each}
+				</Table.Header>
+				<Table.Body class="bg-white">
+					{#each table.getRowModel().rows as row (row.id)}
+						{@const rowId = (row as any).original?.id || (row as any).id}
+						<tr
+							data-id={rowId}
+							draggable="true"
+							ondragstart={(e) => onDragStart(e as DragEvent, rowId)}
+							ondragover={(e) => onDragOver(e as DragEvent)}
+							ondragleave={(e) => onDragLeave(e as DragEvent)}
+							ondrop={(e) => onDrop(e as DragEvent, rowId)}
+							class:cursor-grabbing={draggingId === rowId}
+						>
+							<!-- Drag handle cell -->
+							<Table.Cell class="w-8 text-center">
+								<button
+									class="text-muted-foreground hover:text-foreground"
+									aria-label="Drag to reorder"
+									title="Drag to reorder"
+								>
+									<GripVerticalIcon class="h-4 w-4 text-gray-400" aria-hidden="true" />
+								</button>
 							</Table.Cell>
-						{/each}
-					</tr>
-				{:else}
-					<tr>
-						<Table.Cell colspan={columns.length + 1} class="h-24 text-center">
-							No pages found.
-						</Table.Cell>
-					</tr>
-				{/each}
-			</Table.Body>
-		</Table.Root>
-	</div>
+							{#each row.getVisibleCells() as cell (cell.id)}
+								<Table.Cell>
+									<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+								</Table.Cell>
+							{/each}
+						</tr>
+					{:else}
+						<tr>
+							<Table.Cell colspan={columns.length + 1} class="h-24 text-center">
+								No pages found.
+							</Table.Cell>
+						</tr>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		</div>
 
-	<div class="flex items-center justify-between space-x-2 pt-4">
-		<div class="text-sm text-muted-foreground">
-			Showing page {currentPage} of {totalPages} ({totalItems} total)
-		</div>
-		<div class="space-x-2">
-			<Button
-				variant="outline"
-				size="sm"
-				onclick={() => navigateToPage(currentPage - 1)}
-				disabled={currentPage <= 1}
-			>
-				Previous
-			</Button>
-			<Button
-				variant="outline"
-				size="sm"
-				onclick={() => navigateToPage(currentPage + 1)}
-				disabled={currentPage >= totalPages}
-			>
-				Next
-			</Button>
+		<div class="flex items-center justify-between space-x-2 pt-4">
+			<div class="text-sm text-muted-foreground">
+				Showing page {currentPage} of {totalPages} ({totalItems} total)
+			</div>
+			<div class="space-x-2">
+				<Button
+					variant="outline"
+					size="sm"
+					onclick={() => navigateToPage(currentPage - 1)}
+					disabled={currentPage <= 1}
+				>
+					Previous
+				</Button>
+				<Button
+					variant="outline"
+					size="sm"
+					onclick={() => navigateToPage(currentPage + 1)}
+					disabled={currentPage >= totalPages}
+				>
+					Next
+				</Button>
+			</div>
 		</div>
 	</div>
-</div>
+</Tooltip.Provider>

@@ -45,11 +45,16 @@
     overflow: hidden;
   }
 
+  /* Ensure all Tipex internal wrappers inherit border radius */
+  .tipex-wrapper :global(> *) {
+    border-radius: inherit;
+  }
+
   .tipex-wrapper :global(.ProseMirror) {
     min-height: 200px;
     padding: 0.75rem;
     outline: none;
-    border-radius: inherit;
+    border-radius: 0.375rem; /* md radius */
   }
 
   .tipex-wrapper :global(.ProseMirror:focus) {

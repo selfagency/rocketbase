@@ -1,6 +1,6 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { actions } from '../../../routes/forgot-password/+page.server';
+import { actions, load } from '../../../routes/forgot-password/+page.server';
 
 describe('Forgot Password Server Actions', () => {
   let mockLocals: any;
@@ -109,6 +109,16 @@ describe('Forgot Password Server Actions', () => {
       const result = await actions.default(mockEvent as any);
 
       expect(result).toHaveProperty('status', 400);
+    });
+  });
+
+  describe('load function', () => {
+    it('returns form with valid structure', async () => {
+      const result: any = await load({} as any);
+
+      expect(result).toHaveProperty('form');
+      expect(result.form).toHaveProperty('valid');
+      expect(result.form).toHaveProperty('data');
     });
   });
 });

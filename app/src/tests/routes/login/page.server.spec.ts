@@ -1,6 +1,6 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { actions } from '../../../routes/login/+page.server';
+import { actions, load } from '../../../routes/login/+page.server';
 
 describe('Login Server Actions', () => {
   let mockLocals: any;
@@ -208,6 +208,29 @@ describe('Login Server Actions', () => {
 
       expect(result).toHaveProperty('status', 400);
       expect((result as any).data.form.message).toContain('required');
+    });
+  });
+
+  describe('load function', () => {
+    it('redirects to home if user is already logged in', async () => {
+      mockLocals.user = { id: '123', email: 'test@example.com' };
+
+      try {
+        await load({ locals: mockLocals } as any);
+        expect.fail('Should have thrown redirect');
+      } catch (error: any) {
+        expect(error.status).toBe(303);
+        expect(error.location).toBe('/');
+      }
+    });
+
+    it('returns form when user is not logged in', async () => {
+      mockLocals.user = null;
+
+      const result: any = await load({ locals: mockLocals } as any);
+
+      expect(result).toHaveProperty('form');
+      expect(result.form).toHaveProperty('valid');
     });
   });
 });

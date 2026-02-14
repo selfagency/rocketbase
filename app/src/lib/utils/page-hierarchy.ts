@@ -46,10 +46,7 @@ export function buildPageHierarchy(pages: PagesResponseWithAuthor[]): PageWithCh
  * @param depth - Current depth level (defaults to 0)
  * @returns Flat array of pages with depth property
  */
-export function flattenPageHierarchy(
-	pages: PageWithChildren[],
-	depth = 0
-): PageWithDepth[] {
+export function flattenPageHierarchy(pages: PageWithChildren[], depth = 0): PageWithDepth[] {
 	const flat: PageWithDepth[] = [];
 
 	for (const page of pages) {
@@ -77,9 +74,7 @@ export function flattenPageHierarchy(
  * @param pages - Flat list of pages
  * @returns Flat array of pages with depth property, in hierarchical display order
  */
-export function buildAndFlattenPageHierarchy(
-	pages: PagesResponseWithAuthor[]
-): PageWithDepth[] {
+export function buildAndFlattenPageHierarchy(pages: PagesResponseWithAuthor[]): PageWithDepth[] {
 	const hierarchy = buildPageHierarchy(pages);
 	return flattenPageHierarchy(hierarchy);
 }

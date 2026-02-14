@@ -17,7 +17,9 @@ export interface GeneratePostMetaTagsOptions {
 /**
  * Generate complete meta tags for a blog post including OpenGraph and JSON-LD structured data
  */
-export function generatePostMetaTags(options: GeneratePostMetaTagsOptions): MetaTagsProps & { jsonLd?: any } {
+export function generatePostMetaTags(
+	options: GeneratePostMetaTagsOptions
+): MetaTagsProps & { jsonLd?: any } {
 	const { post, origin, cdnUrl, siteName = 'Rocketbase', ogImage } = options;
 
 	const canonical = `${origin}/posts/${post.slug}`;

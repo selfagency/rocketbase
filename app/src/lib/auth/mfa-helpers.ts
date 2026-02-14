@@ -118,9 +118,7 @@ export async function authenticateWithPassword<T extends Record<string, any>>(
 			// Ignore console errors
 		}
 
-		logger
-			.withContext({ route, requestId, email })
-			.debug('Attempting authWithPassword');
+		logger.withContext({ route, requestId, email }).debug('Attempting authWithPassword');
 
 		const authData = await pb.collection('users').authWithPassword(email, password);
 
@@ -168,7 +166,10 @@ export async function authenticateWithPassword<T extends Record<string, any>>(
 		const mfaIdFromError = err?.response?.mfaId;
 		if (mfaIdFromError) {
 			// MFA is required - request OTP
-			return await requestMfaOtp({ email, password, mfaId: mfaIdFromError, pb, logger, requestId, route }, form);
+			return await requestMfaOtp(
+				{ email, password, mfaId: mfaIdFromError, pb, logger, requestId, route },
+				form
+			);
 		}
 
 		// Regular login error

@@ -64,7 +64,7 @@ describe('Individual Post Page Server Load', () => {
 
       mockPb.getFirstListItem.mockResolvedValue(mockPost);
 
-      const result = await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
+      const result: any = await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
 
       expect(result.post).toEqual(mockPost);
       expect(mockPb.collection).toHaveBeenCalledWith('posts');
@@ -84,7 +84,7 @@ describe('Individual Post Page Server Load', () => {
 
       mockPb.getFirstListItem.mockResolvedValue(mockPost);
 
-      const result = await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
+      const result: any = await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
 
       expect(result.post.slug).toBe('another-post-slug');
       expect(mockPb.getFirstListItem).toHaveBeenCalledWith('slug = "another-post-slug"', expect.any(Object));

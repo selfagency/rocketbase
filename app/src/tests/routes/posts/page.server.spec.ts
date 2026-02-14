@@ -61,7 +61,7 @@ describe('Posts Index Page Server Load', () => {
 
       mockPb.getList.mockResolvedValue(mockResult);
 
-      const result = await load({ url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({ url: mockUrl, locals: mockLocals } as any);
 
       expect(result.posts).toEqual(mockResult.items);
       expect(result.pagination).toEqual({
@@ -92,7 +92,7 @@ describe('Posts Index Page Server Load', () => {
 
       mockPb.getList.mockResolvedValue(mockResult);
 
-      const result = await load({ url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({ url: mockUrl, locals: mockLocals } as any);
 
       expect(result.pagination.page).toBe(3);
       expect(mockPb.getList).toHaveBeenCalledWith(3, 12, expect.any(Object));
@@ -111,7 +111,7 @@ describe('Posts Index Page Server Load', () => {
 
       mockPb.getList.mockResolvedValue(mockResult);
 
-      const result = await load({ url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({ url: mockUrl, locals: mockLocals } as any);
 
       expect(result.pagination.perPage).toBe(20);
       expect(mockPb.getList).toHaveBeenCalledWith(1, 20, expect.any(Object));
@@ -131,7 +131,7 @@ describe('Posts Index Page Server Load', () => {
 
       mockPb.getList.mockResolvedValue(mockResult);
 
-      const result = await load({ url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({ url: mockUrl, locals: mockLocals } as any);
 
       expect(result.pagination.page).toBe(2);
       expect(result.pagination.perPage).toBe(15);
@@ -149,7 +149,7 @@ describe('Posts Index Page Server Load', () => {
 
       mockPb.getList.mockResolvedValue(mockResult);
 
-      const result = await load({ url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({ url: mockUrl, locals: mockLocals } as any);
 
       expect(result.posts).toEqual([]);
       expect(result.pagination.totalItems).toBe(0);
@@ -299,7 +299,7 @@ describe('Posts Index Page Server Load', () => {
       const error = new Error('Database error');
       mockPb.getList.mockRejectedValue(error);
 
-      const result = await load({ url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({ url: mockUrl, locals: mockLocals } as any);
 
       expect(result.posts).toEqual([]);
       expect(result.pagination).toEqual({
@@ -329,7 +329,7 @@ describe('Posts Index Page Server Load', () => {
       mockUrl.searchParams.set('perPage', '25');
       mockPb.getList.mockRejectedValue(new Error('Test error'));
 
-      const result = await load({ url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({ url: mockUrl, locals: mockLocals } as any);
 
       expect(result.pagination.perPage).toBe(25);
     });

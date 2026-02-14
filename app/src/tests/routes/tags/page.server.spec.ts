@@ -58,7 +58,7 @@ describe('Tags Index Page Server Load', () => {
         if (name === 'posts') return postsCollection;
       });
 
-      const result = await load({ locals: mockLocals } as any);
+      const result: any = await load({ locals: mockLocals } as any);
 
       expect(tagsCollection.getFullList).toHaveBeenCalledWith({ sort: 'tag' });
       expect(result.tags).toHaveLength(2);
@@ -78,7 +78,7 @@ describe('Tags Index Page Server Load', () => {
         if (name === 'posts') return postsCollection;
       });
 
-      const result = await load({ locals: mockLocals } as any);
+      const result: any = await load({ locals: mockLocals } as any);
 
       expect(postsCollection.getList).toHaveBeenCalledWith(
         1,
@@ -123,7 +123,7 @@ describe('Tags Index Page Server Load', () => {
 
       mockPb.collection = vi.fn(() => tagsCollection);
 
-      const result = await load({ locals: mockLocals } as any);
+      const result: any = await load({ locals: mockLocals } as any);
 
       expect(result.tags).toEqual([]);
     });
@@ -137,7 +137,7 @@ describe('Tags Index Page Server Load', () => {
 
       mockPb.collection = vi.fn(() => tagsCollection);
 
-      const result = await load({ locals: mockLocals } as any);
+      const result: any = await load({ locals: mockLocals } as any);
 
       expect(result.tags).toEqual([]);
     });

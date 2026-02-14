@@ -57,7 +57,7 @@ describe('Individual Tag Page Server Load', () => {
         if (name === 'posts') return postsCollection;
       });
 
-      const result = await load({ params: mockParams, url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({ params: mockParams, url: mockUrl, locals: mockLocals } as any);
 
       expect(result.tag).toEqual(mockTag);
       expect(result.posts).toEqual(mockPosts.items);
@@ -105,7 +105,7 @@ describe('Individual Tag Page Server Load', () => {
         if (name === 'posts') return postsCollection;
       });
 
-      const result = await load({ params: mockParams, url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({ params: mockParams, url: mockUrl, locals: mockLocals } as any);
 
       expect(postsCollection.getList).toHaveBeenCalledWith(2, 20, expect.any(Object));
       expect(result.pagination.page).toBe(2);

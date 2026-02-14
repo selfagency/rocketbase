@@ -42,9 +42,11 @@
 	<div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
 		{#if post.author && post.author.length > 0}
 			<div class="flex items-center gap-2">
+				<span class="sr-only">Authors:</span>
+				<span aria-hidden="true" title="Authors">👤</span>
 				<div class="flex -space-x-2">
 					{#each post.author as author}
-						<a href={`/authors/${author.id}`} class="p-author h-card" rel="author">
+						<a href={`/authors/${author.id}`} class="p-author u-category h-card" rel="author">
 							<Avatar
 								class="h-6 w-6 border border-muted ring-2 ring-background"
 								title={author.name || author.email}
@@ -69,7 +71,7 @@
 					{#each post.author as author, i}
 						<a
 							href={`/authors/${author.id}`}
-							class="p-author h-card transition-colors hover:text-primary"
+							class="p-author u-category h-card transition-colors hover:text-primary"
 							rel="author"
 						>
 							<span class="p-name">{author.name || author.email}</span>

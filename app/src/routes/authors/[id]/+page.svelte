@@ -77,7 +77,10 @@
 				{getAuthorInitials(data.author.name, data.author.email)}
 			</AvatarFallback>
 		</Avatar>
-		<h1 class="p-name mb-2 text-4xl font-bold">{data.author.name || data.author.email}</h1>
+		<h1 class="p-name mb-2 text-4xl font-bold">
+			<span aria-hidden="true" class="mr-2 opacity-70">👤</span>
+			{data.author.name || data.author.email}
+		</h1>
 		<data class="u-url hidden" value={`${page.url.origin}/authors/${data.author.id}`}></data>
 		<data class="p-nickname hidden" value={data.author.username}></data>
 		{#if data.author.title}

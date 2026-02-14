@@ -54,10 +54,12 @@
 
 		{#if showAuthor}
 			<div class="mb-4 flex items-center gap-3">
+				<span class="sr-only">Authors:</span>
+				<span aria-hidden="true" class="text-muted-foreground" title="Authors">👤</span>
 				{#if post.author && post.author.length > 0}
 					<div class="flex -space-x-2">
 						{#each post.author as author, i}
-							<a href={`/authors/${author.id}`} class="p-author h-card" rel="author">
+							<a href={`/authors/${author.id}`} class="p-author u-category h-card" rel="author">
 								<Avatar
 									class="h-8 w-8 border border-muted ring-2 ring-background"
 									title={author.name || author.email}
@@ -74,6 +76,7 @@
 									</AvatarFallback>
 								</Avatar>
 								<data class="p-name hidden" value={author.name || author.email}></data>
+								<data class="u-url hidden" value={`/authors/${author.id}`}></data>
 							</a>
 						{/each}
 					</div>
@@ -82,10 +85,11 @@
 							{#each post.author as author, i}
 								<a
 									href={`/authors/${author.id}`}
-									class="p-author h-card transition-colors hover:text-primary"
+									class="p-author u-category h-card transition-colors hover:text-primary"
 									rel="author"
 								>
 									<span class="p-name">{author.name || author.email}</span>
+									<data class="u-url hidden" value={`/authors/${author.id}`}></data>
 								</a>
 								{i < post.author.length - 1 ? ', ' : ''}
 							{/each}

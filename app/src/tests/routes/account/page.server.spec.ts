@@ -102,6 +102,53 @@ describe('Account Server Actions', () => {
       expect(mockCollection.authRefresh).toHaveBeenCalled();
     });
 
+    it('handles avatar file upload', async () => {
+      const formData = new FormData();
+      formData.append('name', 'Test User');
+      formData.append('email', 'test@example.com');
+
+      // Create a mock file
+      const avatarFile = new File(['avatar content'], 'avatar.jpg', { type: 'image/jpeg' });
+      formData.append('avatar', avatarFile);
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      mockCollection.update.mockResolvedValue({ ...mockUser, avatar: 'avatar.jpg' });
+      mockCollection.authRefresh.mockResolvedValue({});
+
+      const result: any = await actions.updateProfile(mockEvent as any);
+
+      expect(result.success).toBe(true);
+      expect(mockCollection.update).toHaveBeenCalledWith(
+        'user-123',
+        expect.objectContaining({
+          avatar: expect.any(File),
+        })
+      );
+    });
+
+    it('handles profile update errors', async () => {
+      const formData = new FormData();
+      formData.append('name', 'Updated Name');
+      formData.append('email', 'updated@example.com');
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const error = new Error('Database error');
+      mockCollection.update.mockRejectedValue(error);
+
+      const result: any = await actions.updateProfile(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+      expect(mockLocals.logger.error).toHaveBeenCalledWith('Profile update error:');
+    });
+
     it('validates name minimum length', async () => {
       const formData = new FormData();
       formData.append('name', 'A');
@@ -180,6 +227,24 @@ describe('Account Server Actions', () => {
       const result = await actions.sendVerificationEmail(mockEvent as any);
 
       expect(result).toHaveProperty('status', 401);
+    });
+
+    it('handles email verification errors', async () => {
+      const formData = new FormData();
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const error: any = new Error('Failed to send email');
+      error.data = { message: 'SMTP connection failed' };
+      mockCollection.requestVerification.mockRejectedValue(error);
+
+      const result: any = await actions.sendVerificationEmail(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+      expect(mockLocals.logger.error).toHaveBeenCalledWith('Email verification error:');
     });
   });
 
@@ -327,6 +392,24 @@ describe('Account Server Actions', () => {
 
       expect(result).toHaveProperty('status', 401);
     });
+
+    it('handles MFA opt-in update errors', async () => {
+      const formData = new FormData();
+      formData.append('mfaOptIn', 'true');
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const error = new Error('Database update failed');
+      mockCollection.update.mockRejectedValue(error);
+
+      const result: any = await actions.toggleMfaOptIn(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+      expect(mockLocals.logger.error).toHaveBeenCalledWith('MFA opt-in update error:');
+    });
   });
 
   describe('requestTwoFactor action', () => {
@@ -435,6 +518,60 @@ describe('Account Server Actions', () => {
 
       expect(result).toHaveProperty('status', 401);
     });
+
+    it('returns error when otpId is missing', async () => {
+      expect.assertions(1);
+
+      const formData = new FormData();
+      formData.append('code', '123456');
+      // otpId intentionally missing
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await actions.verifyTwoFactor(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+    });
+
+    it('returns error when code is missing', async () => {
+      expect.assertions(1);
+
+      const formData = new FormData();
+      formData.append('otpId', 'otp-123');
+      // code intentionally missing
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await actions.verifyTwoFactor(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+    });
+
+    it('returns error when OTP not found', async () => {
+      expect.assertions(1);
+
+      const formData = new FormData();
+      formData.append('otpId', 'otp-invalid');
+      formData.append('code', '123456');
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      // Mock empty OTP list (OTP not found)
+      mockCollection.getFullList.mockResolvedValue([]);
+
+      const result = await actions.verifyTwoFactor(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+    });
   });
 
   describe('disableTwoFactor action', () => {
@@ -459,6 +596,20 @@ describe('Account Server Actions', () => {
       const result = await actions.disableTwoFactor(mockEvent as any);
 
       expect(result).toHaveProperty('status', 401);
+    });
+
+    it('handles 2FA disable errors', async () => {
+      expect.assertions(2);
+
+      mockCollection.getFullList.mockResolvedValue([{ id: 'mfa-1', recordRef: 'user-123', method: 'otp' }]);
+
+      const error = new Error('Failed to delete MFA record');
+      mockCollection.delete.mockRejectedValue(error);
+
+      const result: any = await actions.disableTwoFactor(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+      expect(mockLocals.logger.error).toHaveBeenCalledWith('2FA disable error:');
     });
   });
 });

@@ -1,7 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import AccountPage from '../../../routes/account/+page.svelte';
-import { vi } from 'vitest';
 
 describe('ProfileCard rendering via Account Page', () => {
   const mockUser = {
@@ -118,8 +117,14 @@ describe('ProfileCard rendering via Account Page', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(fetchMock).toHaveBeenCalled();
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('?/sendVerificationEmail');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      '?/sendVerificationEmail',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.any(FormData),
+      })
+    );
   });
 
   it('handles avatar file selection and shows remove button', async () => {

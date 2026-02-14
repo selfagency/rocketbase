@@ -21,6 +21,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
   const filters: string[] = [];
 
+  // Exclude trashed items by default
+  filters.push('in_trash != true');
+
   if (search) {
     filters.push(`title ~ "${search}" || slug ~ "${search}" || summary ~ "${search}"`);
   }
@@ -90,7 +93,14 @@ export const actions: Actions = {
     }
 
     try {
-      await locals.pb.collection('posts').delete(id);
+      // Soft delete: move to trash instead of hard delete
+      await locals.pb.collection('posts').update(id, {
+        published: false,
+        visible: false,
+        require_login: false,
+        subscriber_only: false,
+        in_trash: true,
+      });
       return { success: true };
     } catch (err) {
       const pbError = err as Error;

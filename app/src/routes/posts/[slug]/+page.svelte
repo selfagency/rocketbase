@@ -2,23 +2,50 @@
 	import { page } from '$app/state';
 	import PostHeader from '$lib/components/posts/PostHeader.svelte';
 	import * as m from '$lib/paraglide/messages.js';
+	import { MetaTags } from 'svelte-meta-tags';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	const metaTags = $derived({
+		title: data.post.title,
+		description: data.post.summary,
+		canonical: `${page.url.origin}/posts/${data.post.slug}`,
+		openGraph: {
+			type: 'article',
+			url: `${page.url.origin}/posts/${data.post.slug}`,
+			title: data.post.title,
+			description: data.post.summary,
+			images: data.post.image
+				? [
+						{
+							url: `${page.url.origin}/api/pb/files/posts/${data.post.id}/${data.post.image}`,
+							width: 1200,
+							height: 630,
+							alt: data.post.title
+						}
+					]
+				: [],
+			article: {
+				publishedTime: data.post.date,
+				modifiedTime: data.post.updated,
+				authors:
+					(data.post.expand as any)?.author?.map((a: any) => a.name || a.email) || [],
+				tags: (data.post.expand as any)?.tags?.map((t: any) => t.name) || []
+			}
+		},
+		twitter: {
+			cardType: 'summary_large_image' as const,
+			title: data.post.title,
+			description: data.post.summary,
+			image: data.post.image
+				? `${page.url.origin}/api/pb/files/posts/${data.post.id}/${data.post.image}`
+				: undefined
+		}
+	});
 </script>
 
-<svelte:head>
-	<title>{data.post.title} | Rocketbase</title>
-	{#if data.post.summary}
-		<meta name="description" content={data.post.summary} />
-	{/if}
-	{#if data.post.image}
-		<meta
-			property="og:image"
-			content="{page.url.origin}/api/pb/files/posts/{data.post.id}/{data.post.image}"
-		/>
-	{/if}
-</svelte:head>
+<MetaTags {...metaTags} />
 
 <div class="container mx-auto max-w-4xl px-4 py-8">
 	<article class="prose prose-lg max-w-none">

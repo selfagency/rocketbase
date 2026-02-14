@@ -19,10 +19,20 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as m from '$lib/paraglide/messages.js';
 	import { toast } from '$lib/stores/toast';
+	import { MetaTags } from 'svelte-meta-tags';
 	import { onMount } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+
+	const metaTags = {
+		title: 'Account Settings',
+		description: 'Manage your account settings and preferences',
+		openGraph: {
+			title: 'Account Settings',
+			description: 'Manage your account settings and preferences'
+		}
+	};
 
 	const { data } = $props();
 
@@ -202,6 +212,8 @@
 		}
 	}
 </script>
+
+<MetaTags {...metaTags} />
 
 <div class="container mx-auto max-w-4xl py-8">
 	<h1 class="mb-8 text-3xl font-bold">{m['account.title']()}</h1>

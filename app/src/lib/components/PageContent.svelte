@@ -1,17 +1,35 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
+	import { MetaTags } from 'svelte-meta-tags';
 	import type { PagesResponse } from '$lib/types/pocketbase';
 
 	let { page: pageData }: { page: PagesResponse } = $props();
+
+	const metaTags = $derived({
+		title: pageData.title || 'Page',
+		description: pageData.summary,
+		canonical: `${page.url.origin}/${pageData.slug}`,
+		openGraph: {
+			type: 'website',
+			url: `${page.url.origin}/${pageData.slug}`,
+			title: pageData.title || 'Page',
+			description: pageData.summary,
+			images: pageData.image
+				? [
+						{
+							url: `${page.url.origin}/api/pb/files/pages/${pageData.id}/${pageData.image}`,
+							width: 1200,
+							height: 630,
+							alt: pageData.title || 'Page'
+						}
+					]
+				: []
+		}
+	});
 </script>
 
-<svelte:head>
-	<title>{pageData.title || 'Page'} | Rocketbase</title>
-	{#if pageData.summary}
-		<meta name="description" content={pageData.summary} />
-	{/if}
-</svelte:head>
+<MetaTags {...metaTags} />
 
 {#if pageData.custom_css}
 	<style>

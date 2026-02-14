@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import RegisterPage from '../../../routes/register/+page.svelte';
 
-type PageData = { navItems: any[]; user: any; form: any };
+type PageData = { navItems: any[]; user: any; form: any; url: string; metadata: Record<string, string> };
 
 describe('Register Page Component', () => {
 	const mockFormData: PageData = {
@@ -16,7 +16,9 @@ describe('Register Page Component', () => {
 			message: undefined,
 			id: 'test-form'
 		},
-		user: undefined
+		user: undefined,
+		url: 'http://localhost:5173',
+		metadata: {}
 	};
 
 	it('renders registration form without errors', async () => {
@@ -37,7 +39,9 @@ describe('Register Page Component', () => {
 					email: ['Invalid email address']
 				}
 			},
-			user: undefined
+			user: undefined,
+			url: 'http://localhost:5173',
+			metadata: {}
 		};
 		const { container } = render(RegisterPage, { props: { data: dataWithErrors } });
 		expect(container).toBeTruthy();

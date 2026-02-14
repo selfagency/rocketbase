@@ -1,3 +1,4 @@
+import type { MetadataResponse } from '$lib/types/pocketbase';
 import type { LayoutServerLoad } from './$types';
 
 interface PageItem {
@@ -10,7 +11,7 @@ interface PageItem {
 	children?: PageItem[];
 }
 
-export const load: LayoutServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const { pb } = locals;
 
 	// Query pages collection — only published + visible pages appear in nav
@@ -23,9 +24,22 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	// Build hierarchical structure
 	const navItems = buildHierarchy(pages);
 
+	// Load site-wide metadata for SEO
+	const metadata = await pb.collection('metadata').getFullList<MetadataResponse>({
+		fields: 'key,value,type'
+	});
+
+	// Convert metadata array to object for easy access
+	const metadataObj: Record<string, string> = {};
+	for (const item of metadata) {
+		metadataObj[item.key] = item.value || '';
+	}
+
 	return {
 		navItems,
-		user: locals.user ?? null
+		user: locals.user ?? null,
+		metadata: metadataObj,
+		url: url.origin
 	};
 };
 

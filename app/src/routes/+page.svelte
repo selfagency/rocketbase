@@ -5,6 +5,7 @@
 	import { Card, CardContent, CardDescription, CardHeader } from '$lib/components/ui/card';
 	import * as m from '$lib/paraglide/messages.js';
 	import { toast } from '$lib/stores/toast';
+	import { MetaTags } from 'svelte-meta-tags';
 	import { onMount } from 'svelte';
 
 	let { data } = $props();
@@ -18,7 +19,21 @@
 			toast(m['auth.logout.success'](), 'success');
 		}
 	});
+
+	const metaTags = $derived({
+		title: m['home.title'](),
+		description: m['home.description'](),
+		canonical: page.url.origin,
+		openGraph: {
+			type: 'website',
+			url: page.url.origin,
+			title: m['home.title'](),
+			description: m['home.description']()
+		}
+	});
 </script>
+
+<MetaTags {...metaTags} />
 
 {#if data.page}
 	<PageContent page={data.page} />

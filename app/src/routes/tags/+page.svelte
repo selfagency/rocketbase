@@ -1,15 +1,26 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
+	import { MetaTags } from 'svelte-meta-tags';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	const metaTags = $derived({
+		title: 'Tags',
+		description: 'Browse all post tags',
+		canonical: `${page.url.origin}/tags`,
+		openGraph: {
+			type: 'website',
+			url: `${page.url.origin}/tags`,
+			title: 'Tags',
+			description: 'Browse all post tags'
+		}
+	});
 </script>
 
-<svelte:head>
-	<title>Tags | Rocketbase</title>
-	<meta name="description" content="Browse all post tags" />
-</svelte:head>
+<MetaTags {...metaTags} />
 
 <div class="container mx-auto px-4 py-8">
 	<div class="mb-8">

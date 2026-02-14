@@ -10,7 +10,9 @@ describe('/+page.svelte', () => {
 				data: {
 					navItems: [],
 					user: null,
-					page: null
+					page: null,
+					url: 'http://localhost:5173',
+					metadata: {}
 				}
 			}
 		});

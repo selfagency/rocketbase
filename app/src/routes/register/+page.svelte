@@ -11,10 +11,20 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import * as m from '$lib/paraglide/messages.js';
+	import { MetaTags } from 'svelte-meta-tags';
 	import { CircleAlert } from '@lucide/svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+
+	const metaTags = {
+		title: 'Register',
+		description: 'Create a new account',
+		openGraph: {
+			title: 'Register',
+			description: 'Create a new account'
+		}
+	};
 
 	const registerSchema = z
 		.object({
@@ -40,6 +50,8 @@
 	// Use Superforms snapshot support for browser navigation state preservation
 	export const snapshot = { capture, restore };
 </script>
+
+<MetaTags {...metaTags} />
 
 <div class="flex min-h-screen items-center justify-center px-4">
 	<Card class="w-full max-w-md">

@@ -53,7 +53,9 @@
       "Bash(pnpx paraglide-js compile:*)",
       "Bash(pnpm -C app check:*)",
       "Bash(pnpm test:node:*)",
-      "Bash(pnpm build:types:*)"
+      "Bash(pnpm build:types:*)",
+      "WebFetch(domain:oekazuma.github.io)",
+      "Bash(pnpm -C app build:types:*)"
     ]
   },
   "hooks": {

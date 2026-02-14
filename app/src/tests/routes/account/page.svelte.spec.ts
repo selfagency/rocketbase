@@ -11,6 +11,8 @@ type PageData = {
 	mfaOptIn: boolean;
 	mfaEnabled: boolean;
 	user: any;
+	url: string;
+	metadata: Record<string, string>;
 };
 
 describe('Account Page Component', () => {
@@ -71,7 +73,9 @@ describe('Account Page Component', () => {
 		mfaRequired: false,
 		mfaOptIn: false,
 		mfaEnabled: false,
-		user: mockUser
+		user: mockUser,
+		url: 'http://localhost:5173',
+		metadata: {}
 	};
 
 	it('renders account page without errors', async () => {

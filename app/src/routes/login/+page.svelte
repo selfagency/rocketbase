@@ -13,11 +13,21 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as m from '$lib/paraglide/messages.js';
 	import { toast } from '$lib/stores/toast';
+	import { MetaTags } from 'svelte-meta-tags';
 	import { CircleAlert } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+
+	const metaTags = {
+		title: 'Login',
+		description: 'Sign in to your account',
+		openGraph: {
+			title: 'Login',
+			description: 'Sign in to your account'
+		}
+	};
 
 	const loginSchema = z.object({
 		email: z.string().optional(),
@@ -80,6 +90,8 @@
 		}
 	});
 </script>
+
+<MetaTags {...metaTags} />
 
 <div class="flex w-full items-center justify-center">
 	<Card class="w-full max-w-md">

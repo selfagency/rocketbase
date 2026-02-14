@@ -1,15 +1,26 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import PostList from '$lib/components/posts/PostList.svelte';
 	import * as m from '$lib/paraglide/messages.js';
+	import { MetaTags } from 'svelte-meta-tags';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	const metaTags = $derived({
+		title: m.posts_title(),
+		description: m.posts_description(),
+		canonical: `${page.url.origin}/posts`,
+		openGraph: {
+			type: 'website',
+			url: `${page.url.origin}/posts`,
+			title: m.posts_title(),
+			description: m.posts_description()
+		}
+	});
 </script>
 
-<svelte:head>
-	<title>{m.posts_title()}</title>
-	<meta name="description" content={m.posts_description()} />
-</svelte:head>
+<MetaTags {...metaTags} />
 
 <div class="container mx-auto px-4 py-8">
 	<div class="mb-8">

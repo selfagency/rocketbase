@@ -20,7 +20,7 @@
     "prepare": "svelte-kit sync || echo ''",
     "preview": "vite preview",
     "test": "pnpm run test:node && pnpm run test:browser && pnpm run test:e2e",
-    "test:coverage": "pnpm run test:node:coverage && pnpm run test:browser:coverage && pnpm run test:e2e:coverage",
+    "test:coverage": "set +e; pnpm run test:node:coverage; NODE_EXIT=$?; pnpm run test:browser:coverage; BROWSER_EXIT=$?; pnpm run test:e2e:coverage; E2E_EXIT=$?; set -e; if [ $NODE_EXIT -ne 0 ] || [ $BROWSER_EXIT -ne 0 ] || [ $E2E_EXIT -ne 0 ]; then exit 1; fi",
     "test:browser": "vitest --config vitest.browser.config.js --run",
     "test:browser:coverage": "pnpm run test:browser --coverage",
     "test:cleanup": "node ./util/cleanup-test-users.js",

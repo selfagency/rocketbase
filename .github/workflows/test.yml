@@ -25,14 +25,15 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Get pnpm store directory
+        id: pnpm-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "store_path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
 
       - name: Setup pnpm cache
         uses: actions/cache@v4
         with:
-          path: ${{ env.STORE_PATH }}
+          path: ${{ steps.pnpm-cache.outputs.store_path }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
@@ -155,7 +156,7 @@ jobs:
           name: coverage-unit
           path: |
             app/coverage/
-          retention-days: 30
+          retention-days: 7
 
       - name: Upload e2e coverage reports
         uses: actions/upload-artifact@v4
@@ -164,7 +165,7 @@ jobs:
           name: coverage-e2e-playwright
           path: |
             app/coverage/e2e-playwright/
-          retention-days: 30
+          retention-days: 7
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -174,4 +175,4 @@ jobs:
           path: |
             app/test-results/
             app/playwright-report/
-          retention-days: 30
+          retention-days: 7

@@ -9,18 +9,13 @@
 	import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
 	import * as m from '$lib/paraglide/messages.js';
 	import { isMobile } from '$lib/stores/screen';
-	import {
-		getDisplayName,
-		getPocketBaseAvatarUrl,
-		getUserInitials
-	} from '$lib/utils/user-profile';
+	import { getDisplayName, getPocketBaseAvatarUrl, getUserInitials } from '$lib/utils/user-profile';
 	import type { NavItem } from '../../types';
 
 	let { navItems = [] }: { navItems?: NavItem[] } = $props();
 
 	let logoutFormRef = $state<HTMLFormElement | null>(null);
 	let dropdownOpen = $state(false);
-
 </script>
 
 <nav
@@ -131,7 +126,8 @@
 					>
 						<Avatar.Root>
 							<Avatar.Image
-								src={getPocketBaseAvatarUrl(page?.data?.user, env.PUBLIC_POCKETBASE_URL) || undefined}
+								src={getPocketBaseAvatarUrl(page?.data?.user, env.PUBLIC_POCKETBASE_URL) ||
+									undefined}
 								alt={getDisplayName(page?.data?.user, m['common.user_fallback']())}
 							/>
 							<Avatar.Fallback>

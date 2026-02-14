@@ -11,11 +11,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as m from '$lib/paraglide/messages.js';
 	import { toast } from '$lib/stores/toast';
-	import {
-		getDisplayName,
-		getPocketBaseAvatarUrl,
-		getUserInitials
-	} from '$lib/utils/user-profile';
+	import { getDisplayName, getPocketBaseAvatarUrl, getUserInitials } from '$lib/utils/user-profile';
 
 	let {
 		user,
@@ -101,7 +97,9 @@
 										alt={getDisplayName(user, m['common.user_fallback']())}
 									/>
 								{/if}
-								<Avatar.Fallback>{getUserInitials(user, m['common.user_fallback']())}</Avatar.Fallback>
+								<Avatar.Fallback
+									>{getUserInitials(user, m['common.user_fallback']())}</Avatar.Fallback
+								>
 							</Avatar.Root>
 						</div>
 						<div class="flex flex-col gap-2 pt-1">

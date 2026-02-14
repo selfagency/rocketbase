@@ -100,7 +100,6 @@
 			toast(m['account.email_verified_success'](), 'success');
 		}
 	});
-
 </script>
 
 <MetaTags {...metaTags} />

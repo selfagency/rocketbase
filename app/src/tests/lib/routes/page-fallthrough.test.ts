@@ -19,15 +19,15 @@ describe('page fallthrough helpers', () => {
 	});
 
 	it('returns auth error for login-required pages', () => {
-		expect(
-			getFallthroughAccessError({ require_login: true, subscriber_only: false }, false)
-		).toBe('error.authentication_required');
+		expect(getFallthroughAccessError({ require_login: true, subscriber_only: false }, false)).toBe(
+			'error.authentication_required'
+		);
 	});
 
 	it('returns subscriber error for subscriber-only pages', () => {
-		expect(
-			getFallthroughAccessError({ require_login: false, subscriber_only: true }, false)
-		).toBe('error.subscriber_access_required');
+		expect(getFallthroughAccessError({ require_login: false, subscriber_only: true }, false)).toBe(
+			'error.subscriber_access_required'
+		);
 	});
 
 	it('returns null when user has access', () => {

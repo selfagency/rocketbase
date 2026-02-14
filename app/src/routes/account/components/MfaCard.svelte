@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
-	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import {
+		Card,
+		CardContent,
+		CardDescription,
+		CardHeader,
+		CardTitle
+	} from '$lib/components/ui/card';
 	import * as Form from '$lib/components/ui/form';
 	import { Label } from '$lib/components/ui/label';
 	import { Switch } from '$lib/components/ui/switch';

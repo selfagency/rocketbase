@@ -61,7 +61,12 @@
 					<Form.Control>
 						{#snippet children({ props })}
 							<Form.Label>{m['account.confirm_password_label']()}</Form.Label>
-							<Input {...props} bind:value={$passwordForm.passwordConfirm} type="password" required />
+							<Input
+								{...props}
+								bind:value={$passwordForm.passwordConfirm}
+								type="password"
+								required
+							/>
 						{/snippet}
 					</Form.Control>
 					<Form.FieldErrors />

@@ -35,6 +35,32 @@
 				authors: (data.post.expand as any)?.author?.map((a: any) => a.name || a.email) || [],
 				tags: (data.post.expand as any)?.tags?.map((t: any) => t.name) || []
 			}
+		},
+		jsonLd: {
+			'@context': 'https://schema.org',
+			'@type': 'BlogPosting',
+			headline: data.post.title,
+			description: data.post.summary,
+			image: data.post.image
+				? `${page.url.origin}${getFileUrl('posts', data.post.id, data.post.image, cdnUrl)}`
+				: undefined,
+			datePublished: data.post.date,
+			dateModified: data.post.updated,
+			author: (data.post.expand as any)?.author?.map((a: any) => ({
+				'@type': 'Person',
+				name: a.name || a.email,
+				url: `${page.url.origin}/authors/${a.id}`
+			})),
+			publisher: {
+				'@type': 'Organization',
+				name: data.metadata?.site_title || 'Rocketbase',
+				logo: data.metadata?.og_image
+					? {
+							'@type': 'ImageObject',
+							url: data.metadata.og_image
+						}
+					: undefined
+			}
 		}
 	});
 </script>
@@ -42,13 +68,13 @@
 <MetaTags {...metaTags} />
 
 <div class="container mx-auto max-w-4xl px-4 py-8">
-	<article class="prose prose-lg max-w-none">
+	<article class="h-entry prose prose-lg max-w-none">
 		{#if data.post.title}
 			<PostHeader post={data.post} {cdnUrl} />
 		{/if}
 
 		{#if data.post.content}
-			<div class="content">
+			<div class="e-content content">
 				{@html data.post.content}
 			</div>
 		{:else}

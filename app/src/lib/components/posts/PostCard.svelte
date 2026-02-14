@@ -30,25 +30,25 @@
 	}
 </script>
 
-<Card.Root class="overflow-hidden transition-shadow hover:shadow-lg">
+<Card.Root class="h-entry overflow-hidden transition-shadow hover:shadow-lg">
 	{#if post.image}
 		<div class="aspect-video overflow-hidden">
 			<img
 				src={getFileUrl('posts', post.id, post.image, cdnUrl)}
 				alt={post.title}
-				class="h-full w-full object-cover transition-transform hover:scale-105"
+				class="u-featured h-full w-full object-cover transition-transform hover:scale-105"
 			/>
 		</div>
 	{/if}
 	<Card.Content class="p-6">
 		<div class="mb-4">
-			<h2 class="mb-2 line-clamp-2 text-xl font-semibold">
-				<a href={`/posts/${post.slug}`} class="transition-colors hover:text-primary">
+			<h2 class="p-name mb-2 line-clamp-2 text-xl font-semibold">
+				<a href={`/posts/${post.slug}`} class="u-url transition-colors hover:text-primary">
 					{post.title}
 				</a>
 			</h2>
 			{#if post.summary}
-				<p class="line-clamp-3 text-muted-foreground">{post.summary}</p>
+				<p class="p-summary line-clamp-3 text-muted-foreground">{post.summary}</p>
 			{/if}
 		</div>
 
@@ -57,7 +57,7 @@
 				{#if post.author && post.author.length > 0}
 					<div class="flex -space-x-2">
 						{#each post.author as author, i}
-							<a href={`/authors/${author.id}`}>
+							<a href={`/authors/${author.id}`} class="p-author h-card" rel="author">
 								<Avatar
 									class="h-8 w-8 border border-muted ring-2 ring-background"
 									title={author.name || author.email}
@@ -66,37 +66,49 @@
 										<AvatarImage
 											src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
 											alt={author.name || author.email}
+											class="u-photo"
 										/>
 									{/if}
 									<AvatarFallback class="text-xs">
 										{getAuthorInitials(author.name, author.email)}
 									</AvatarFallback>
 								</Avatar>
+								<data class="p-name hidden" value={author.name || author.email}></data>
 							</a>
 						{/each}
 					</div>
 					<div class="text-sm">
 						<p class="font-medium">
 							{#each post.author as author, i}
-								<a href={`/authors/${author.id}`} class="transition-colors hover:text-primary">
-									{author.name || author.email}
+								<a
+									href={`/authors/${author.id}`}
+									class="p-author h-card transition-colors hover:text-primary"
+									rel="author"
+								>
+									<span class="p-name">{author.name || author.email}</span>
 								</a>
 								{i < post.author.length - 1 ? ', ' : ''}
 							{/each}
 						</p>
 						<p class="text-muted-foreground">
-							{format(post.date || post.created, 'MMMM D, YYYY')}
+							<time class="dt-published" datetime={post.date || post.created}>
+								{format(post.date || post.created, 'MMMM D, YYYY')}
+							</time>
 						</p>
 					</div>
 				{:else}
 					<div class="text-sm text-muted-foreground">
-						{format(post.date || post.created, 'MMMM D, YYYY')}
+						<time class="dt-published" datetime={post.date || post.created}>
+							{format(post.date || post.created, 'MMMM D, YYYY')}
+						</time>
 					</div>
 				{/if}
 			</div>
 		{:else}
 			<div class="mb-4 text-sm text-muted-foreground">
-				{format(post.date || post.created, 'MMMM D, YYYY')}
+				<time class="dt-published" datetime={post.date || post.created}>
+					{format(post.date || post.created, 'MMMM D, YYYY')}
+				</time>
 			</div>
 		{/if}
 

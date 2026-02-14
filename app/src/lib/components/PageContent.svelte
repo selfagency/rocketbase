@@ -36,14 +36,15 @@
 {/if}
 
 <div class="container mx-auto max-w-4xl px-4 py-8">
-	<article class="prose prose-lg max-w-none">
+	<article class="h-entry prose prose-lg max-w-none">
 		{#if pageData.title}
 			<header class="mb-8">
-				<h1 class="mb-4 text-3xl leading-tight font-bold">
+				<h1 class="p-name mb-4 text-3xl leading-tight font-bold">
 					{pageData.title}
 				</h1>
+				<data class="u-url hidden" value={`${page.url.origin}/${pageData.slug}`}></data>
 				{#if pageData.summary}
-					<p class="text-xl leading-relaxed text-muted-foreground">
+					<p class="p-summary text-xl leading-relaxed text-muted-foreground">
 						{pageData.summary}
 					</p>
 				{/if}
@@ -51,14 +52,14 @@
 					<img
 						src="{page.url.origin}/api/pb/files/pages/{pageData.id}/{pageData.image}"
 						alt={pageData.title || 'Page image'}
-						class="mt-6 h-64 w-full rounded-lg object-cover"
+						class="u-featured mt-6 h-64 w-full rounded-lg object-cover"
 					/>
 				{/if}
 			</header>
 		{/if}
 
 		{#if pageData.content}
-			<div class="content">
+			<div class="e-content content">
 				{@html pageData.content}
 			</div>
 		{:else}

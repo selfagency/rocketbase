@@ -41,7 +41,7 @@
 		<p class="text-muted-foreground">{emptyDescription}</p>
 	</div>
 {:else}
-	<div class="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+	<div class="h-feed mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 		{#each posts as post (post.id)}
 			<PostCard {post} {cdnUrl} {showAuthor} />
 		{/each}

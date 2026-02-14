@@ -29,6 +29,13 @@
 			url: page.url.origin,
 			title: m['home.title'](),
 			description: m['home.description']()
+		},
+		jsonLd: {
+			'@context': 'https://schema.org',
+			'@type': 'WebSite',
+			name: m['home.title'](),
+			description: m['home.description'](),
+			url: page.url.origin
 		}
 	});
 </script>

@@ -69,7 +69,28 @@
 				name: 'bluesky:actor',
 				content: data.metadata?.bluesky_handle
 			}
-		].filter((tag) => tag.content)
+		].filter((tag) => tag.content),
+		additionalLink: [
+			{
+				rel: 'alternate',
+				type: 'application/rss+xml',
+				href: '/feed/rss',
+				title: 'Rocketbase RSS Feed'
+			},
+			{
+				rel: 'alternate',
+				type: 'application/json',
+				href: '/feed/json',
+				title: 'Rocketbase JSON Feed'
+			}
+		],
+		jsonLd: {
+			'@context': 'https://schema.org',
+			'@type': 'WebSite',
+			name: data.metadata?.site_title || 'Rocketbase',
+			description: data.metadata?.site_description,
+			url: data.url
+		}
 	});
 </script>
 

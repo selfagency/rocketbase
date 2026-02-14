@@ -30,6 +30,17 @@
 						}
 					]
 				: []
+		},
+		jsonLd: {
+			'@context': 'https://schema.org',
+			'@type': 'Person',
+			name: data.author.name || data.author.email,
+			description: data.author.bio,
+			image: data.author.avatar
+				? `${page.url.origin}${getFileUrl('users', data.author.id, data.author.avatar)}`
+				: undefined,
+			url: `${page.url.origin}/authors/${data.author.id}`,
+			sameAs: data.author.website ? [data.author.website] : []
 		}
 	});
 
@@ -53,28 +64,42 @@
 
 <div class="container mx-auto px-4 py-12">
 	<!-- Author Profile Header -->
-	<div class="mb-12 flex flex-col items-center text-center">
+	<div class="h-card mb-12 flex flex-col items-center text-center">
 		<Avatar class="mb-6 h-32 w-32 border-4 border-background shadow-lg">
 			{#if data.author.avatar}
 				<AvatarImage
 					src={getFileUrl('users', data.author.id, data.author.avatar)}
 					alt={data.author.name || data.author.email}
+					class="u-photo"
 				/>
 			{/if}
 			<AvatarFallback class="text-3xl">
 				{getAuthorInitials(data.author.name, data.author.email)}
 			</AvatarFallback>
 		</Avatar>
-		<h1 class="mb-2 text-4xl font-bold">{data.author.name || data.author.email}</h1>
+		<h1 class="p-name mb-2 text-4xl font-bold">{data.author.name || data.author.email}</h1>
+		<data class="u-url hidden" value={`${page.url.origin}/authors/${data.author.id}`}></data>
+		<data class="p-nickname hidden" value={data.author.username}></data>
 		{#if data.author.title}
-			<p class="mb-4 text-xl text-muted-foreground">{data.author.title}</p>
+			<p class="p-job-title mb-4 text-xl text-muted-foreground">{data.author.title}</p>
 		{/if}
 		{#if data.author.bio}
-			<div class="prose mb-6 max-w-2xl text-lg text-muted-foreground dark:prose-invert">
+			<div
+				class="p-note prose mb-6 max-w-2xl text-lg text-muted-foreground dark:prose-invert"
+			>
 				{@html data.author.bio}
 			</div>
 		{/if}
 		<div class="flex items-center gap-4">
+			{#if data.author.website}
+				<a
+					href={data.author.website}
+					class="u-url rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+					rel="me"
+				>
+					{new URL(data.author.website).hostname}
+				</a>
+			{/if}
 			<div class="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
 				{data.pagination.totalItems}
 				{data.pagination.totalItems === 1 ? 'post' : 'posts'}

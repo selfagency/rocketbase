@@ -13,12 +13,12 @@
 	let { post, cdnUrl }: Props = $props();
 </script>
 
-<header class="mb-8">
-	<h1 class="group mb-4 flex items-center gap-2 text-3xl leading-tight font-bold">
+<header class="mb-8 font-sans">
+	<h1 class="p-name group mb-4 flex items-center gap-2 text-3xl leading-tight font-bold">
 		{post.title}
 		<a
 			href={`/posts/${post.slug}`}
-			class="opacity-0 transition-opacity hover:text-primary group-hover:opacity-100"
+			class="u-url u-uid opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary"
 			aria-label="Permalink"
 		>
 			<LinkIcon class="h-6 w-6" />
@@ -26,7 +26,7 @@
 	</h1>
 
 	{#if post.summary}
-		<p class="mb-4 text-xl leading-relaxed text-muted-foreground">
+		<p class="p-summary mb-4 text-xl leading-relaxed text-muted-foreground">
 			{post.summary}
 		</p>
 	{/if}
@@ -35,7 +35,7 @@
 		<img
 			src={getFileUrl('posts', post.id, post.image, cdnUrl)}
 			alt={post.title}
-			class="mt-6 mb-6 h-64 w-full rounded-lg object-cover"
+			class="u-featured mt-6 mb-6 h-64 w-full rounded-lg object-cover"
 		/>
 	{/if}
 
@@ -44,7 +44,7 @@
 			<div class="flex items-center gap-2">
 				<div class="flex -space-x-2">
 					{#each post.author as author}
-						<a href={`/authors/${author.id}`}>
+						<a href={`/authors/${author.id}`} class="p-author h-card" rel="author">
 							<Avatar
 								class="h-6 w-6 border border-muted ring-2 ring-background"
 								title={author.name || author.email}
@@ -53,19 +53,27 @@
 									<AvatarImage
 										src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
 										alt={author.name || author.email}
+										class="u-photo"
 									/>
 								{/if}
 								<AvatarFallback class="text-xs">
 									{(author.name || author.email || 'U').charAt(0).toUpperCase()}
 								</AvatarFallback>
 							</Avatar>
+							<data class="p-name hidden" value={author.name || author.email}></data>
+							<data class="u-url hidden" value={`/authors/${author.id}`}></data>
 						</a>
 					{/each}
 				</div>
 				<span>
 					{#each post.author as author, i}
-						<a href={`/authors/${author.id}`} class="transition-colors hover:text-primary">
-							{author.name || author.email}
+						<a
+							href={`/authors/${author.id}`}
+							class="p-author h-card transition-colors hover:text-primary"
+							rel="author"
+						>
+							<span class="p-name">{author.name || author.email}</span>
+							<data class="u-url hidden" value={`/authors/${author.id}`}></data>
 						</a>
 						{i < post.author.length - 1 ? ', ' : ''}
 					{/each}
@@ -74,8 +82,8 @@
 		{/if}
 
 		{#if post.date}
-			<a href={`/posts/${post.slug}`} class="transition-colors hover:text-primary">
-				<time datetime={post.date}>
+			<a href={`/posts/${post.slug}`} class="u-url transition-colors hover:text-primary">
+				<time class="dt-published" datetime={post.date}>
 					{new Date(post.date).toLocaleDateString('en-US', {
 						year: 'numeric',
 						month: 'long',
@@ -88,7 +96,7 @@
 		{#if post.tags && post.tags.length > 0}
 			<div class="mt-4 flex flex-wrap gap-2">
 				{#each post.tags as tag}
-					<a href={`/tags/${tag.slug}`}>
+					<a href={`/tags/${tag.slug}`} class="p-category" rel="tag">
 						<Badge
 							variant="secondary"
 							class="text-xs transition-colors hover:bg-primary hover:text-primary-foreground"

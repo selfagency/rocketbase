@@ -1,11 +1,11 @@
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import logger from '$lib/server/logger';
 import { createPocketBaseClient } from '$lib/server/pocketbase';
+import { handleRedirects } from '$lib/server/redirect-handler';
 import type { Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
-import { redirect } from '@sveltejs/kit';
 import crypto from 'node:crypto';
-import type { RedirectsResponse, UsersResponse } from './lib/types/pocketbase';
+import type { UsersResponse } from './lib/types/pocketbase';
 
 const generateRequestId: Handle = async ({ event, resolve }) => {
   const requestId = crypto.randomUUID();
@@ -52,44 +52,6 @@ const handleAuth: Handle = async ({ event, resolve }) => {
   response.headers.append('set-cookie', event.locals.pb.authStore.exportToCookie({ httpOnly: false }));
 
   return response;
-};
-
-const handleRedirects: Handle = async ({ event, resolve }) => {
-  // Skip redirects for API routes and static assets
-  if (event.url.pathname.startsWith('/api/') || event.url.pathname.startsWith('/_app/')) {
-    return resolve(event);
-  }
-
-  try {
-    // Query redirects collection - this will use the PB client initialized in handleAuth
-    // TODO: Add caching layer to avoid querying PocketBase on every request
-    // Consider using a Map with TTL or node-cache for in-memory caching
-    const pb = createPocketBaseClient();
-    const redirects = await pb.collection('redirects').getFullList<RedirectsResponse>({
-      filter: 'slug != ""',
-    });
-
-    // Normalize the pathname (remove trailing slash for comparison)
-    const pathname = event.url.pathname.replace(/\/$/, '') || '/';
-
-    // Find matching redirect
-    const matchedRedirect = redirects.find((r) => {
-      const redirectSlug = r.slug?.replace(/^\//, '').replace(/\/$/, '');
-      const normalizedPathname = pathname.replace(/^\//, '');
-      return redirectSlug === normalizedPathname;
-    });
-
-    if (matchedRedirect?.url) {
-      // Use 302 (temporary redirect) by default
-      // TODO: Add status code field to redirects collection for 301/302 control
-      redirect(302, matchedRedirect.url);
-    }
-  } catch (error) {
-    // Log error but don't break the request flow
-    logger.error('Failed to check redirects', error instanceof Error ? error.message : String(error));
-  }
-
-  return resolve(event);
 };
 
 const handleParaglide: Handle = ({ event, resolve }) =>

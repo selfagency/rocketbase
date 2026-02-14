@@ -1,3 +1,0 @@
-dbs: pnpm run db
-app: pnpm -C app run dev:trace
-car: pnpm -C sidecar run dev

@@ -16,6 +16,7 @@ describe('Register Page Component', () => {
       message: undefined,
       id: 'test-form',
     },
+    user: undefined,
   };
 
   it('renders registration form without errors', async () => {
@@ -36,6 +37,7 @@ describe('Register Page Component', () => {
           email: ['Invalid email address'],
         },
       },
+      user: undefined,
     };
     const { container } = render(RegisterPage, { props: { data: dataWithErrors } });
     expect(container).toBeTruthy();

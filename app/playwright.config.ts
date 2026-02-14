@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load .env file from app directory for API_KEY and other environment variables
-config({ path: resolve(__dirname, '.env') });
+config({ path: resolve(__dirname, '.env'), quiet: true });
 
 export default defineConfig({
   webServer: process.env.CI
@@ -25,5 +25,7 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
   },
   globalTeardown: './util/global-teardown.ts',
-  reporter: [['html'], ['line']],
+  // Disable HTML report in CI/local e2e runs to avoid starting the server that serves
+  // the report during automated runs. Use 'line' for concise console output.
+  reporter: [['line']],
 });

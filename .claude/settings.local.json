@@ -50,7 +50,9 @@
       "Bash(ls:*)",
       "Bash(pnpm oxlint:*)",
       "Bash(pnpx @inlang/paraglide-js compile:*)",
-      "Bash(pnpx paraglide-js compile:*)"
+      "Bash(pnpx paraglide-js compile:*)",
+      "Bash(pnpm -C app check:*)",
+      "Bash(pnpm test:node:*)"
     ]
   },
   "hooks": {

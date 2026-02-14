@@ -5,7 +5,7 @@ status: in-progress
 type: task
 priority: high
 created_at: 2026-02-13T22:51:45Z
-updated_at: 2026-02-14T07:38:48Z
+updated_at: 2026-02-14T07:45:53Z
 ---
 
 Ensure all components and functions have unit tests and are documented within the code with explanations of their purpose.
@@ -36,3 +36,14 @@ Ensure all components and functions have unit tests and are documented within th
 - [ ] Root layout and page
 - [ ] Utility functions (lib/utils/*)
 - [ ] Improve partial coverage (<100%)
+
+
+
+### Utility Tests Completed (2026-02-14 - Second Commit)
+- **lib/utils/page-hierarchy.test.ts** (16 tests) ✅ - tree building, flattening, sorting
+- **lib/utils/user-profile.test.ts** (30 tests) ✅ - display names, initials, avatar URLs  
+- **lib/utils/seo-metadata.test.ts** (15 tests) ✅ - OpenGraph, JSON-LD, metadata generation
+
+**Total Tests Now**: 203 passing (17 test files)
+**Coverage Now**: 48.35% (slight improvement from utility tests)
+**Files with 100% Coverage**: 13 files (feed, posts, tags, logout, utilities)

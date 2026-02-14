@@ -3,6 +3,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 	import { getFileUrl } from '$lib/utils';
+	import LinkIcon from '@lucide/svelte/icons/link';
 
 	interface Props {
 		post: PostsResponseWithExpanded;
@@ -13,8 +14,15 @@
 </script>
 
 <header class="mb-8">
-	<h1 class="mb-4 text-3xl leading-tight font-bold">
+	<h1 class="group mb-4 flex items-center gap-2 text-3xl leading-tight font-bold">
 		{post.title}
+		<a
+			href={`/posts/${post.slug}`}
+			class="opacity-0 transition-opacity hover:text-primary group-hover:opacity-100"
+			aria-label="Permalink"
+		>
+			<LinkIcon class="h-6 w-6" />
+		</a>
 	</h1>
 
 	{#if post.summary}
@@ -66,13 +74,15 @@
 		{/if}
 
 		{#if post.date}
-			<time datetime={post.date}>
-				{new Date(post.date).toLocaleDateString('en-US', {
-					year: 'numeric',
-					month: 'long',
-					day: 'numeric'
-				})}
-			</time>
+			<a href={`/posts/${post.slug}`} class="transition-colors hover:text-primary">
+				<time datetime={post.date}>
+					{new Date(post.date).toLocaleDateString('en-US', {
+						year: 'numeric',
+						month: 'long',
+						day: 'numeric'
+					})}
+				</time>
+			</a>
 		{/if}
 
 		{#if post.tags && post.tags.length > 0}

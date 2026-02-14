@@ -9,6 +9,11 @@
 	import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
 	import * as m from '$lib/paraglide/messages.js';
 	import { isMobile } from '$lib/stores/screen';
+	import {
+		getDisplayName,
+		getPocketBaseAvatarUrl,
+		getUserInitials
+	} from '$lib/utils/user-profile';
 	import type { NavItem } from '../../types';
 
 	let { navItems = [] }: { navItems?: NavItem[] } = $props();
@@ -16,23 +21,6 @@
 	let logoutFormRef = $state<HTMLFormElement | null>(null);
 	let dropdownOpen = $state(false);
 
-	const getDisplayName = (user?: { name?: string | null; email?: string | null }) => {
-		return user?.name || user?.email || m['common.user_fallback']();
-	};
-
-	const getInitials = (user?: { name?: string | null; email?: string | null }) => {
-		const display = getDisplayName(user).trim();
-		const parts = display.split(/\s+/).filter(Boolean);
-		if (parts.length === 0) return 'U';
-		if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-		return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-	};
-
-	const getAvatarUrl = (user?: { id?: string | null; avatar?: string | null }) => {
-		if (!user?.id || !user.avatar) return null;
-		const baseUrl = env.PUBLIC_POCKETBASE_URL || 'http://127.0.0.1:8090';
-		return `${baseUrl}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`;
-	};
 </script>
 
 <nav
@@ -143,10 +131,12 @@
 					>
 						<Avatar.Root>
 							<Avatar.Image
-								src={getAvatarUrl(page?.data?.user) || undefined}
-								alt={getDisplayName(page?.data?.user)}
+								src={getPocketBaseAvatarUrl(page?.data?.user, env.PUBLIC_POCKETBASE_URL) || undefined}
+								alt={getDisplayName(page?.data?.user, m['common.user_fallback']())}
 							/>
-							<Avatar.Fallback>{getInitials(page?.data?.user)}</Avatar.Fallback>
+							<Avatar.Fallback>
+								{getUserInitials(page?.data?.user, m['common.user_fallback']())}
+							</Avatar.Fallback>
 						</Avatar.Root>
 					</DropdownMenu.Trigger>
 

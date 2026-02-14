@@ -2,36 +2,15 @@ import * as m from '$lib/paraglide/messages.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
-
-const profileSchema = z.object({
-	name: z.string().min(2, m['validation.name_min_length']()),
-	email: z.email(m['validation.email_invalid']()),
-	title: z.string().optional(),
-	bio: z.string().optional(),
-	website: z.url().optional().or(z.literal('')),
-	avatar: z.instanceof(File).optional()
-});
-
-const passwordSchema = z
-	.object({
-		oldPassword: z.string().min(8, m['validation.password_min_length']()),
-		password: z.string().min(8, m['validation.password_min_length']()),
-		passwordConfirm: z.string().min(8, m['validation.password_min_length']())
-	})
-	.refine((data) => data.password === data.passwordConfirm, {
-		message: m['validation.password_mismatch'](),
-		path: ['passwordConfirm']
-	});
-
-const mfaSchema = z.object({
-	mfaOptIn: z.boolean()
-});
-
-type ProfileSchema = z.infer<typeof profileSchema>;
-type PasswordSchema = z.infer<typeof passwordSchema>;
-type MfaSchema = z.infer<typeof mfaSchema>;
+import {
+	mfaSchema,
+	passwordSchema,
+	profileSchema,
+	type MfaSchema,
+	type PasswordSchema,
+	type ProfileSchema
+} from './schemas';
 
 // Roles that require MFA per PocketBase collection config
 const MFA_REQUIRED_ROLES = ['admin', 'editor', 'contributor'];

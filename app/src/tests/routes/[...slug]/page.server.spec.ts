@@ -1,5 +1,6 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { RESERVED_ROUTE_SEGMENTS } from '$lib/routes/page-fallthrough';
 import { load } from '../../../routes/[...slug]/+page.server';
 
 describe('[slug] Fallthrough Route', () => {
@@ -28,7 +29,7 @@ describe('[slug] Fallthrough Route', () => {
 	});
 
 	describe('Reserved routes', () => {
-		it.each(['account', 'auth', 'forgot-password', 'login', 'logout', 'register', 'verify-email'])(
+		it.each(RESERVED_ROUTE_SEGMENTS)(
 			'should return 404 for reserved route: %s',
 			async (reservedSlug) => {
 				mockEvent.params = { slug: reservedSlug };

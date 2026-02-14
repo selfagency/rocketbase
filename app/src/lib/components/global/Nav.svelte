@@ -48,6 +48,24 @@
 					</NavigationMenu.Link>
 				</NavigationMenu.Item>
 
+				<NavigationMenu.Item>
+					<NavigationMenu.Link href="/posts" class={navigationMenuTriggerStyle()}>
+						{m['nav.posts'] ? m['nav.posts']() : 'Posts'}
+					</NavigationMenu.Link>
+				</NavigationMenu.Item>
+
+				<NavigationMenu.Item>
+					<NavigationMenu.Link href="/tags" class={navigationMenuTriggerStyle()}>
+						{m['nav.tags'] ? m['nav.tags']() : 'Tags'}
+					</NavigationMenu.Link>
+				</NavigationMenu.Item>
+
+				<NavigationMenu.Item>
+					<NavigationMenu.Link href="/authors" class={navigationMenuTriggerStyle()}>
+						Authors
+					</NavigationMenu.Link>
+				</NavigationMenu.Item>
+
 				{#each navItems as item (item.id)}
 					{#if item.children && item.children.length > 0}
 						<!-- Menu with children -->

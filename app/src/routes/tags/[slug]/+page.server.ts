@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ params, url, locals }) => {
 
 		// Fetch paginated posts with this tag
 		const result = await pb.collection('posts').getList<PostsResponseWithExpanded>(page, perPage, {
-			filter: `published = true && tags.id ?= "${tag.id}"`,
+			filter: `tags.id ?= "${tag.id}" && published = true && visible = true`,
 			sort: '-created',
 			expand: 'author,tags'
 		});

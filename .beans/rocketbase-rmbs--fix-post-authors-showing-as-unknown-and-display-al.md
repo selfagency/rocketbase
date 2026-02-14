@@ -5,7 +5,7 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T05:06:49Z
-updated_at: 2026-02-14T05:17:32Z
+updated_at: 2026-02-14T05:50:44Z
 ---
 
 ## Description
@@ -33,3 +33,5 @@ Post authors are showing as "unknown" in the UI. The PostCard and PostHeader com
 ## Testing
 - Verified API expand works without authentication
 - Both authors are correctly displayed in the expanded response
+
+6. **Added author detail routes** - Created /authors/[id] and /authors route to display author profiles and their posts\n7. **Improved PocketBase client** - Updated afterSend hook to automatically flatten expanded fields in list items

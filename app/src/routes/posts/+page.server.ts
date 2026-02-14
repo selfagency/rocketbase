@@ -6,13 +6,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
 	// Get pagination parameters from URL
 	const page = parseInt(url.searchParams.get('page') || '1');
-	const perPage = parseInt(url.searchParams.get('perPage') || '10');
+	const perPage = parseInt(url.searchParams.get('perPage') || '12');
 
 	try {
 		// Fetch paginated posts
 		const result = await pb.collection('posts').getList<PostsResponseWithExpanded>(page, perPage, {
-			filter: 'published = true',
-			sort: '-created',
+			filter: 'published = true && visible = true',
+			sort: '-date',
 			expand: 'author,tags'
 		});
 

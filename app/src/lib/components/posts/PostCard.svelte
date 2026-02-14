@@ -9,9 +9,10 @@
 	interface Props {
 		post: PostsResponseWithExpanded;
 		cdnUrl?: string;
+		showAuthor?: boolean;
 	}
 
-	let { post, cdnUrl }: Props = $props();
+	let { post, cdnUrl, showAuthor = true }: Props = $props();
 
 	function getAuthorInitials(name?: string, email?: string): string {
 		if (name) {
@@ -51,39 +52,53 @@
 			{/if}
 		</div>
 
-		<div class="mb-4 flex items-center gap-3">
-			{#if post.author && post.author.length > 0}
-				<div class="flex -space-x-2">
-					{#each post.author as author, i}
-						<Avatar class="h-8 w-8 ring-2 ring-background" title={author.name || author.email}>
-							{#if author.avatar}
-								<AvatarImage
-									src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
-									alt={author.name || author.email}
-								/>
-							{/if}
-							<AvatarFallback class="text-xs">
-								{getAuthorInitials(author.name, author.email)}
-							</AvatarFallback>
-						</Avatar>
-					{/each}
-				</div>
-				<div class="text-sm">
-					<p class="font-medium">
+		{#if showAuthor}
+			<div class="mb-4 flex items-center gap-3">
+				{#if post.author && post.author.length > 0}
+					<div class="flex -space-x-2">
 						{#each post.author as author, i}
-							{author.name || author.email}{i < post.author.length - 1 ? ', ' : ''}
+							<a href={`/authors/${author.id}`}>
+								<Avatar
+									class="h-8 w-8 border border-muted ring-2 ring-background"
+									title={author.name || author.email}
+								>
+									{#if author.avatar}
+										<AvatarImage
+											src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
+											alt={author.name || author.email}
+										/>
+									{/if}
+									<AvatarFallback class="text-xs">
+										{getAuthorInitials(author.name, author.email)}
+									</AvatarFallback>
+								</Avatar>
+							</a>
 						{/each}
-					</p>
-					<p class="text-muted-foreground">
+					</div>
+					<div class="text-sm">
+						<p class="font-medium">
+							{#each post.author as author, i}
+								<a href={`/authors/${author.id}`} class="transition-colors hover:text-primary">
+									{author.name || author.email}
+								</a>
+								{i < post.author.length - 1 ? ', ' : ''}
+							{/each}
+						</p>
+						<p class="text-muted-foreground">
+							{format(post.date || post.created, 'MMMM D, YYYY')}
+						</p>
+					</div>
+				{:else}
+					<div class="text-sm text-muted-foreground">
 						{format(post.date || post.created, 'MMMM D, YYYY')}
-					</p>
-				</div>
-			{:else}
-				<div class="text-sm text-muted-foreground">
-					{format(post.date || post.created, 'MMMM D, YYYY')}
-				</div>
-			{/if}
-		</div>
+					</div>
+				{/if}
+			</div>
+		{:else}
+			<div class="mb-4 text-sm text-muted-foreground">
+				{format(post.date || post.created, 'MMMM D, YYYY')}
+			</div>
+		{/if}
 
 		{#if post.tags && post.tags.length > 0}
 			<div class="mt-4 flex flex-wrap gap-2">

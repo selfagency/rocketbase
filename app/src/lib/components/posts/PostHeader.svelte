@@ -36,22 +36,30 @@
 			<div class="flex items-center gap-2">
 				<div class="flex -space-x-2">
 					{#each post.author as author}
-						<Avatar class="h-6 w-6 ring-2 ring-background" title={author.name || author.email}>
-							{#if author.avatar}
-								<AvatarImage
-									src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
-									alt={author.name || author.email}
-								/>
-							{/if}
-							<AvatarFallback class="text-xs">
-								{(author.name || author.email || 'U').charAt(0).toUpperCase()}
-							</AvatarFallback>
-						</Avatar>
+						<a href={`/authors/${author.id}`}>
+							<Avatar
+								class="h-6 w-6 border border-muted ring-2 ring-background"
+								title={author.name || author.email}
+							>
+								{#if author.avatar}
+									<AvatarImage
+										src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
+										alt={author.name || author.email}
+									/>
+								{/if}
+								<AvatarFallback class="text-xs">
+									{(author.name || author.email || 'U').charAt(0).toUpperCase()}
+								</AvatarFallback>
+							</Avatar>
+						</a>
 					{/each}
 				</div>
 				<span>
 					{#each post.author as author, i}
-						{author.name || author.email}{i < post.author.length - 1 ? ', ' : ''}
+						<a href={`/authors/${author.id}`} class="transition-colors hover:text-primary">
+							{author.name || author.email}
+						</a>
+						{i < post.author.length - 1 ? ', ' : ''}
 					{/each}
 				</span>
 			</div>

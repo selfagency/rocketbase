@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 /**
- * Generate 25 blog posts using falso library and Pexels API for images
+ * Generate 25 blog posts and a dozen tags using falso library and Pexels API for images
  *
  * This script creates realistic blog posts with:
+ * - A dozen random tags
  * - Random titles using falso's randCatchPhrase
  * - Random content (3-7 paragraphs)
  * - Random summaries
  * - Random dates within the past year
  * - Random authors from existing users
- * - Random tags from existing tags (if any)
+ * - Random tags from existing tags (both old and newly generated)
  * - Images downloaded from Pexels curated photos
  *
  * Usage:
@@ -29,14 +30,18 @@
  *   API_USER=admin@example.com API_PASS=password node util/generate-posts.js
  */
 
-import 'dotenv/config';
 import {
 	randCatchPhrase,
+	randJobTitle,
+	randNumber,
 	randParagraph,
-	randSentence,
 	randPastDate,
-	randNumber
+	randProductName,
+	randSentence,
+	randWord
 } from '@ngneat/falso';
+import 'dotenv/config';
+import { snake } from 'radashi';
 
 const PB_URL =
 	process.env.PUBLIC_POCKETBASE_URL || process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
@@ -86,8 +91,8 @@ async function fetchTags(headers) {
 	return data?.items || [];
 }
 
-async function fetchPexelsPhoto(apiKey, page = 1) {
-	const url = `https://api.pexels.com/v1/curated?per_page=1&page=${page}`;
+async function fetchPexelsPhotos(apiKey, page = 1, perPage = 1) {
+	const url = `https://api.pexels.com/v1/curated?per_page=${perPage}&page=${page}`;
 	const res = await fetch(url, {
 		headers: {
 			Authorization: apiKey
@@ -95,10 +100,10 @@ async function fetchPexelsPhoto(apiKey, page = 1) {
 	});
 	if (!res.ok) {
 		log('Pexels API error:', res.status);
-		return null;
+		return [];
 	}
 	const data = await res.json();
-	return data.photos?.[0] || null;
+	return data.photos || [];
 }
 
 async function downloadImage(imageUrl) {
@@ -112,13 +117,15 @@ async function downloadImage(imageUrl) {
 async function createPost(postData, headers) {
 	const url = `${PB_URL}/api/collections/posts/records`;
 
-	// If we have image data, create a FormData request
-	if (postData.imageBuffer && postData.imageFilename) {
+	// Check if we have any files (image or media)
+	const hasFiles = postData.imageFile || (postData.mediaFiles && postData.mediaFiles.length > 0);
+
+	if (hasFiles) {
 		const formData = new FormData();
 
-		// Add all post fields except image data
+		// Add all post fields except file objects
 		for (const [key, value] of Object.entries(postData)) {
-			if (key === 'imageBuffer' || key === 'imageFilename') continue;
+			if (key === 'imageFile' || key === 'mediaFiles') continue;
 
 			if (Array.isArray(value)) {
 				// For array fields like author and tags, append each value
@@ -130,9 +137,19 @@ async function createPost(postData, headers) {
 			}
 		}
 
-		// Add the image file
-		const blob = new Blob([postData.imageBuffer], { type: 'image/jpeg' });
-		formData.append('image', blob, postData.imageFilename);
+		// Add the single image file
+		if (postData.imageFile) {
+			const blob = new Blob([postData.imageFile.buffer], { type: 'image/jpeg' });
+			formData.append('image', blob, postData.imageFile.name);
+		}
+
+		// Add multiple media files
+		if (postData.mediaFiles) {
+			for (const file of postData.mediaFiles) {
+				const blob = new Blob([file.buffer], { type: 'image/jpeg' });
+				formData.append('media', blob, file.name);
+			}
+		}
 
 		// Remove Content-Type header to let fetch set it with boundary
 		const { 'Content-Type': _, ...headersWithoutContentType } = headers;
@@ -145,12 +162,12 @@ async function createPost(postData, headers) {
 
 		if (!res.ok) {
 			const error = await res.text();
-			throw new Error(`Failed to create post: ${res.status} ${error}`);
+			throw new Error(`Failed to create post (FormData): ${res.status} ${error}`);
 		}
 		return res.json();
 	}
 
-	// Fallback to JSON request if no image
+	// Fallback to JSON request if no images
 	const res = await fetch(url, {
 		method: 'POST',
 		headers,
@@ -158,28 +175,38 @@ async function createPost(postData, headers) {
 	});
 	if (!res.ok) {
 		const error = await res.text();
-		throw new Error(`Failed to create post: ${res.status} ${error}`);
+		throw new Error(`Failed to create post (JSON): ${res.status} ${error}`);
 	}
 	return res.json();
 }
 
-function slugify(text) {
-	return text
-		.toLowerCase()
-		.replace(/[^\w\s-]/g, '')
-		.replace(/\s+/g, '-')
-		.replace(/-+/g, '-')
-		.trim();
+async function createTag(tagData, headers) {
+	const url = `${PB_URL}/api/collections/tags/records`;
+	const res = await fetch(url, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify(tagData)
+	});
+	if (!res.ok) {
+		const error = await res.text();
+		throw new Error(`Failed to create tag: ${res.status} ${error}`);
+	}
+	return res.json();
 }
 
 async function generatePost(users, tags, pexelsPage) {
-	const title = randCatchPhrase();
+	// Mixed titles for more variety
+	const title =
+		randNumber({ min: 0, max: 1 }) === 0
+			? randCatchPhrase()
+			: `${randJobTitle()} ${randProductName()}`;
+
 	// Add random number to slug to prevent duplicates
-	const slug = slugify(title) + '-' + randNumber({ min: 1000, max: 9999 });
+	const slug = snake(title) + '-' + randNumber({ min: 1000, max: 9999 });
 	const summary = randSentence();
 
-	// Generate 3-7 paragraphs for content
-	const paragraphCount = randNumber({ min: 3, max: 7 });
+	// Generate 4-10 paragraphs for content
+	const paragraphCount = randNumber({ min: 4, max: 10 });
 	const paragraphs = randParagraph({ length: paragraphCount });
 	const content = `<p>${paragraphs.join('</p><p>')}</p>`;
 
@@ -208,22 +235,44 @@ async function generatePost(users, tags, pexelsPage) {
 		author,
 		tags: postTags,
 		published: true,
+		visible: true,
 		require_login: false,
 		subscriber_only: false
 	};
 
-	// Fetch and download Pexels image if API key is available
+	// Fetch and download Pexels images if API key is available
 	if (PEXELS_API_KEY) {
 		try {
-			const photo = await fetchPexelsPhoto(PEXELS_API_KEY, pexelsPage);
-			if (photo?.src?.large) {
-				const imageBuffer = await downloadImage(photo.src.large);
-				postData.imageBuffer = imageBuffer;
-				postData.imageFilename = `${slug}.jpg`;
-				log(`  Downloaded image from Pexels (photographer: ${photo.photographer})`);
+			// Fetch up to 4 photos (1 for image, 0-3 for media)
+			const photoCount = randNumber({ min: 1, max: 4 });
+			const photos = await fetchPexelsPhotos(PEXELS_API_KEY, pexelsPage, photoCount);
+
+			if (photos.length > 0) {
+				// First photo for 'image' field
+				const mainPhoto = photos[0];
+				const mainBuffer = await downloadImage(mainPhoto.src.large);
+				postData.imageFile = {
+					buffer: mainBuffer,
+					name: `${slug}.jpg`
+				};
+				log(`  Downloaded main image (photographer: ${mainPhoto.photographer})`);
+
+				// Remaining photos for 'media' field
+				if (photos.length > 1) {
+					postData.mediaFiles = [];
+					for (let i = 1; i < photos.length; i++) {
+						const mediaPhoto = photos[i];
+						const mediaBuffer = await downloadImage(mediaPhoto.src.large);
+						postData.mediaFiles.push({
+							buffer: mediaBuffer,
+							name: `${slug}-media-${i}.jpg`
+						});
+					}
+					log(`  Downloaded ${postData.mediaFiles.length} media images`);
+				}
 			}
 		} catch (err) {
-			log(`  Failed to fetch Pexels image:`, err.message);
+			log(`  Failed to fetch Pexels images:`, err.message);
 			// Continue without image
 		}
 	}
@@ -265,6 +314,22 @@ void (async function main() {
 			log('No users found. Cannot generate posts without authors.');
 			process.exitCode = 1;
 			return;
+		}
+
+		// Generate 12 tags
+		const tagCountToGenerate = 12;
+		log(`Generating ${tagCountToGenerate} tags...`);
+		for (let i = 0; i < tagCountToGenerate; i++) {
+			const word = randWord();
+			const tag = word.charAt(0).toUpperCase() + word.slice(1);
+			const slug = snake(tag) + '-' + randNumber({ min: 100, max: 999 });
+			try {
+				const newTag = await createTag({ tag, slug }, headers);
+				log(`Created tag ${i + 1}/${tagCountToGenerate}: "${newTag.tag}" (${newTag.id})`);
+				tags.push(newTag);
+			} catch (err) {
+				log(`Failed to create tag ${i + 1}:`, err.message);
+			}
 		}
 
 		// Generate and create 25 posts

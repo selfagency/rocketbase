@@ -16,6 +16,7 @@
 		emptyTitle?: string;
 		emptyDescription?: string;
 		cdnUrl?: string;
+		showAuthor?: boolean;
 	}
 
 	let {
@@ -23,7 +24,8 @@
 		pagination,
 		emptyTitle = 'No posts found',
 		emptyDescription = 'There are no posts to display.',
-		cdnUrl
+		cdnUrl,
+		showAuthor = true
 	}: Props = $props();
 
 	function handlePageChange(pageNum: number) {
@@ -41,7 +43,7 @@
 {:else}
 	<div class="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 		{#each posts as post (post.id)}
-			<PostCard {post} {cdnUrl} />
+			<PostCard {post} {cdnUrl} {showAuthor} />
 		{/each}
 	</div>
 

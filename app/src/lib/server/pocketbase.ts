@@ -11,6 +11,10 @@ export function createPocketBaseClient(): TypedPocketBase {
 
 	// Automatically flatten expanded fields into the main object
 	pb.afterSend = function (_, data) {
+		if (data?.items && Array.isArray(data.items)) {
+			data.items = data.items.map((item: any) => omit(assign(item, item.expand || {}), ['expand']));
+			return data;
+		}
 		return omit(assign(data, data.expand || {}), ['expand']);
 	};
 

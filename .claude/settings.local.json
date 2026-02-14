@@ -52,7 +52,8 @@
       "Bash(pnpx @inlang/paraglide-js compile:*)",
       "Bash(pnpx paraglide-js compile:*)",
       "Bash(pnpm -C app check:*)",
-      "Bash(pnpm test:node:*)"
+      "Bash(pnpm test:node:*)",
+      "Bash(pnpm build:types:*)"
     ]
   },
   "hooks": {

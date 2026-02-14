@@ -89,6 +89,11 @@
                       <div class="font-medium">{m['nav.pages'] ? m['nav.pages']() : 'Pages'}</div>
                     </NavigationMenu.Link>
                   </li>
+                  <li>
+                    <NavigationMenu.Link href="/admin/posts">
+                      <div class="font-medium">Posts</div>
+                    </NavigationMenu.Link>
+                  </li>
                 {/if}
               </ul>
             </NavigationMenu.Content>

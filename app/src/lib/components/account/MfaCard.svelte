@@ -4,7 +4,7 @@
   import * as Form from '$lib/components/ui/form';
   import { Label } from '$lib/components/ui/label';
   import { Switch } from '$lib/components/ui/switch';
-  import * as m from '$lib/paraglide/messages.js';
+  import * as m from '$lib/paraglide/messages';
 
   let {
     mfaRequired,

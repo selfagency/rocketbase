@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state';
   import PostList from '$lib/components/posts/PostList.svelte';
-  import * as m from '$lib/paraglide/messages.js';
+  import * as m from '$lib/paraglide/messages';
   import { MetaTags } from 'svelte-meta-tags';
   import type { PageData } from './$types';
 

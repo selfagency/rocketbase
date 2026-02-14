@@ -2,11 +2,11 @@
  * MFA (Multi-Factor Authentication) helper functions for login flows
  */
 
-import * as m from '$lib/paraglide/messages.js';
-import type PocketBase from 'pocketbase';
-import type { LogLayer } from 'loglayer';
-import type { SuperValidated } from 'sveltekit-superforms';
+import * as m from '$lib/paraglide/messages';
 import { fail } from '@sveltejs/kit';
+import type { LogLayer } from 'loglayer';
+import type PocketBase from 'pocketbase';
+import type { SuperValidated } from 'sveltekit-superforms';
 
 export interface MfaVerificationParams {
   email: string;

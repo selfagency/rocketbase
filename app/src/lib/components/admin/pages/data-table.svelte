@@ -7,7 +7,7 @@
   import { Input } from '$lib/components/ui/input';
   import * as Table from '$lib/components/ui/table';
   import * as Tooltip from '$lib/components/ui/tooltip';
-  import * as m from '$lib/paraglide/messages.js';
+  import * as m from '$lib/paraglide/messages';
   import ArrowDown01Icon from '@lucide/svelte/icons/arrow-down-0-1';
   import ArrowDown10Icon from '@lucide/svelte/icons/arrow-down-1-0';
   import ArrowDownUpIcon from '@lucide/svelte/icons/arrow-down-up';

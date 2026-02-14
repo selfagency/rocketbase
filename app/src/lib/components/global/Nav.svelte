@@ -7,7 +7,7 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import * as NavigationMenu from '$lib/components/ui/navigation-menu';
   import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
-  import * as m from '$lib/paraglide/messages.js';
+  import * as m from '$lib/paraglide/messages';
   import { isMobile } from '$lib/stores/screen';
   import { getDisplayName, getPocketBaseAvatarUrl, getUserInitials } from '$lib/utils/user-profile';
   import type { NavItem } from '../../types';

@@ -1,5 +1,5 @@
-import * as m from '$lib/paraglide/messages.js';
 import { registerSchema, type RegisterSchema } from '$lib/auth/schemas';
+import * as m from '$lib/paraglide/messages';
 import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';

@@ -2,7 +2,7 @@
  * Shared authentication form schemas for login and registration
  */
 
-import * as m from '$lib/paraglide/messages.js';
+import * as m from '$lib/paraglide/messages';
 import { z } from 'zod';
 
 /**

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import { loginSchema } from '$lib/auth/schemas';
+  import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import { Button } from '$lib/components/ui/button';
   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
   import * as Form from '$lib/components/ui/form';
   import { Input } from '$lib/components/ui/input';
-  import * as m from '$lib/paraglide/messages.js';
+  import * as m from '$lib/paraglide/messages';
   import { toast } from '$lib/stores/toast';
   import { CircleAlert } from '@lucide/svelte';
   import { onMount } from 'svelte';

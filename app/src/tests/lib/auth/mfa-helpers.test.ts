@@ -1,9 +1,9 @@
+import type { SuperValidated } from 'sveltekit-superforms';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { authenticateWithPassword, verifyMfaCode } from '../../../lib/auth/mfa-helpers';
-import type { SuperValidated } from 'sveltekit-superforms';
 
 // Mock the paraglide messages module
-vi.mock('$lib/paraglide/messages.js', () => ({
+vi.mock('$lib/paraglide/messages', () => ({
   default: {},
   'auth.login.invalid_credentials': vi.fn(() => 'Invalid email or password'),
   'auth.login.account_disabled': vi.fn(() => 'Account has been disabled'),

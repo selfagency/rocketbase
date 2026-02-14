@@ -1,7 +1,7 @@
 <script lang="ts">
   import DataTable from '$lib/components/admin/pages/data-table.svelte';
-  import * as m from '$lib/paraglide/messages.js';
-  import { columns } from '$lib/server/admin/pages-columns.js';
+  import * as m from '$lib/paraglide/messages';
+  import { columns } from '$lib/server/admin/pages-columns';
   import { MetaTags } from 'svelte-meta-tags';
   import type { PageData } from './$types';
 

@@ -1,4 +1,4 @@
-import * as m from '$lib/paraglide/messages.js';
+import * as m from '$lib/paraglide/messages';
 import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';

@@ -3,7 +3,7 @@
 	Changes: Added optional `href` prop to make triggers clickable when provided.
 -->
 <script lang="ts" module>
-  import { cn } from '$lib/utils.js';
+  import { cn } from '$lib/utils';
   import { tv } from 'tailwind-variants';
 
   export const navigationMenuTriggerStyle = tv({

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state';
   import PostHeader from '$lib/components/posts/PostHeader.svelte';
-  import * as m from '$lib/paraglide/messages.js';
+  import * as m from '$lib/paraglide/messages';
   import { getFileUrl } from '$lib/utils';
   import { MetaTags } from 'svelte-meta-tags';
   import type { PageData } from './$types';

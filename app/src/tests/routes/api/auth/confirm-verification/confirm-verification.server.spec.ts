@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { POST } from '../../../../../routes/api/auth/confirm-verification/+server';
 
 // Mock paraglide messages
-vi.mock('$lib/paraglide/messages.js', () => ({
+vi.mock('$lib/paraglide/messages', () => ({
   'api.token_required': () => 'Token is required',
   'api.email_verification_failed': () => 'Email verification failed',
 }));

@@ -1,6 +1,6 @@
 import DataTableActions from '$lib/components/admin/pages/data-table-actions.svelte';
 import { renderComponent, renderSnippet } from '$lib/components/ui/data-table';
-import * as m from '$lib/paraglide/messages.js';
+import * as m from '$lib/paraglide/messages';
 import type { PagesResponseWithAuthor } from '$lib/types/pocketbase-expanded';
 import EyeIcon from '@lucide/svelte/icons/eye';
 import EyeOffIcon from '@lucide/svelte/icons/eye-off';

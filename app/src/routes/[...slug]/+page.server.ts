@@ -1,4 +1,4 @@
-import * as m from '$lib/paraglide/messages.js';
+import * as m from '$lib/paraglide/messages';
 import { constructFullPath, findPageBySlug } from '$lib/server/fallthrough';
 import {
   FALLTHROUGH_PAGE_FIELDS,

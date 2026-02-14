@@ -54,6 +54,19 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
     accessorKey: 'slug',
     header: m['admin.pages.slug'](),
     meta: { sortKey: 'slug' },
+    cell: ({ row }) => {
+      const slugSnippet = createRawSnippet<[{ slug: string }]>(getData => {
+        const { slug } = getData();
+        const safeSlug = slug?.trim() || '—';
+        return {
+          render: () =>
+            `<div class="max-w-20 truncate text-sm text-muted-foreground sm:max-w-24 md:max-w-32" title="${safeSlug.replace(/"/g, '&quot;')}">${safeSlug}</div>`,
+        };
+      });
+      return renderSnippet(slugSnippet, {
+        slug: row.original.slug || '',
+      });
+    },
   },
   {
     accessorKey: 'summary',

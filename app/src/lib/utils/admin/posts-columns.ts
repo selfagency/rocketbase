@@ -44,14 +44,14 @@ export const columns: ColumnDef<PostsResponseWithExpanded>[] = [
       const { image, id } = row.original as any;
       if (!image) {
         return renderComponent(ImageIcon, {
-          class: 'w-8 h-8 text-gray-300 p-2 bg-gray-100 rounded',
+          class: 'size-10 text-gray-300 p-2 bg-gray-100 rounded',
         });
       }
       const imageSnippet = createRawSnippet<[{ imageUrl: string; title: string }]>(getData => {
         const { imageUrl, title } = getData();
         return {
           render: () =>
-            `<img src="${escapeHtml(imageUrl)}" alt="Thumbnail for ${escapeHtml(title || 'post')}" class="h-12 w-12 min-w-12 rounded object-cover" loading="lazy" />`,
+            `<img src="${escapeHtml(imageUrl)}" alt="Thumbnail for ${escapeHtml(title || 'post')}" class="h-10 w-10 min-w-10 rounded object-cover" loading="lazy" />`,
         };
       });
 

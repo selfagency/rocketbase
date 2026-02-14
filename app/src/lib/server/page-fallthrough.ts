@@ -4,6 +4,7 @@ export const RESERVED_ROUTE_SEGMENTS = [
   'forgot-password',
   'login',
   'logout',
+  'preview',
   'register',
   'verify-email',
 ] as const;

@@ -72,7 +72,7 @@ describe('Individual Post Page Server Load', () => {
 
       expect(result.post).toEqual(mockPost);
       expect(mockPb.collection).toHaveBeenCalledWith('posts');
-      expect(mockPb.getFirstListItem).toHaveBeenCalledWith('slug = "test-slug"', {
+      expect(mockPb.getFirstListItem).toHaveBeenCalledWith('slug = "test-slug" && published = true && visible = true', {
         expand: 'author,tags',
       });
     });
@@ -95,7 +95,10 @@ describe('Individual Post Page Server Load', () => {
       } as any);
 
       expect(result.post.slug).toBe('another-post-slug');
-      expect(mockPb.getFirstListItem).toHaveBeenCalledWith('slug = "another-post-slug"', expect.any(Object));
+      expect(mockPb.getFirstListItem).toHaveBeenCalledWith(
+        'slug = "another-post-slug" && published = true && visible = true',
+        expect.any(Object)
+      );
     });
 
     it('expands author and tags relationships', async () => {
@@ -131,7 +134,7 @@ describe('Individual Post Page Server Load', () => {
       await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
 
       expect(mockPb.getFirstListItem).toHaveBeenCalledWith(
-        'slug = "post-with-dashes-and-numbers-123"',
+        'slug = "post-with-dashes-and-numbers-123" && published = true && visible = true',
         expect.any(Object)
       );
     });

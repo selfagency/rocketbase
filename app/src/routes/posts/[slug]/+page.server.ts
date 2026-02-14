@@ -8,9 +8,11 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 
   try {
     // Find the post by slug
-    const post = await pb.collection('posts').getFirstListItem<PostsResponseWithExpanded>(`slug = "${params.slug}"`, {
-      expand: 'author,tags',
-    });
+    const post = await pb
+      .collection('posts')
+      .getFirstListItem<PostsResponseWithExpanded>(`slug = "${params.slug}" && published = true && visible = true`, {
+        expand: 'author,tags',
+      });
 
     return {
       post,

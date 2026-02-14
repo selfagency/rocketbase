@@ -15,10 +15,12 @@
     data,
     isEdit = false,
     parentSlug = null,
+    pageId,
   }: {
     data: { form: SuperValidated<Infer<PageSchema>> };
     isEdit?: boolean;
     parentSlug?: string | null;
+    pageId?: string;
   } = $props();
 
   // svelte-ignore state_referenced_locally
@@ -241,6 +243,17 @@
   <!-- Actions -->
   <div class="flex gap-4">
     <Form.Button type="submit">{isEdit ? 'Update Page' : 'Create Page'}</Form.Button>
+    {#if isEdit && pageId}
+      <Button
+        type="button"
+        variant="secondary"
+        href={`/preview/pages/${pageId}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open Preview
+      </Button>
+    {/if}
     <Button type="button" variant="outline" href="/admin/pages">Cancel</Button>
   </div>
 </form>

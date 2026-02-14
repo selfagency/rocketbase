@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { loginSchema } from '$lib/auth/schemas';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Card,
@@ -18,7 +19,6 @@
 	import { MetaTags } from 'svelte-meta-tags';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import { z } from 'zod';
 
 	const metaTags = {
 		title: 'Login',
@@ -33,14 +33,6 @@
 			description: 'Sign in to your account'
 		}
 	};
-
-	const loginSchema = z.object({
-		email: z.string().optional(),
-		password: z.string().optional(),
-		code: z.string().optional(),
-		mfaId: z.string().optional(),
-		otpId: z.string().optional()
-	});
 
 	const { data } = $props();
 

@@ -1,23 +1,9 @@
 import * as m from '$lib/paraglide/messages.js';
+import { registerSchema, type RegisterSchema } from '$lib/auth/schemas';
 import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
-
-const registerSchema = z
-	.object({
-		email: z.email(m['validation.email_invalid']()),
-		password: z.string().min(8, m['validation.password_min_length']()),
-		passwordConfirm: z.string(),
-		name: z.string().min(2, m['validation.name_min_length']())
-	})
-	.refine((data) => data.password === data.passwordConfirm, {
-		message: m['validation.passwords_no_match'](),
-		path: ['passwordConfirm']
-	});
-
-type RegisterSchema = z.infer<typeof registerSchema>;
 
 export const load: PageServerLoad = async ({ locals }) => {
 	// Redirect if already logged in

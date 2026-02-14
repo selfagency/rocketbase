@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { registerSchema } from '$lib/auth/schemas';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Card,
@@ -15,7 +16,6 @@
 	import { MetaTags } from 'svelte-meta-tags';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import { z } from 'zod';
 
 	const metaTags = {
 		title: 'Register',
@@ -25,18 +25,6 @@
 			description: 'Create a new account'
 		}
 	};
-
-	const registerSchema = z
-		.object({
-			email: z.email(m['validation.email_invalid']()),
-			password: z.string().min(8, m['validation.password_min_length']()),
-			passwordConfirm: z.string(),
-			name: z.string().min(2, m['validation.name_min_length']())
-		})
-		.refine((data) => data.password === data.passwordConfirm, {
-			message: m['validation.passwords_no_match'](),
-			path: ['passwordConfirm']
-		});
 
 	let { data } = $props();
 

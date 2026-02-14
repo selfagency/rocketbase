@@ -64,7 +64,8 @@
       "WebFetch(domain:pocketbase.io)",
       "Bash(cd:*)",
       "Bash(pnpm dev:services:down:*)",
-      "Bash(pnpm dev:services:*)"
+      "Bash(pnpm dev:services:*)",
+      "Bash(wc:*)"
     ]
   },
   "hooks": {

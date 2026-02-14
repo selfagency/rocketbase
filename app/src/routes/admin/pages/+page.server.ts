@@ -1,4 +1,5 @@
 import type { PagesResponseWithAuthor } from '$lib/types/pocketbase-expanded';
+import { buildAndFlattenPageHierarchy } from '$lib/utils/page-hierarchy';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -37,47 +38,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		fields: 'id,title,slug,parent,order,published,visible,image,created,updated'
 	});
 
-	// Build hierarchical structure: organize pages with children under parents
-	type PageWithChildren = PagesResponseWithAuthor & { children: PageWithChildren[] };
-
-	const pageMap = new Map<string, PageWithChildren>();
-	const rootPages: PageWithChildren[] = [];
-
-	// First pass: create map and add children array
-	for (const pageItem of result.items) {
-		pageMap.set(pageItem.id, { ...pageItem, children: [] } as PageWithChildren);
-	}
-
-	// Second pass: build tree structure
-	for (const pageItem of result.items) {
-		const page = pageMap.get(pageItem.id)!;
-		if (pageItem.parent && pageMap.has(pageItem.parent)) {
-			pageMap.get(pageItem.parent)!.children.push(page);
-		} else {
-			rootPages.push(page);
-		}
-	}
-
-	// Flatten tree in display order (parents followed by indented children)
-
-	function flattenPages(pages: PageWithChildren[], depth = 0): PagesResponseWithAuthor[] {
-		const flat: PagesResponseWithAuthor[] = [];
-		for (const page of pages) {
-			const { children, ...pageData } = page;
-			// attach depth for rendering hierarchy
-			const pd = { ...(pageData as PagesResponseWithAuthor) } as any;
-			pd.depth = depth;
-			flat.push(pd as PagesResponseWithAuthor);
-			if (children.length > 0) {
-				// Sort children by order
-				children.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
-				flat.push(...flattenPages(children, depth + 1));
-			}
-		}
-		return flat;
-	}
-
-	const flatPages = flattenPages(rootPages);
+	// Build and flatten hierarchical page structure
+	const flatPages = buildAndFlattenPageHierarchy(result.items);
 
 	// Apply pagination to flattened list
 	const startIndex = (page - 1) * perPage;

@@ -214,6 +214,26 @@ describe('ProfileCard rendering via Account Page', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('uses API-provided error message when verification request fails with JSON message', async () => {
+    const jsonMock = vi.fn(async () => ({ message: 'Verification service unavailable' }));
+
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      json: jsonMock,
+    }));
+    vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
+
+    const { container } = render(AccountPage, { props: { data: createMockData({ verified: false }) as any } });
+    const sendButton = container.querySelector('[data-testid="send-verification-email-button"]') as HTMLElement | null;
+
+    sendButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(jsonMock).toHaveBeenCalledTimes(1);
+  });
+
   it('clicks upload button to trigger hidden file input click handler', async () => {
     const { container } = render(AccountPage, {
       props: { data: createMockData({ avatar: '' }) as any },

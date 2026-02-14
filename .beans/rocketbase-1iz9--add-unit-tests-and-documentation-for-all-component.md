@@ -5,7 +5,7 @@ status: in-progress
 type: task
 priority: high
 created_at: 2026-02-13T22:51:45Z
-updated_at: 2026-02-14T18:10:49Z
+updated_at: 2026-02-14T18:19:06Z
 ---
 
 Ensure all components and functions have unit tests and are documented within the code with explanations of their purpose.
@@ -141,3 +141,15 @@ Results remained:
 - Extracted account page result/toast logic into `app/src/lib/utils/account-page-handlers.ts` and added unit tests.
 - Updated account page to use extracted handlers with no functional behavior changes.
 - Browser suite currently passing with improved coverage metrics from the prior baseline.
+
+### Coverage push (follow-up)
+- Added additional branch tests for `account-page-handlers` to cover success-no-avatar and non-success fallback paths.
+- Added/strengthened Nav and ProfileCard coverage tests for dropdown and error-response paths.
+- Latest browser coverage: **97.33% statements**, **82.95% branches**, **98.55% functions**, **98.77% lines**.
+
+### Commit prep (latest coverage tweaks)
+- Added targeted tests for remaining branch paths in:
+  - `app/src/tests/lib/utils/account-page-handlers.test.ts`
+  - `app/src/lib/components/global/Nav.auth.spec.ts`
+  - `app/src/lib/components/account/ProfileCard.spec.ts`
+- Browser tests pass with coverage after these updates.

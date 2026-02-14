@@ -22,6 +22,7 @@ vi.mock('$app/state', () => ({
 }));
 
 import Nav from './Nav.svelte';
+import { goto } from '$app/navigation';
 
 describe('Nav.svelte (authenticated/admin)', () => {
   it('renders authenticated navigation without login button', async () => {
@@ -145,27 +146,34 @@ describe('Nav.svelte (authenticated/admin)', () => {
   });
 
   it('handles account and logout dropdown item selections', async () => {
+    const requestSubmitSpy = vi.spyOn(HTMLFormElement.prototype, 'requestSubmit').mockImplementation(() => undefined);
+
     render(Nav, {
       props: {
         navItems: [],
       },
     });
 
-    const accountItem = Array.from(document.querySelectorAll('[role="menuitem"], button, div')).find(el =>
-      el.textContent?.match(/account settings/i)
-    );
-    const logoutItem = Array.from(document.querySelectorAll('[role="menuitem"], button, div')).find(el =>
-      el.textContent?.match(/logout/i)
-    );
+    const userMenuTrigger = document.querySelector('[aria-label]') as HTMLElement | null;
+    userMenuTrigger?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    await Promise.resolve();
+
+    const menuItems = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-item"]')) as HTMLElement[];
+    const accountItem = menuItems.find(el => el.textContent?.match(/account settings/i));
+    const logoutItem = menuItems.find(el => el.textContent?.match(/logout/i));
 
     expect(accountItem).toBeTruthy();
     expect(logoutItem).toBeTruthy();
 
     accountItem?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    accountItem?.dispatchEvent(new CustomEvent('select', { bubbles: true, cancelable: true }));
     logoutItem?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    logoutItem?.dispatchEvent(new CustomEvent('select', { bubbles: true, cancelable: true }));
 
     await Promise.resolve();
+
+    expect(goto).toHaveBeenCalledWith('/account');
+    expect(requestSubmitSpy).toHaveBeenCalled();
+
+    requestSubmitSpy.mockRestore();
   });
 });

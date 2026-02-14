@@ -17,12 +17,32 @@ describe('account-page-handlers', () => {
     expect(next).toBe(false);
   });
 
+  it('keeps avatarUploaded=true on success when no avatar upload reset is needed', () => {
+    const toast = vi.fn();
+    const next = handleProfileResult({ type: 'success' }, false, toast, m);
+
+    expect(toast).toHaveBeenCalledTimes(1);
+    expect(toast).toHaveBeenCalledWith(expect.any(String), 'success');
+    expect(next).toBe(false);
+  });
+
   it('handles profile failure and resets avatarUploaded flag', () => {
     const toast = vi.fn();
     const next = handleProfileResult({ type: 'failure' }, true, toast, m);
 
     expect(toast).toHaveBeenCalledWith(expect.any(String), 'error');
     expect(next).toBe(false);
+  });
+
+  it('returns previous avatarUploaded state for non-success/failure profile result', () => {
+    const toast = vi.fn();
+
+    const nextTrue = handleProfileResult({ type: 'other' }, true, toast, m);
+    const nextFalse = handleProfileResult({ type: 'other' }, false, toast, m);
+
+    expect(toast).not.toHaveBeenCalled();
+    expect(nextTrue).toBe(true);
+    expect(nextFalse).toBe(false);
   });
 
   it('handles password result success only', () => {
@@ -45,6 +65,14 @@ describe('account-page-handlers', () => {
     expect(toast).toHaveBeenCalledTimes(2);
     expect(toast).toHaveBeenNthCalledWith(1, expect.any(String), 'success');
     expect(toast).toHaveBeenNthCalledWith(2, expect.any(String), 'info');
+  });
+
+  it('ignores MFA result when type is not success', () => {
+    const toast = vi.fn();
+
+    handleMfaResult({ type: 'failure', data: { mfaOptIn: true } }, toast, m);
+
+    expect(toast).not.toHaveBeenCalled();
   });
 
   it('handles verified query flag only when true', () => {

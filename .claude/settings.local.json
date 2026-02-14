@@ -56,7 +56,12 @@
       "Bash(pnpm build:types:*)",
       "WebFetch(domain:oekazuma.github.io)",
       "Bash(pnpm -C app build:types:*)",
-      "Bash(pnpm db:migrate:*)"
+      "Bash(pnpm db:migrate:*)",
+      "WebFetch(domain:ngneat.github.io)",
+      "WebFetch(domain:www.pexels.com)",
+      "Bash(node:*)",
+      "Bash(pnpm format:*)",
+      "WebFetch(domain:pocketbase.io)"
     ]
   },
   "hooks": {

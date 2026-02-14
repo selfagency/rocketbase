@@ -3,13 +3,15 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
+	import { getFileUrl } from '$lib/utils';
 	import { format } from '@formkit/tempo';
 
 	interface Props {
 		post: PostsResponseWithExpanded;
+		cdnUrl?: string;
 	}
 
-	let { post }: Props = $props();
+	let { post, cdnUrl }: Props = $props();
 
 	function getAuthorInitials(name?: string, email?: string): string {
 		if (name) {
@@ -31,7 +33,7 @@
 	{#if post.image}
 		<div class="aspect-video overflow-hidden">
 			<img
-				src={`/api/pb/_superusers/files/${post.collectionId}/${post.id}/${post.image}`}
+				src={getFileUrl('posts', post.id, post.image, cdnUrl)}
 				alt={post.title}
 				class="h-full w-full object-cover transition-transform hover:scale-105"
 			/>
@@ -55,7 +57,7 @@
 				<Avatar class="h-8 w-8">
 					{#if author.avatar}
 						<AvatarImage
-							src={`/api/pb/files/users/${author.id}/${author.avatar}`}
+							src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
 							alt={author.name || author.email}
 						/>
 					{/if}

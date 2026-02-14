@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 	import { Badge } from '$lib/components/ui/badge';
 	import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
+	import { getFileUrl } from '$lib/utils';
 
 	interface Props {
 		post: PostsResponseWithExpanded;
+		cdnUrl?: string;
 	}
 
-	let { post }: Props = $props();
+	let { post, cdnUrl }: Props = $props();
 </script>
 
 <header class="mb-8">
@@ -24,7 +25,7 @@
 
 	{#if post.image}
 		<img
-			src="{page.url.origin}/api/pb/files/posts/{post.id}/{post.image}"
+			src={getFileUrl('posts', post.id, post.image, cdnUrl)}
 			alt={post.title}
 			class="mt-6 mb-6 h-64 w-full rounded-lg object-cover"
 		/>
@@ -37,7 +38,7 @@
 				<Avatar class="h-6 w-6">
 					{#if author.avatar}
 						<AvatarImage
-							src="{page.url.origin}/api/pb/files/users/{author.id}/{author.avatar}"
+							src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
 							alt={author.name || author.email}
 						/>
 					{/if}

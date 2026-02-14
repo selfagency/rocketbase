@@ -37,5 +37,6 @@
 		pagination={data.pagination}
 		emptyTitle={m.posts_empty_title()}
 		emptyDescription={m.posts_empty_description()}
+		cdnUrl={data.metadata?.cdn_url}
 	/>
 </div>

@@ -27,6 +27,11 @@ migrate(
 				key: 'twitter_handle',
 				value: '',
 				type: 'string'
+			},
+			{
+				key: 'cdn_url',
+				value: '',
+				type: 'string'
 			}
 		];
 
@@ -50,7 +55,14 @@ migrate(
 	},
 	() => {
 		// Delete the default metadata entries on rollback
-		const keys = ['site_title', 'site_description', 'og_image', 'twitter_site', 'twitter_handle'];
+		const keys = [
+			'site_title',
+			'site_description',
+			'og_image',
+			'twitter_site',
+			'twitter_handle',
+			'cdn_url'
+		];
 
 		for (const key of keys) {
 			$dbx.newQuery('DELETE FROM metadata WHERE key = {:key}').bind({ key: key }).execute();

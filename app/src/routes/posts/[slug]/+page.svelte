@@ -2,10 +2,13 @@
 	import { page } from '$app/state';
 	import PostHeader from '$lib/components/posts/PostHeader.svelte';
 	import * as m from '$lib/paraglide/messages.js';
+	import { getFileUrl } from '$lib/utils';
 	import { MetaTags } from 'svelte-meta-tags';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	const cdnUrl = $derived(data.metadata?.cdn_url);
 
 	const metaTags = $derived({
 		title: data.post.title,
@@ -19,7 +22,7 @@
 			images: data.post.image
 				? [
 						{
-							url: `${page.url.origin}/api/pb/files/posts/${data.post.id}/${data.post.image}`,
+							url: `${page.url.origin}${getFileUrl('posts', data.post.id, data.post.image, cdnUrl)}`,
 							width: 1200,
 							height: 630,
 							alt: data.post.title
@@ -38,7 +41,7 @@
 			title: data.post.title,
 			description: data.post.summary,
 			image: data.post.image
-				? `${page.url.origin}/api/pb/files/posts/${data.post.id}/${data.post.image}`
+				? `${page.url.origin}${getFileUrl('posts', data.post.id, data.post.image, cdnUrl)}`
 				: undefined
 		}
 	});
@@ -49,7 +52,7 @@
 <div class="container mx-auto max-w-4xl px-4 py-8">
 	<article class="prose prose-lg max-w-none">
 		{#if data.post.title}
-			<PostHeader post={data.post} />
+			<PostHeader post={data.post} {cdnUrl} />
 		{/if}
 
 		{#if data.post.content}

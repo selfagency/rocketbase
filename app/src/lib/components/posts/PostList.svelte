@@ -15,13 +15,15 @@
 		};
 		emptyTitle?: string;
 		emptyDescription?: string;
+		cdnUrl?: string;
 	}
 
 	let {
 		posts,
 		pagination,
 		emptyTitle = 'No posts found',
-		emptyDescription = 'There are no posts to display.'
+		emptyDescription = 'There are no posts to display.',
+		cdnUrl
 	}: Props = $props();
 
 	function handlePageChange(pageNum: number) {
@@ -39,7 +41,7 @@
 {:else}
 	<div class="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 		{#each posts as post (post.id)}
-			<PostCard {post} />
+			<PostCard {post} {cdnUrl} />
 		{/each}
 	</div>
 

@@ -3,9 +3,9 @@
   import { Button } from '$lib/components/ui/button';
   import * as Tooltip from '$lib/components/ui/tooltip';
   import type { PagesResponse } from '$lib/types/pocketbase';
-  import ViewIcon from '@lucide/svelte/icons/view';
   import PencilIcon from '@lucide/svelte/icons/pencil';
   import TrashIcon from '@lucide/svelte/icons/trash';
+  import ViewIcon from '@lucide/svelte/icons/view';
 
   let { page }: { page: PagesResponse } = $props();
 

@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
+  buildAndFlattenPageHierarchy,
   buildPageHierarchy,
   flattenPageHierarchy,
-  buildAndFlattenPageHierarchy,
   type PageWithChildren,
 } from '../../../lib/utils/page-hierarchy';
 

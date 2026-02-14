@@ -1,10 +1,9 @@
 import DataTableActions from '$lib/components/admin/pages/data-table-actions.svelte';
 import PageTitleCell from '$lib/components/admin/pages/page-title-cell.svelte';
+import PublishVisibilityCell from '$lib/components/admin/pages/publish-visibility-cell.svelte';
 import { renderComponent, renderSnippet } from '$lib/components/ui/data-table';
 import * as m from '$lib/paraglide/messages';
 import type { PagesResponseWithAuthor } from '$lib/types/pocketbase-expanded';
-import EyeIcon from '@lucide/svelte/icons/eye';
-import EyeOffIcon from '@lucide/svelte/icons/eye-off';
 import ImageIcon from '@lucide/svelte/icons/image';
 import type { ColumnDef } from '@tanstack/table-core';
 import { createRawSnippet } from 'svelte';
@@ -59,29 +58,11 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
   {
     accessorKey: 'published',
     header: m['admin.pages.published'](),
-    cell: ({ row }) => {
-      const publishedSnippet = createRawSnippet<[{ published: boolean }]>(getData => {
-        const { published } = getData();
-        const badge = published
-          ? '<span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">Published</span>'
-          : '<span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">Draft</span>';
-        return {
-          render: () => badge,
-        };
-      });
-      return renderSnippet(publishedSnippet, {
+    cell: ({ row }) =>
+      renderComponent(PublishVisibilityCell, {
         published: row.original.published || false,
-      });
-    },
-  },
-  {
-    accessorKey: 'visible',
-    header: m['admin.pages.visible'](),
-    cell: ({ row }) => {
-      const vis = row.original.visible;
-      const comp = vis ? EyeIcon : EyeOffIcon;
-      return renderComponent(comp, { class: 'w-5 h-5', 'aria-hidden': true });
-    },
+        visible: row.original.visible || false,
+      }),
   },
   {
     accessorKey: 'created',

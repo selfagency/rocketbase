@@ -97,6 +97,6 @@
 <Toaster />
 <Nav navItems={data.navItems || []} />
 
-<div class="container mx-auto flex min-h-[80vh] w-full max-w-5xl flex-col items-center justify-center">
+<div class="container mx-auto flex min-h-[80vh] w-full flex-col items-center justify-center">
   {@render children()}
 </div>

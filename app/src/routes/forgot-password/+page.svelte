@@ -5,6 +5,7 @@
   import * as Form from '$lib/components/ui/form';
   import { Input } from '$lib/components/ui/input';
   import * as m from '$lib/paraglide/messages';
+  import { onMount } from 'svelte';
   import { superForm } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
   import { z } from 'zod';
@@ -16,6 +17,12 @@
   let { data, form: actionData } = $props();
 
   let showSuccess = $state(false);
+
+  onMount(() => {
+    if ((actionData as { success?: boolean } | undefined)?.success) {
+      showSuccess = true;
+    }
+  });
 
   // svelte-ignore state_referenced_locally
   const superFormObj = superForm(data.form, {

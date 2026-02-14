@@ -15,7 +15,15 @@ export default defineConfig({
       instances: [{ browser: 'chromium' }],
       headless: true,
     },
-    include: ['src/tests/**/*.svelte.spec.{js,ts}', 'src/lib/components/**/*.spec.{js,ts}'],
+    include: [
+      'src/tests/**/*.svelte.spec.{js,ts}',
+      'src/tests/lib/auth/schemas.test.ts',
+      'src/tests/lib/schemas/**/*.test.ts',
+      'src/tests/lib/stores/**/*.test.ts',
+      'src/tests/lib/utils/**/*.test.ts',
+      'src/tests/lib/utils.test.ts',
+      'src/lib/components/**/*.spec.{js,ts}',
+    ],
     exclude: ['src/tests/**/*.server.spec.{js,ts}', 'node_modules'],
     coverage: {
       provider: 'v8',

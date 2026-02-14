@@ -5,7 +5,7 @@ status: in-progress
 type: task
 priority: high
 created_at: 2026-02-13T22:51:45Z
-updated_at: 2026-02-14T16:17:39Z
+updated_at: 2026-02-14T17:39:56Z
 ---
 
 Ensure all components and functions have unit tests and are documented within the code with explanations of their purpose.
@@ -98,3 +98,34 @@ Ensure all components and functions have unit tests and are documented within th
 - [ ] lib/auth/mfa-helpers.ts (66% - defensive checks, disabled accounts, OTP errors)
 - [ ] routes/account/+page.server.ts (80% - error paths, avatar upload)
 - [ ] lib/server/fallthrough.ts (95% - one missing line)
+
+
+## Browser Coverage Update (2026-02-14)
+
+- Reconfigured Vitest scripts to run one-shot () so commands exit automatically.
+- Expanded browser test include patterns for lib tests that are browser-safe.
+- Added targeted coverage tests:
+  - 
+  - route branch tests in  and 
+  - interaction-path tests in 
+- Improved forgot-password success branch rendering and strengthened assertions.
+
+### Results
+- Browser suite: **18 files / 157 tests passing**
+- Coverage improved to **84.91% statements**, **62.89% branches**, **87.39% functions**, **86.57% lines**.
+
+## Browser Coverage Update (corrected notes)
+
+- Reconfigured Vitest scripts to run one-shot (`--run`) so commands exit automatically.
+- Added targeted coverage tests in:
+  - `app/src/lib/components/global/Nav.auth.spec.ts`
+  - `app/src/tests/routes/page.svelte.spec.ts`
+  - `app/src/tests/routes/login/page.svelte.spec.ts`
+  - `app/src/lib/components/account/ProfileCard.spec.ts`
+- Updated forgot-password success branch handling in:
+  - `app/src/routes/forgot-password/+page.svelte`
+  - `app/src/tests/routes/forgot-password/page.svelte.spec.ts`
+
+Results remained:
+- Browser suite: **18 files / 157 tests passing**
+- Coverage: **84.91% statements**, **62.89% branches**, **87.39% functions**, **86.57% lines**

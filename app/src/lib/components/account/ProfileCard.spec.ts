@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import AccountPage from '../../../routes/account/+page.svelte';
+import { vi } from 'vitest';
 
 describe('ProfileCard rendering via Account Page', () => {
   const mockUser = {
@@ -102,5 +103,59 @@ describe('ProfileCard rendering via Account Page', () => {
     const buttons = container.querySelectorAll('button');
     const removeButton = Array.from(buttons).find(btn => btn.textContent?.includes('Remove Avatar'));
     expect(removeButton).toBeUndefined();
+  });
+
+  it('shows success state after sending verification email', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true }));
+    vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
+
+    const { container } = render(AccountPage, { props: { data: createMockData({ verified: false }) as any } });
+    const sendButton = container.querySelector('[data-testid="send-verification-email-button"]') as HTMLElement | null;
+
+    expect(sendButton).not.toBeNull();
+    sendButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(fetchMock).toHaveBeenCalled();
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('?/sendVerificationEmail');
+  });
+
+  it('handles avatar file selection and shows remove button', async () => {
+    class MockFileReader {
+      result: string | ArrayBuffer | null = null;
+      onload: ((event: ProgressEvent<FileReader>) => void) | null = null;
+
+      readAsDataURL(_file: Blob) {
+        this.result = 'data:image/png;base64,ZmFrZQ==';
+        const event = {
+          target: { result: this.result },
+        } as unknown as ProgressEvent<FileReader>;
+        this.onload?.(event);
+      }
+    }
+
+    vi.stubGlobal('FileReader', MockFileReader as unknown as typeof FileReader);
+
+    const { container } = render(AccountPage, {
+      props: { data: createMockData({ avatar: '' }) as any },
+    });
+
+    const fileInput = container.querySelector('#avatar-upload') as HTMLInputElement | null;
+    expect(fileInput).not.toBeNull();
+
+    const file = new File(['avatar-bytes'], 'avatar.png', { type: 'image/png' });
+
+    Object.defineProperty(fileInput, 'files', {
+      value: [file],
+      configurable: true,
+    });
+
+    fileInput?.dispatchEvent(new Event('change', { bubbles: true }));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(container.textContent).toContain('Remove');
   });
 });

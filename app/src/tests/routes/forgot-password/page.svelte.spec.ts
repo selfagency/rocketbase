@@ -75,6 +75,6 @@ describe('Forgot Password Page Component', () => {
         form: actionData,
       } as any,
     });
-    expect(container).toBeTruthy();
+    expect(container.textContent).toContain('Password reset link sent');
   });
 });

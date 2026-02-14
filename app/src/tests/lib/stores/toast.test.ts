@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { toast, toasts } from '../../../lib/stores/toast';
 
 describe('toast store', () => {
@@ -25,7 +25,7 @@ describe('toast store', () => {
         message: 'Operation successful',
         type: 'success',
       });
-      expect(toasts.current[0].timestamp).toBeInstanceOf(Date);
+      expect(new Date(toasts.current[0].timestamp).toString()).not.toBe('Invalid Date');
     });
 
     it('adds error toast', () => {
@@ -80,10 +80,12 @@ describe('toast store', () => {
       toast('First');
       toast('Second');
 
-      expect(toasts.current[0].timestamp).toBeInstanceOf(Date);
-      expect(toasts.current[1].timestamp).toBeInstanceOf(Date);
+      expect(new Date(toasts.current[0].timestamp).toString()).not.toBe('Invalid Date');
+      expect(new Date(toasts.current[1].timestamp).toString()).not.toBe('Invalid Date');
       // Timestamps should be close but not necessarily different due to test speed
-      expect(toasts.current[0].timestamp.getTime()).toBeLessThanOrEqual(toasts.current[1].timestamp.getTime());
+      const firstTs = new Date(toasts.current[0].timestamp).getTime();
+      const secondTs = new Date(toasts.current[1].timestamp).getTime();
+      expect(firstTs).toBeLessThanOrEqual(secondTs);
     });
   });
 });

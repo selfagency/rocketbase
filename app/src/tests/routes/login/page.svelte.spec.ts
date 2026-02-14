@@ -61,8 +61,41 @@ describe('Login Page Component', () => {
       mfaId: 'mfa-123',
       otpId: 'otp-456',
       email: 'test@example.com',
+      form: {
+        ...mockFormData.form,
+        data: {
+          ...mockFormData.form.data,
+          mfaId: 'mfa-123',
+          otpId: 'otp-456',
+          code: '',
+        },
+      },
     };
     const { container } = render(LoginPage, { props: { data: mfaData } });
     expect(container).toBeTruthy();
+  });
+
+  it('shows MFA input and verify button when mfaId and otpId exist in form data', async () => {
+    const mfaData: any = {
+      ...mockFormData,
+      form: {
+        ...mockFormData.form,
+        data: {
+          ...mockFormData.form.data,
+          mfaId: 'mfa-123',
+          otpId: 'otp-456',
+          code: '',
+        },
+      },
+    };
+
+    render(LoginPage, { props: { data: mfaData } });
+
+    await expect
+      .element(document.querySelector('[data-testid="mfa-code-input"]') as HTMLElement | null)
+      .toBeInTheDocument();
+    await expect
+      .element(document.querySelector('[data-testid="mfa-verify-button"]') as HTMLElement | null)
+      .toBeInTheDocument();
   });
 });

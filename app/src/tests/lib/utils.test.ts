@@ -1,5 +1,24 @@
-import { describe, it, expect } from 'vitest';
-import { cn, getFileUrl } from '../../lib/utils';
+import { cn, getFileUrl } from '$lib/utils';
+import { describe, expect, it } from 'vitest';
+
+describe('utils', () => {
+  it('cn merges and dedups class names', () => {
+    const res = cn('p-2', 'text-sm', 'p-2', { 'text-bold': false } as any);
+    expect(typeof res).toBe('string');
+    expect(res).toContain('p-2');
+    expect(res).toContain('text-sm');
+  });
+
+  it('getFileUrl builds path without CDN', () => {
+    const url = getFileUrl('posts', 'rec1', 'image.png');
+    expect(url).toBe('/api/files/posts/rec1/image.png');
+  });
+
+  it('getFileUrl prepends CDN when provided', () => {
+    const url = getFileUrl('users', 'u1', 'a.jpg', 'https://cdn.test');
+    expect(url).toBe('https://cdn.test/api/files/users/u1/a.jpg');
+  });
+});
 
 describe('utils', () => {
   describe('cn', () => {
@@ -8,7 +27,8 @@ describe('utils', () => {
     });
 
     it('handles conditional classes', () => {
-      expect(cn('foo', false && 'bar', 'baz')).toBe('foo baz');
+      const showBar = false;
+      expect(cn('foo', showBar && 'bar', 'baz')).toBe('foo baz');
     });
 
     it('merges tailwind classes correctly', () => {

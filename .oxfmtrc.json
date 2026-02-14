@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "arrowParens": "avoid",
+  "bracketSpacing": true,
+  "jsxBracketSameLine": true,
+  "printWidth": 120,
+  "proseWrap": "preserve",
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "useTabs": false,
+  "experimentalSortPackageJson": false,
+  "ignorePatterns": [
+    "**/node_modules/",
+    "**/.svelte-kit/",
+    "**/build/",
+    "**/dist/",
+    "**/pb_data/",
+    "**/src/lib/paraglide",
+    "**/project.inlang/cache/"
+  ]
+}

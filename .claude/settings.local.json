@@ -65,7 +65,11 @@
       "Bash(cd:*)",
       "Bash(pnpm dev:services:down:*)",
       "Bash(pnpm dev:services:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm vitest:*)",
+      "Bash(/tmp/coverage-progress.md:*)",
+      "Bash(pnpm run test:node:*)"
     ]
   },
   "hooks": {

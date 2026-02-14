@@ -81,4 +81,23 @@ describe('Toaster component', () => {
 
     expect(toast.success).toHaveBeenCalledTimes(2);
   });
+
+  it('handles invalid timestamp values by falling back to zero in key generation', async () => {
+    const { unmount } = render(Toaster);
+    cleanup = unmount;
+
+    toasts.current = [
+      {
+        // Intentionally invalid date value to cover Number.isNaN(timestamp) fallback
+        timestamp: 'not-a-valid-date' as unknown as Date,
+        message: 'Invalid timestamp toast',
+        type: 'info',
+      },
+    ];
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(toast.info).toHaveBeenCalledTimes(1);
+    expect(toast.info).toHaveBeenCalledWith('Invalid timestamp toast');
+  });
 });

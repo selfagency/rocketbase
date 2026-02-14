@@ -75,6 +75,19 @@ describe('Login Page Component', () => {
     expect(container).toBeTruthy();
   });
 
+  it('renders form-level error alert when message is present', async () => {
+    const dataWithMessage: PageData = {
+      ...mockFormData,
+      form: {
+        ...mockFormData.form,
+        message: 'Invalid email or password',
+      },
+    };
+
+    const { container } = render(LoginPage, { props: { data: dataWithMessage } });
+    expect(container.textContent).toContain('Invalid email or password');
+  });
+
   it('shows MFA input and verify button when mfaId and otpId exist in form data', async () => {
     const mfaData: any = {
       ...mockFormData,
@@ -97,5 +110,10 @@ describe('Login Page Component', () => {
     await expect
       .element(document.querySelector('[data-testid="mfa-verify-button"]') as HTMLElement | null)
       .toBeInTheDocument();
+
+    const mfaHidden = document.querySelector('input[name="mfaId"]') as HTMLInputElement | null;
+    const otpHidden = document.querySelector('input[name="otpId"]') as HTMLInputElement | null;
+    expect(mfaHidden?.value).toBe('mfa-123');
+    expect(otpHidden?.value).toBe('otp-456');
   });
 });

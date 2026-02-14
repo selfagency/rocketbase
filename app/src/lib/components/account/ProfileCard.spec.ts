@@ -15,7 +15,7 @@ describe('ProfileCard rendering via Account Page', () => {
     role: 'user',
   };
 
-  const createMockData = (userOverrides = {}) => ({
+  const createMockData = (userOverrides = {}, dataOverrides: Record<string, unknown> = {}) => ({
     navItems: [],
     profileForm: {
       valid: true,
@@ -63,6 +63,7 @@ describe('ProfileCard rendering via Account Page', () => {
     user: { ...mockUser, ...userOverrides },
     url: 'http://localhost:5173',
     metadata: {},
+    ...dataOverrides,
   });
 
   it('renders ProfileCard with user role badge', async () => {
@@ -162,5 +163,114 @@ describe('ProfileCard rendering via Account Page', () => {
     await Promise.resolve();
 
     expect(container.textContent).toContain('Remove');
+  });
+
+  it('renders profile-level error message when provided', async () => {
+    const { container } = render(AccountPage, {
+      props: {
+        data: createMockData(
+          {},
+          {
+            profileForm: {
+              valid: false,
+              posted: true,
+              errors: {},
+              data: {
+                name: 'Test User',
+                email: 'test@example.com',
+                title: '',
+                bio: '',
+                website: '',
+                avatar: undefined,
+              },
+              constraints: {},
+              message: 'Profile update failed',
+              id: 'profileForm',
+            },
+          }
+        ) as any,
+      },
+    });
+
+    expect(container.textContent).toContain('Profile update failed');
+  });
+
+  it('handles failed verification email response with JSON parse fallback', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      json: async () => {
+        throw new Error('invalid json');
+      },
+    }));
+    vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
+
+    const { container } = render(AccountPage, { props: { data: createMockData({ verified: false }) as any } });
+    const sendButton = container.querySelector('[data-testid="send-verification-email-button"]') as HTMLElement | null;
+
+    sendButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('clicks upload button to trigger hidden file input click handler', async () => {
+    const { container } = render(AccountPage, {
+      props: { data: createMockData({ avatar: '' }) as any },
+    });
+
+    const fileInput = container.querySelector('#avatar-upload') as HTMLInputElement | null;
+    expect(fileInput).not.toBeNull();
+
+    const clickSpy = vi.spyOn(fileInput as HTMLInputElement, 'click').mockImplementation(() => undefined);
+
+    const uploadButton = Array.from(container.querySelectorAll('button')).find(btn =>
+      btn.textContent?.match(/upload/i)
+    );
+    uploadButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+
+    clickSpy.mockRestore();
+  });
+
+  it('clears selected avatar when remove button is clicked', async () => {
+    class MockFileReader {
+      result: string | ArrayBuffer | null = null;
+      onload: ((event: ProgressEvent<FileReader>) => void) | null = null;
+
+      readAsDataURL(_file: Blob) {
+        this.result = 'data:image/png;base64,ZmFrZQ==';
+        const event = {
+          target: { result: this.result },
+        } as unknown as ProgressEvent<FileReader>;
+        this.onload?.(event);
+      }
+    }
+
+    vi.stubGlobal('FileReader', MockFileReader as unknown as typeof FileReader);
+
+    const { container } = render(AccountPage, {
+      props: { data: createMockData({ avatar: '' }) as any },
+    });
+
+    const fileInput = container.querySelector('#avatar-upload') as HTMLInputElement | null;
+    const file = new File(['avatar-bytes'], 'avatar.png', { type: 'image/png' });
+    Object.defineProperty(fileInput, 'files', {
+      value: [file],
+      configurable: true,
+    });
+
+    fileInput?.dispatchEvent(new Event('change', { bubbles: true }));
+    await Promise.resolve();
+
+    const removeButton = Array.from(container.querySelectorAll('button')).find(btn =>
+      btn.textContent?.match(/remove/i)
+    );
+    expect(removeButton).toBeTruthy();
+
+    removeButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+
+    expect(container.textContent || '').not.toContain('Remove Avatar');
   });
 });

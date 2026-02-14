@@ -6,6 +6,12 @@
   import * as m from '$lib/paraglide/messages';
   import { mfaSchema, passwordSchema, profileSchema } from '$lib/schemas/account';
   import { toast } from '$lib/stores/toast';
+  import {
+    handleMfaResult,
+    handlePasswordResult,
+    handleProfileResult,
+    handleVerifiedQueryFlag,
+  } from '$lib/utils/account-page-handlers';
   import { onMount } from 'svelte';
   import { MetaTags } from 'svelte-meta-tags';
   import { superForm } from 'sveltekit-superforms';
@@ -29,17 +35,7 @@
     validators: zod4Client(profileSchema),
     resetForm: false,
     onResult: ({ result }) => {
-      if (result.type === 'success') {
-        toast(m['account.profile_updated'](), 'success');
-        // Check if avatar was uploaded
-        if (avatarUploaded) {
-          toast(m['account.avatar_upload_success'](), 'success');
-          avatarUploaded = false;
-        }
-      } else if (result.type === 'failure') {
-        toast(m['account.profile_update_failed'](), 'error');
-        avatarUploaded = false;
-      }
+      avatarUploaded = handleProfileResult(result, avatarUploaded, toast, m);
     },
   });
 
@@ -57,9 +53,7 @@
     validators: zod4Client(passwordSchema),
     resetForm: true,
     onResult: ({ result }) => {
-      if (result.type === 'success') {
-        toast(m['account.password_changed_success'](), 'success');
-      }
+      handlePasswordResult(result, toast, m);
     },
   });
 
@@ -71,15 +65,7 @@
     validators: zod4Client(mfaSchema),
     resetForm: false,
     onResult: ({ result }) => {
-      if (result.type === 'success') {
-        const nextOptIn = (result.data as { mfaOptIn?: boolean } | undefined)?.mfaOptIn;
-        if (typeof nextOptIn === 'boolean') {
-          toast(
-            nextOptIn ? m['account.2fa_enabled_success']() : m['account.2fa_disabled_success'](),
-            nextOptIn ? 'success' : 'info'
-          );
-        }
-      }
+      handleMfaResult(result, toast, m);
     },
   });
 
@@ -91,10 +77,7 @@
 
   // Check for email verification success on mount
   onMount(() => {
-    const verifiedFlag = page?.url?.searchParams?.get('verified');
-    if (verifiedFlag === 'true') {
-      toast(m['account.email_verified_success'](), 'success');
-    }
+    handleVerifiedQueryFlag(page?.url?.searchParams?.get('verified') ?? null, toast, m);
   });
 </script>
 

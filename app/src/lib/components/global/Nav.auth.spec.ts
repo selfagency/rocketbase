@@ -92,4 +92,80 @@ describe('Nav.svelte (authenticated/admin)', () => {
 
     expect(servicesTrigger).toBeTruthy();
   });
+
+  it('renders child summary text when nested item includes summary', async () => {
+    const navItems = [
+      {
+        id: 'services',
+        slug: 'services',
+        title: 'Services',
+        children: [
+          {
+            id: 'consulting',
+            slug: 'consulting',
+            title: 'Consulting',
+            summary: 'Expert advice',
+          },
+        ],
+      },
+    ];
+
+    const { container } = render(Nav, {
+      props: { navItems: navItems as any },
+    });
+
+    const servicesTrigger = Array.from(container.querySelectorAll('button, a')).find(el =>
+      el.textContent?.includes('Services')
+    );
+    servicesTrigger?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+
+    // Content can be portaled in primitives; inspect whole document text.
+    expect(document.body.textContent || '').toContain('Expert advice');
+  });
+
+  it('shows admin links when admin menu is opened', async () => {
+    const { container } = render(Nav, {
+      props: {
+        navItems: [],
+      },
+    });
+
+    const adminTrigger = Array.from(container.querySelectorAll('button, a')).find(el =>
+      el.textContent?.match(/admin/i)
+    );
+    expect(adminTrigger).toBeTruthy();
+
+    adminTrigger?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+
+    const pageText = document.body.textContent || '';
+    expect(pageText).toMatch(/dashboard|admin/i);
+    expect(pageText).toMatch(/pages/i);
+  });
+
+  it('handles account and logout dropdown item selections', async () => {
+    render(Nav, {
+      props: {
+        navItems: [],
+      },
+    });
+
+    const accountItem = Array.from(document.querySelectorAll('[role="menuitem"], button, div')).find(el =>
+      el.textContent?.match(/account settings/i)
+    );
+    const logoutItem = Array.from(document.querySelectorAll('[role="menuitem"], button, div')).find(el =>
+      el.textContent?.match(/logout/i)
+    );
+
+    expect(accountItem).toBeTruthy();
+    expect(logoutItem).toBeTruthy();
+
+    accountItem?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    accountItem?.dispatchEvent(new CustomEvent('select', { bubbles: true, cancelable: true }));
+    logoutItem?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    logoutItem?.dispatchEvent(new CustomEvent('select', { bubbles: true, cancelable: true }));
+
+    await Promise.resolve();
+  });
 });

@@ -52,4 +52,18 @@ describe('Register Page Component', () => {
     const { container } = render(RegisterPage, { props: { data: dataWithErrors } });
     expect(container).toBeTruthy();
   });
+
+  it('renders top-level form message when provided', async () => {
+    expect.assertions(1);
+    const dataWithMessage: PageData = {
+      ...mockFormData,
+      form: {
+        ...mockFormData.form,
+        message: 'Email is already in use',
+      },
+    };
+
+    const { container } = render(RegisterPage, { props: { data: dataWithMessage } });
+    expect(container.textContent).toContain('Email is already in use');
+  });
 });

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import AccountPage from '../../../routes/account/+page.svelte';
 
@@ -93,6 +93,55 @@ describe('Account Page Component', () => {
     };
     const { container } = await render(AccountPage, { props: { data: dataWithMFA } });
     expect(container).toBeTruthy();
+  });
+
+  it('renders MFA required alert state', async () => {
+    expect.assertions(1);
+    const { container } = await render(AccountPage, {
+      props: {
+        data: {
+          ...mockFormData,
+          mfaRequired: true,
+        },
+      },
+    });
+
+    expect(container.textContent).toContain('2FA Required');
+  });
+
+  it('auto-submits MFA form when opt-in is toggled', async () => {
+    expect.assertions(2);
+    const requestSubmitSpy = vi.spyOn(HTMLFormElement.prototype, 'requestSubmit').mockImplementation(() => undefined);
+
+    const { container } = await render(AccountPage, { props: { data: mockFormData } });
+    const switchInput = container.querySelector('#mfa-opt-in') as HTMLInputElement | null;
+
+    expect(switchInput).not.toBeNull();
+    switchInput?.click();
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(requestSubmitSpy).toHaveBeenCalled();
+
+    requestSubmitSpy.mockRestore();
+  });
+
+  it('renders password form error message when present', async () => {
+    expect.assertions(1);
+    const { container } = await render(AccountPage, {
+      props: {
+        data: {
+          ...mockFormData,
+          passwordForm: {
+            ...mockFormData.passwordForm,
+            message: 'Current password is incorrect',
+          },
+        },
+      },
+    });
+
+    expect(container.textContent).toContain('Current password is incorrect');
   });
 
   it('renders with validation errors', async () => {

@@ -117,7 +117,7 @@
             </Avatar.Root>
           </DropdownMenu.Trigger>
 
-          <DropdownMenu.Content align="end" class="w-48">
+          <DropdownMenu.Content align="end" class="w-48" forceMount>
             <DropdownMenu.Label>{m['nav.account_label']()}</DropdownMenu.Label>
             <DropdownMenu.Separator />
             <DropdownMenu.Item

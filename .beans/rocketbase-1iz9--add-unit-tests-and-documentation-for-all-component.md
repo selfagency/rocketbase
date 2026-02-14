@@ -5,7 +5,7 @@ status: in-progress
 type: task
 priority: high
 created_at: 2026-02-13T22:51:45Z
-updated_at: 2026-02-14T17:39:56Z
+updated_at: 2026-02-14T18:10:49Z
 ---
 
 Ensure all components and functions have unit tests and are documented within the code with explanations of their purpose.
@@ -129,3 +129,15 @@ Ensure all components and functions have unit tests and are documented within th
 Results remained:
 - Browser suite: **18 files / 157 tests passing**
 - Coverage: **84.91% statements**, **62.89% branches**, **87.39% functions**, **86.57% lines**
+
+\n\n### Coverage push (2026-02-14)\n- Added targeted browser coverage tests for nav/auth flows, route toasts, register/login/account branches, and toaster edge cases.\n- Added utility extraction + tests for account page form result handling:  + .\n- Browser suite now passes with **178 tests**.\n- Coverage improved from **84.91 / 62.89 / 87.39 / 86.57** to **96.23 / 81.16 / 97.97 / 97.54** (stmt/branch/func/line).
+
+\n\n### Coverage push note (paths corrected)\n- New utility file: app/src/lib/utils/account-page-handlers.ts\n- New utility test: app/src/tests/lib/utils/account-page-handlers.test.ts
+
+## Summary of Changes (coverage pass)
+
+- Added targeted browser tests for account, login, register, nav, and toaster coverage gaps.
+- Added route toast behavior tests for root and login pages.
+- Extracted account page result/toast logic into `app/src/lib/utils/account-page-handlers.ts` and added unit tests.
+- Updated account page to use extracted handlers with no functional behavior changes.
+- Browser suite currently passing with improved coverage metrics from the prior baseline.

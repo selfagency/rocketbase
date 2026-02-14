@@ -125,6 +125,9 @@ describe('page-hierarchy utilities', () => {
       expect(flat[0]).toMatchObject({ id: '1', depth: 0 });
       expect(flat[1]).toMatchObject({ id: '2', depth: 1 });
       expect(flat[2]).toMatchObject({ id: '3', depth: 1 });
+      expect(flat[0].orderLabel).toBe('1');
+      expect(flat[1].orderLabel).toBe('1-1');
+      expect(flat[2].orderLabel).toBe('1-2');
     });
 
     it('sorts children by order field before flattening', () => {
@@ -192,6 +195,9 @@ describe('page-hierarchy utilities', () => {
       expect(flat[0].depth).toBe(0);
       expect(flat[1].depth).toBe(1);
       expect(flat[2].depth).toBe(2);
+      expect(flat[0].orderLabel).toBe('1');
+      expect(flat[1].orderLabel).toBe('1-1');
+      expect(flat[2].orderLabel).toBe('1-1-1');
     });
 
     it('handles empty hierarchy', () => {
@@ -263,6 +269,21 @@ describe('page-hierarchy utilities', () => {
 
       expect(result.map(p => p.id)).toEqual(['r1', 'r1c1', 'r1c1g1', 'r1c2', 'r2', 'r2c1']);
       expect(result.map(p => p.depth)).toEqual([0, 1, 2, 1, 0, 1]);
+      expect(result.map(p => p.orderLabel)).toEqual(['1', '1-1', '1-1-1', '1-2', '2', '2-1']);
+    });
+
+    it('creates hierarchical sibling labels based on sorted position', () => {
+      const pages = [
+        { id: 'home', title: 'Home', parent: null, order: 1 },
+        { id: 'posts', title: 'Posts', parent: null, order: 2 },
+        { id: 'about', title: 'About', parent: null, order: 3 },
+        { id: 'authors', title: 'Authors', parent: 'about', order: 999 },
+      ] as any;
+
+      const result = buildAndFlattenPageHierarchy(pages);
+      const authors = result.find(p => p.id === 'authors');
+
+      expect(authors?.orderLabel).toBe('3-1');
     });
   });
 });

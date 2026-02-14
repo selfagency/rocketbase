@@ -10,6 +10,7 @@ export type PageWithChildren = PagesResponseWithAuthor & {
 
 export type PageWithDepth = PagesResponseWithAuthor & {
   depth: number;
+  orderLabel: string;
 };
 
 /**
@@ -46,25 +47,29 @@ export function buildPageHierarchy(pages: PagesResponseWithAuthor[]): PageWithCh
  * @param depth - Current depth level (defaults to 0)
  * @returns Flat array of pages with depth property
  */
-export function flattenPageHierarchy(pages: PageWithChildren[], depth = 0): PageWithDepth[] {
+export function flattenPageHierarchy(pages: PageWithChildren[], depth = 0, parentOrderLabel?: string): PageWithDepth[] {
   const flat: PageWithDepth[] = [];
 
-  for (const page of pages) {
+  // Keep ordering stable for each level
+  const sortedPages = [...pages].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+
+  sortedPages.forEach((page, index) => {
+    const siblingPosition = index + 1;
+    const currentOrderLabel = parentOrderLabel ? `${parentOrderLabel}-${siblingPosition}` : `${siblingPosition}`;
+
     const { children, ...pageData } = page;
 
     // Add page with depth information
     flat.push({
       ...pageData,
       depth,
+      orderLabel: currentOrderLabel,
     } as PageWithDepth);
 
     if (children.length > 0) {
-      // Sort children by order field
-      children.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
-      // Recursively flatten children with increased depth
-      flat.push(...flattenPageHierarchy(children, depth + 1));
+      flat.push(...flattenPageHierarchy(children, depth + 1, currentOrderLabel));
     }
-  }
+  });
 
   return flat;
 }

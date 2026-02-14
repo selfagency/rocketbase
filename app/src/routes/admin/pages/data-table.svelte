@@ -3,7 +3,6 @@
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import * as ButtonGroup from '$lib/components/ui/button-group';
-	import * as Combobox from '$lib/components/ui/combobox';
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table';
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
@@ -23,7 +22,6 @@
 		totalPages: number;
 		totalItems: number;
 		status: string;
-		authors?: { id: string; name: string }[];
 	};
 
 	let {
@@ -32,43 +30,18 @@
 		currentPage,
 		totalPages,
 		totalItems,
-		status,
-		authors = [] // Default value for authors
+		status
 	}: DataTableProps<TData, TValue> = $props();
 
 	// Get current search from URL
 	let searchValue = $state(page.url.searchParams.get('search') || '');
-	let authorValue = $state(page.url.searchParams.get('author') || '');
 	// svelte-ignore state_referenced_locally
 	let statusValue = $state(status);
 	let searchTimeout: ReturnType<typeof setTimeout> | undefined;
-	let authorTimeout: ReturnType<typeof setTimeout> | undefined;
-
-	let augmentedData = $derived(() => {
-		const authorsMap = new Map<string, { id: string; name: string }>();
-		for (const a of authors || []) authorsMap.set(a.id, a);
-
-		return (data || []).map((item: any) => {
-			const out = { ...item } as any;
-			// Augment if author doesn't have name (was not expanded or incomplete)
-			if (out.author && typeof out.author === 'string') {
-				const found = authorsMap.get(out.author);
-				if (found) {
-					out.author = { id: found.id, name: found.name };
-				}
-			} else if (out.author && !out.author.name) {
-				const found = authorsMap.get(out.author.id);
-				if (found) {
-					out.author = { id: found.id, name: found.name };
-				}
-			}
-			return out;
-		});
-	});
 
 	const table = createSvelteTable({
 		get data() {
-			return augmentedData();
+			return data;
 		},
 		get columns() {
 			return columns;
@@ -172,18 +145,6 @@
 		return { asc: current === sortKey, desc: current === `-${sortKey}` };
 	}
 
-	function handleAuthorSearch(value: string) {
-		authorValue = value;
-		clearTimeout(authorTimeout);
-		authorTimeout = setTimeout(() => {
-			const params = new URLSearchParams(page.url.searchParams);
-			if (value) params.set('author', value);
-			else params.delete('author');
-			params.set('page', '1');
-			goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
-		}, 300);
-	}
-
 	// Watch for status changes
 	$effect(() => {
 		if (statusValue !== status) {
@@ -207,12 +168,6 @@
 				value={searchValue}
 				oninput={(e) => handleSearch(e.currentTarget.value)}
 				class="max-w-sm"
-			/>
-			<Combobox.Root
-				options={[{ id: '', name: m['admin.pages.all_authors']() }, ...authors]}
-				value={authorValue}
-				placeholder={m['admin.pages.select_author']()}
-				onchange={handleAuthorSearch}
 			/>
 
 			<ButtonGroup.Root class="rounded-lg border bg-white">

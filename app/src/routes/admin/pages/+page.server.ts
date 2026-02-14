@@ -13,7 +13,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const perPage = parseInt(url.searchParams.get('perPage') || '10');
 	const search = url.searchParams.get('search') || '';
 	const status = url.searchParams.get('status') || 'all';
-	const author = url.searchParams.get('author') || '';
 	const sort = url.searchParams.get('sort') || '-created';
 
 	// Build filter for search and status
@@ -29,32 +28,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		filters.push('published = true');
 	}
 
-	if (author) {
-		filters.push(`author = "${author}"`);
-	}
-
 	const filter = filters.length > 0 ? filters.join(' && ') : '';
 
 	// Fetch all pages to build hierarchical structure
 	const result = await locals.pb.collection('pages').getList<PagesResponseWithAuthor>(1, 500, {
 		sort,
 		filter,
-		fields: 'id,title,slug,author,parent,order,published,visible,image,created,updated',
-		expand: 'author'
+		fields: 'id,title,slug,parent,order,published,visible,image,created,updated'
 	});
-
-	// Fetch all users to build complete authors map (for filter dropdown)
-	const allUsers = await locals.pb.collection('users').getFullList({
-		filter: 'role != "user"',
-		fields: 'id,name,email'
-	});
-
-	// Build authors list from all users
-	const authorsMap = new Map<string, { id: string; name: string }>();
-	for (const user of allUsers) {
-		authorsMap.set(user.id, { id: user.id, name: user.name || user.email || 'Unknown' });
-	}
-	const authors = Array.from(authorsMap.values());
 
 	// Build hierarchical structure: organize pages with children under parents
 	type PageWithChildren = PagesResponseWithAuthor & { children: PageWithChildren[] };
@@ -64,11 +45,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	// First pass: create map and add children array
 	for (const pageItem of result.items) {
-		// PocketBase expand puts the expanded relation in pageItem.expand.author
-		// We need to flatten it to pageItem.author for our type
-		const author = (pageItem as any).expand?.author || pageItem.author;
-		const pd = { ...pageItem, author } as PagesResponseWithAuthor;
-		pageMap.set(pageItem.id, { ...pd, children: [] } as PageWithChildren);
+		pageMap.set(pageItem.id, { ...pageItem, children: [] } as PageWithChildren);
 	}
 
 	// Second pass: build tree structure
@@ -114,8 +91,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		page,
 		perPage,
 		totalItems: flatPages.length,
-		status,
-		authors
+		status
 	};
 };
 

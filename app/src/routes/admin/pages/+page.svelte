@@ -20,6 +20,5 @@
 		totalPages={data.totalPages}
 		totalItems={data.totalItems}
 		status={data.status}
-		authors={data.authors}
 	/>
 </div>

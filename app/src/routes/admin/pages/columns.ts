@@ -131,23 +131,6 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
 		}
 	},
 	{
-		accessorKey: 'author',
-		header: m['admin.pages.author'](),
-		meta: { sortKey: 'author' },
-		cell: ({ row }) => {
-			const authorSnippet = createRawSnippet<[{ author: any }]>((getData) => {
-				const { author } = getData();
-				const authorName = author?.name || author?.email || m['admin.pages.unknown_author']();
-				return {
-					render: () => `<div class="text-sm">${authorName}</div>`
-				};
-			});
-			return renderSnippet(authorSnippet, {
-				author: row.original.author || {}
-			});
-		}
-	},
-	{
 		id: 'actions',
 		enableHiding: false,
 		cell: ({ row }) => renderComponent(DataTableActions, { page: row.original })

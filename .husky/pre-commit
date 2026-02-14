@@ -1,1 +1,2 @@
-pnpm test
+pnpm -C app lint:fix
+pnpm -C app format

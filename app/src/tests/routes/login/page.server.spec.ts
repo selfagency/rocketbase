@@ -143,6 +143,36 @@ describe('Login Server Actions', () => {
 
       expect(result).toHaveProperty('status', 400);
     });
+
+    it('returns error when email is missing', async () => {
+      const formData = new FormData();
+      // email intentionally missing
+      formData.append('password', 'password123');
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result: any = await actions.login(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+    });
+
+    it('returns error when password is missing', async () => {
+      const formData = new FormData();
+      formData.append('email', 'test@example.com');
+      // password intentionally missing
+
+      mockEvent.request = new Request('http://localhost', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result: any = await actions.login(mockEvent as any);
+
+      expect(result).toHaveProperty('status', 400);
+    });
   });
 
   describe('MFA verification (login with code)', () => {

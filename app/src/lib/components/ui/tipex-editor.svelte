@@ -36,13 +36,14 @@
   });
 </script>
 
-<div class="tipex-wrapper rounded-md border border-input bg-background" data-placeholder={placeholder} {...props}>
+<div class="tipex-wrapper rounded-md bg-background" data-placeholder={placeholder} {...props}>
   <Tipex bind:tipex={editor} floating focal />
 </div>
 
 <style>
   .tipex-wrapper {
-    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
   }
 
   /* Ensure all Tipex internal wrappers inherit border radius */
@@ -54,7 +55,8 @@
     min-height: 200px;
     padding: 0.75rem;
     outline: none;
-    border-radius: 0.375rem; /* md radius */
+    border: none;
+    background-color: oklch(0.985 0 0); /* #FBFBFB equivalent */
   }
 
   .tipex-wrapper :global(.ProseMirror:focus) {

@@ -69,7 +69,8 @@
       "Bash(pnpm test:*)",
       "Bash(pnpm vitest:*)",
       "Bash(/tmp/coverage-progress.md:*)",
-      "Bash(pnpm run test:node:*)"
+      "Bash(pnpm run test:node:*)",
+      "Bash(pnpm test:browser:*)"
     ]
   },
   "hooks": {

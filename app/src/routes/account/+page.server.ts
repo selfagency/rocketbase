@@ -6,7 +6,7 @@ import {
   type MfaSchema,
   type PasswordSchema,
   type ProfileSchema,
-} from '$lib/schemas/account.js';
+} from '$lib/schemas/account';
 import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';

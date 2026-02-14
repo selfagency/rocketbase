@@ -4,20 +4,19 @@ import { page } from 'vitest/browser';
 import Page from './+page.svelte';
 
 describe('/+page.svelte', () => {
-	it('should render h1', async () => {
-		render(Page, {
-			props: {
-				data: {
-					navItems: [],
-					user: null,
-					page: null,
-					url: 'http://localhost:5173',
-					metadata: {}
-				}
-			}
-		});
+  it('should render h1', async () => {
+    render(Page, {
+      props: {
+        data: {
+          navItems: [],
+          user: null,
+          page: null,
+          metadata: {},
+        },
+      },
+    });
 
-		const heading = page.getByRole('heading', { level: 1 });
-		await expect.element(heading).toBeInTheDocument();
-	});
+    const heading = page.getByRole('heading', { level: 1 });
+    await expect.element(heading).toBeInTheDocument();
+  });
 });

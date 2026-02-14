@@ -55,7 +55,8 @@
       "Bash(pnpm test:node:*)",
       "Bash(pnpm build:types:*)",
       "WebFetch(domain:oekazuma.github.io)",
-      "Bash(pnpm -C app build:types:*)"
+      "Bash(pnpm -C app build:types:*)",
+      "Bash(pnpm db:migrate:*)"
     ]
   },
   "hooks": {

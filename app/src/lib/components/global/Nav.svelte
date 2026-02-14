@@ -15,7 +15,6 @@
   let { navItems = [] }: { navItems?: NavItem[] } = $props();
 
   let logoutFormRef = $state<HTMLFormElement | null>(null);
-  let dropdownOpen = $state(false);
 </script>
 
 <nav
@@ -101,7 +100,7 @@
     <div class="flex items-center gap-3">
       {#if page?.data?.user}
         <form method="POST" action="/logout" bind:this={logoutFormRef} class="hidden"></form>
-        <DropdownMenu.Root bind:open={dropdownOpen}>
+        <DropdownMenu.Root>
           <DropdownMenu.Trigger
             aria-label={m['nav.user_menu']()}
             class="rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
@@ -117,12 +116,11 @@
             </Avatar.Root>
           </DropdownMenu.Trigger>
 
-          <DropdownMenu.Content align="end" class="w-48" forceMount>
+          <DropdownMenu.Content align="end" class="w-48">
             <DropdownMenu.Label>{m['nav.account_label']()}</DropdownMenu.Label>
             <DropdownMenu.Separator />
             <DropdownMenu.Item
               onSelect={() => {
-                dropdownOpen = false;
                 goto('/account');
               }}
             >
@@ -133,7 +131,6 @@
             <DropdownMenu.Item
               variant="destructive"
               onSelect={() => {
-                dropdownOpen = false;
                 logoutFormRef?.requestSubmit();
               }}
             >

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Badge } from '$lib/components/ui/badge';
 	import PostList from '$lib/components/posts/PostList.svelte';
+	import { Badge } from '$lib/components/ui/badge';
 	import { MetaTags } from 'svelte-meta-tags';
 	import type { PageData } from './$types';
 

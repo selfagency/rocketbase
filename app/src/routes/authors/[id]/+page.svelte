@@ -16,7 +16,20 @@
 			type: 'profile',
 			url: `${page.url.origin}/authors/${data.author.id}`,
 			title: data.author.name || data.author.email,
-			description: `Posts by ${data.author.name || data.author.email}`
+			description: `Posts by ${data.author.name || data.author.email}`,
+			profile: {
+				firstName: data.author.name?.split(' ')[0],
+				lastName: data.author.name?.split(' ').slice(1).join(' '),
+				username: data.author.username
+			},
+			images: data.author.avatar
+				? [
+						{
+							url: `${page.url.origin}${getFileUrl('users', data.author.id, data.author.avatar)}`,
+							alt: data.author.name || data.author.email
+						}
+					]
+				: []
 		}
 	});
 

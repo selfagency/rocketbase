@@ -19,8 +19,8 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as m from '$lib/paraglide/messages.js';
 	import { toast } from '$lib/stores/toast';
-	import { MetaTags } from 'svelte-meta-tags';
 	import { onMount } from 'svelte';
+	import { MetaTags } from 'svelte-meta-tags';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';

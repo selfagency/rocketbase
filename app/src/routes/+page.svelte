@@ -5,8 +5,8 @@
 	import { Card, CardContent, CardDescription, CardHeader } from '$lib/components/ui/card';
 	import * as m from '$lib/paraglide/messages.js';
 	import { toast } from '$lib/stores/toast';
-	import { MetaTags } from 'svelte-meta-tags';
 	import { onMount } from 'svelte';
+	import { MetaTags } from 'svelte-meta-tags';
 
 	let { data } = $props();
 

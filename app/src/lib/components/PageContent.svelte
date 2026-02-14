@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
-	import { MetaTags } from 'svelte-meta-tags';
 	import type { PagesResponse } from '$lib/types/pocketbase';
+	import { MetaTags } from 'svelte-meta-tags';
 
 	let { page: pageData }: { page: PagesResponse } = $props();
 

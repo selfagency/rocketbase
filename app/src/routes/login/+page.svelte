@@ -13,9 +13,9 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as m from '$lib/paraglide/messages.js';
 	import { toast } from '$lib/stores/toast';
-	import { MetaTags } from 'svelte-meta-tags';
 	import { CircleAlert } from '@lucide/svelte';
 	import { onMount } from 'svelte';
+	import { MetaTags } from 'svelte-meta-tags';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -24,6 +24,11 @@
 		title: 'Login',
 		description: 'Sign in to your account',
 		openGraph: {
+			title: 'Login',
+			description: 'Sign in to your account'
+		},
+		twitter: {
+			cardType: 'summary',
 			title: 'Login',
 			description: 'Sign in to your account'
 		}

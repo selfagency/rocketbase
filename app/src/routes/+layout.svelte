@@ -2,6 +2,7 @@
 	import { onNavigate } from '$app/navigation';
 	import Nav from '$lib/components/global/Nav.svelte';
 	import Toaster from '$lib/components/global/Toaster.svelte';
+	import { languageTag } from '$lib/paraglide/runtime.js';
 	import { setScreenSize } from '$lib/stores/screen';
 	import type { Snippet } from 'svelte';
 	import { MetaTags } from 'svelte-meta-tags';
@@ -45,6 +46,9 @@
 			type: 'website',
 			url: data.url,
 			siteName: data.metadata?.site_title || 'Rocketbase',
+			title: data.metadata?.site_title || 'Rocketbase',
+			description: data.metadata?.site_description || 'A production-ready full-stack application',
+			locale: languageTag(),
 			images: data.metadata?.og_image
 				? [
 						{
@@ -55,7 +59,17 @@
 						}
 					]
 				: []
-		}
+		},
+		additionalMetaTags: [
+			{
+				property: 'fediverse:creator',
+				content: data.metadata?.fediverse_handle
+			},
+			{
+				name: 'bluesky:actor',
+				content: data.metadata?.bluesky_handle
+			}
+		].filter((tag) => tag.content)
 	});
 </script>
 

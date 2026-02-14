@@ -6,13 +6,27 @@
  * afterSend hook.
  */
 
-import type { PagesResponse, PostsResponse, TagsRecord, TagsResponse, UsersRecord, UsersResponse } from './pocketbase';
+import type {
+  CommentsResponse,
+  MediaResponse,
+  PagesResponse,
+  PortfolioResponse,
+  PostsResponse,
+  TagsRecord,
+  TagsResponse,
+  UsersRecord,
+  UsersResponse,
+} from './pocketbase';
 
 /**
  * Augmented Pages type with author expanded and flattened
  */
 export type PagesResponseWithAuthor = Omit<PagesResponse, 'author'> & {
   author?: UsersRecord | UsersResponse;
+  attachments?: string[];
+  expand?: {
+    attachments?: MediaResponse[];
+  };
 };
 
 /**
@@ -21,4 +35,31 @@ export type PagesResponseWithAuthor = Omit<PagesResponse, 'author'> & {
 export type PostsResponseWithExpanded = Omit<PostsResponse, 'author' | 'tags'> & {
   author: (UsersRecord | UsersResponse)[];
   tags: (TagsRecord | TagsResponse)[];
+  attachments?: string[];
+  expand?: {
+    author?: (UsersRecord | UsersResponse)[];
+    tags?: (TagsRecord | TagsResponse)[];
+    attachments?: MediaResponse[];
+  };
+};
+
+/**
+ * Augmented comments type with optional expanded post and author relations.
+ */
+export type CommentsResponseWithExpanded = CommentsResponse & {
+  expand?: {
+    post?: PostsResponse;
+    author?: UsersResponse;
+    replyTo?: CommentsResponse;
+  };
+};
+
+/**
+ * Augmented portfolio type with expanded media relations.
+ */
+export type PortfolioResponseWithExpanded = PortfolioResponse & {
+  media?: string[];
+  expand?: {
+    media?: MediaResponse[];
+  };
 };

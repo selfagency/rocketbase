@@ -45,6 +45,7 @@ export const load: PageServerLoad = async ({ params, locals, parent, url }) => {
   // Fetch the full page data from PocketBase
   const page = await pb.collection('pages').getOne<PagesResponse>(navItem.id, {
     fields: FALLTHROUGH_PAGE_FIELDS,
+    expand: 'attachments',
   });
 
   const accessError = getFallthroughAccessError(page, Boolean(locals.user));

@@ -12,8 +12,11 @@ export enum Collections {
   Otps = '_otps',
   Superusers = '_superusers',
   AuditLogs = 'audit_logs',
+  Comments = 'comments',
+  Media = 'media',
   Metadata = 'metadata',
   Pages = 'pages',
+  Portfolio = 'portfolio',
   Posts = 'posts',
   QueueLocks = 'queue_locks',
   QueueStats = 'queue_stats',
@@ -123,6 +126,35 @@ export type AuditLogsRecord<Tafter_changes = unknown, Tbefore_changes = unknown>
   user?: RecordIdString;
 };
 
+export enum CommentsStatusOptions {
+  'approved' = 'approved',
+  'unapproved' = 'unapproved',
+  'abuse' = 'abuse',
+  'spam' = 'spam',
+}
+export type CommentsRecord = {
+  author?: RecordIdString;
+  comment?: HTMLString;
+  id: string;
+  post?: RecordIdString;
+  replyTo?: RecordIdString;
+  status?: CommentsStatusOptions;
+  updated: IsoAutoDateString;
+};
+
+export type MediaRecord<Tmetadata = unknown> = {
+  alt_text?: string;
+  caption?: string;
+  created: IsoAutoDateString;
+  file?: FileNameString;
+  id: string;
+  metadata?: null | Tmetadata;
+  source?: string;
+  source_url?: string;
+  updated: IsoAutoDateString;
+  uploaded_by?: RecordIdString;
+};
+
 export enum MetadataTypeOptions {
   'string' = 'string',
   'integer' = 'integer',
@@ -141,15 +173,16 @@ export type MetadataRecord = {
 export enum PagesCollectionOptions {
   'posts' = 'posts',
   'tags' = 'tags',
+  'users' = 'users',
 }
 export type PagesRecord = {
+  attachments?: RecordIdString[];
   collection?: PagesCollectionOptions;
   content?: HTMLString;
   created: IsoAutoDateString;
   custom_css?: string;
   id: string;
   image?: FileNameString;
-  media?: FileNameString[];
   order?: number;
   parent?: RecordIdString;
   published?: boolean;
@@ -162,15 +195,29 @@ export type PagesRecord = {
   visible?: boolean;
 };
 
+export type PortfolioRecord<Tmetadata = unknown> = {
+  description?: HTMLString;
+  id: string;
+  image?: FileNameString;
+  media?: RecordIdString[];
+  metadata?: null | Tmetadata;
+  slug?: string;
+  summary?: string;
+  title?: string;
+  updated: IsoAutoDateString;
+  url?: string;
+};
+
 export type PostsRecord = {
+  attachments?: RecordIdString[];
   author: RecordIdString[];
   content?: HTMLString;
   created: IsoAutoDateString;
   date: IsoDateString;
+  embed?: string;
   enclosure?: string;
   id: string;
   image?: FileNameString;
-  media?: FileNameString[];
   published?: boolean;
   require_login?: boolean;
   slug: string;
@@ -256,8 +303,13 @@ export type AuditLogsResponse<Tafter_changes = unknown, Tbefore_changes = unknow
   AuditLogsRecord<Tafter_changes, Tbefore_changes>
 > &
   BaseSystemFields<Texpand>;
+export type CommentsResponse<Texpand = unknown> = Required<CommentsRecord> & BaseSystemFields<Texpand>;
+export type MediaResponse<Tmetadata = unknown, Texpand = unknown> = Required<MediaRecord<Tmetadata>> &
+  BaseSystemFields<Texpand>;
 export type MetadataResponse<Texpand = unknown> = Required<MetadataRecord> & BaseSystemFields<Texpand>;
 export type PagesResponse<Texpand = unknown> = Required<PagesRecord> & BaseSystemFields<Texpand>;
+export type PortfolioResponse<Tmetadata = unknown, Texpand = unknown> = Required<PortfolioRecord<Tmetadata>> &
+  BaseSystemFields<Texpand>;
 export type PostsResponse<Texpand = unknown> = Required<PostsRecord> & BaseSystemFields<Texpand>;
 export type QueueLocksResponse<Texpand = unknown> = Required<QueueLocksRecord> & BaseSystemFields<Texpand>;
 export type QueueStatsResponse<Tfailed_tasks = unknown, Tpending_tasks = unknown, Texpand = unknown> = Required<
@@ -279,8 +331,11 @@ export type CollectionRecords = {
   _otps: OtpsRecord;
   _superusers: SuperusersRecord;
   audit_logs: AuditLogsRecord;
+  comments: CommentsRecord;
+  media: MediaRecord;
   metadata: MetadataRecord;
   pages: PagesRecord;
+  portfolio: PortfolioRecord;
   posts: PostsRecord;
   queue_locks: QueueLocksRecord;
   queue_stats: QueueStatsRecord;
@@ -297,8 +352,11 @@ export type CollectionResponses = {
   _otps: OtpsResponse;
   _superusers: SuperusersResponse;
   audit_logs: AuditLogsResponse;
+  comments: CommentsResponse;
+  media: MediaResponse;
   metadata: MetadataResponse;
   pages: PagesResponse;
+  portfolio: PortfolioResponse;
   posts: PostsResponse;
   queue_locks: QueueLocksResponse;
   queue_stats: QueueStatsResponse;
@@ -313,7 +371,8 @@ export type CollectionResponses = {
 type ProcessCreateAndUpdateFields<T> = Omit<
   {
     // Omit AutoDate fields
-    [K in keyof T as Extract<T[K], IsoAutoDateString> extends never ? K : never]: T[K] extends infer U // Convert FileNameString to File
+    [K in keyof T as Extract<T[K], IsoAutoDateString> extends never ? K : never]: // Convert FileNameString to File
+    T[K] extends infer U
       ? U extends FileNameString | FileNameString[]
         ? U extends any[]
           ? File[]

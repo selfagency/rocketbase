@@ -35,7 +35,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const result = await locals.pb.collection('pages').getList<PagesResponseWithAuthor>(1, 500, {
     sort,
     filter,
-    fields: 'id,title,slug,parent,order,published,visible,image,created,updated',
+    fields: 'id,title,slug,parent,order,published,visible,attachments,created,updated',
   });
 
   // Build and flatten hierarchical page structure

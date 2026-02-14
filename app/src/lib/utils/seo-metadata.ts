@@ -2,8 +2,8 @@
  * SEO metadata generation utilities for pages and posts
  */
 
-import { getFileUrl } from '$lib/utils';
 import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
+import { getFileUrl } from '$lib/utils';
 import type { MetaTagsProps } from 'svelte-meta-tags';
 
 export interface GeneratePostMetaTagsOptions {
@@ -23,9 +23,9 @@ export function generatePostMetaTags(options: GeneratePostMetaTagsOptions): Meta
   const canonical = `${origin}/posts/${post.slug}`;
   const imageUrl = post.image ? `${origin}${getFileUrl('posts', post.id, post.image, cdnUrl)}` : undefined;
 
-  // Extract author and tag data from expanded relations
-  const authors = (post.expand as any)?.author || [];
-  const tags = (post.expand as any)?.tags || [];
+  // Extract author and tag data from expanded relations with fallback to flattened fields
+  const authors = post.expand?.author || post.author || [];
+  const tags = post.expand?.tags || post.tags || [];
 
   return {
     title: post.title,
@@ -49,8 +49,8 @@ export function generatePostMetaTags(options: GeneratePostMetaTagsOptions): Meta
       article: {
         publishedTime: post.date,
         modifiedTime: post.updated,
-        authors: authors.map((a: any) => a.name || a.email),
-        tags: tags.map((t: any) => t.name),
+        authors: authors.map(a => a.name || a.email),
+        tags: tags.map(t => t.tag || (t as { name?: string }).name).filter((tag): tag is string => Boolean(tag)),
       },
     },
     jsonLd: {
@@ -61,7 +61,7 @@ export function generatePostMetaTags(options: GeneratePostMetaTagsOptions): Meta
       image: imageUrl,
       datePublished: post.date,
       dateModified: post.updated,
-      author: authors.map((a: any) => ({
+      author: authors.map(a => ({
         '@type': 'Person',
         name: a.name || a.email,
         url: `${origin}/authors/${a.id}`,

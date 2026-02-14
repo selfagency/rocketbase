@@ -9,6 +9,9 @@
   let { data }: { data: PageData } = $props();
 
   const cdnUrl = $derived(data.metadata?.cdn_url);
+  const featuredImageUrl = $derived(
+    data.post.image ? `${page.url.origin}${getFileUrl('posts', data.post.id, data.post.image, cdnUrl)}` : undefined
+  );
 
   const metaTags = $derived({
     title: data.post.title,
@@ -19,10 +22,10 @@
       url: `${page.url.origin}/posts/${data.post.slug}`,
       title: data.post.title,
       description: data.post.summary,
-      images: data.post.image
+      images: featuredImageUrl
         ? [
             {
-              url: `${page.url.origin}${getFileUrl('posts', data.post.id, data.post.image, cdnUrl)}`,
+              url: featuredImageUrl,
               width: 1200,
               height: 630,
               alt: data.post.title,
@@ -41,9 +44,7 @@
       '@type': 'BlogPosting',
       headline: data.post.title,
       description: data.post.summary,
-      image: data.post.image
-        ? `${page.url.origin}${getFileUrl('posts', data.post.id, data.post.image, cdnUrl)}`
-        : undefined,
+      image: featuredImageUrl,
       datePublished: data.post.date,
       dateModified: data.post.updated,
       author: (data.post.expand as any)?.author?.map((a: any) => ({

@@ -42,17 +42,29 @@ export const actions: Actions = {
         pbFormData.append('subscriber_only', form.data.subscriber_only.toString());
       if (form.data.custom_css) pbFormData.append('custom_css', form.data.custom_css);
 
-      // Handle featured image upload
       const image = formData.get('image') as File;
       if (image && image.size > 0) {
         pbFormData.append('image', image);
       }
 
-      // Handle multiple media files upload
+      const attachmentIds = [...(form.data.attachments ?? [])];
       const mediaFiles = formData.getAll('media') as File[];
       for (const file of mediaFiles) {
-        if (file && file.size > 0) {
-          pbFormData.append('media', file);
+        if (!file || file.size === 0) continue;
+
+        const mediaFormData = new FormData();
+        mediaFormData.append('file', file);
+        if (locals.user?.id) {
+          mediaFormData.append('uploaded_by', locals.user.id);
+        }
+
+        const mediaRecord = await locals.pb.collection('media').create(mediaFormData);
+        attachmentIds.push(mediaRecord.id);
+      }
+
+      for (const attachmentId of attachmentIds) {
+        if (attachmentId) {
+          pbFormData.append('attachments', attachmentId);
         }
       }
 

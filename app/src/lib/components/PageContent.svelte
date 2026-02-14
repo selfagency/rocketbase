@@ -1,10 +1,28 @@
 <script lang="ts">
   import { page } from '$app/state';
   import { Button } from '$lib/components/ui/button';
-  import type { PagesResponse } from '$lib/types/pocketbase';
+  import type { MediaResponse, PagesResponse } from '$lib/types/pocketbase';
+  import { getFileUrl } from '$lib/utils';
   import { MetaTags } from 'svelte-meta-tags';
 
   let { page: pageData }: { page: PagesResponse } = $props();
+  type LegacyPage = PagesResponse & { media?: string[] };
+
+  const expandedAttachments = $derived(
+    (pageData.expand as { attachments?: MediaResponse[] } | undefined)?.attachments || []
+  );
+  const legacyMedia = $derived(
+    ((pageData as LegacyPage).media || []).map(file => ({
+      id: pageData.id,
+      file,
+      alt_text: 'Media file',
+      caption: '',
+    }))
+  );
+
+  const attachments = $derived(expandedAttachments.length > 0 ? expandedAttachments : legacyMedia);
+  const isLegacyMedia = $derived(expandedAttachments.length === 0 && legacyMedia.length > 0);
+  const featuredAttachment = $derived(attachments[0]);
 
   const metaTags = $derived({
     title: pageData.title || 'Page',
@@ -69,17 +87,21 @@
     {/if}
   </article>
 
-  {#if pageData.media && pageData.media.length > 0}
+  {#if attachments.length > 0}
     <section class="mt-12">
       <h2 class="mb-6 text-2xl font-semibold">Media</h2>
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {#each pageData.media as mediaFile}
+        {#each attachments as mediaItem}
           <div class="aspect-square">
-            <img
-              src="{page.url.origin}/api/pb/files/pages/{pageData.id}/{mediaFile}"
-              alt="Media file"
-              class="h-full w-full rounded-lg object-cover"
-            />
+            {#if mediaItem.file}
+              <img
+                src={isLegacyMedia
+                  ? `${page.url.origin}/api/pb/files/pages/${pageData.id}/${mediaItem.file}`
+                  : getFileUrl('media', mediaItem.id, mediaItem.file)}
+                alt={mediaItem.alt_text || mediaItem.caption || 'Media file'}
+                class="h-full w-full rounded-lg object-cover"
+              />
+            {/if}
           </div>
         {/each}
       </div>

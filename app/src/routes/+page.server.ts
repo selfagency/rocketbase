@@ -4,7 +4,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   // Try to fetch a home page
   let page = null;
   try {
-    page = await locals.pb.collection('pages').getFirstListItem('slug="home"');
+    page = await locals.pb.collection('pages').getFirstListItem('slug="home"', {
+      expand: 'attachments',
+    });
     locals.logger
       .withContext({
         route: url.pathname,

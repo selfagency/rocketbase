@@ -11,7 +11,7 @@ export const RESERVED_ROUTE_SEGMENTS = [
 export const RESERVED_ROUTES = new Set<string>(RESERVED_ROUTE_SEGMENTS);
 
 export const FALLTHROUGH_PAGE_FIELDS =
-  'id,title,slug,content,summary,image,media,custom_css,created,updated,require_login,subscriber_only';
+  'id,title,slug,content,summary,attachments,custom_css,created,updated,require_login,subscriber_only,expand.attachments.id,expand.attachments.file,expand.attachments.alt_text,expand.attachments.caption';
 
 type FallthroughPage = {
   require_login?: boolean;

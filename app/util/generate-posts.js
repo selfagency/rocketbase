@@ -113,11 +113,47 @@ async function downloadImage(imageUrl) {
   return res.arrayBuffer();
 }
 
+async function createMediaRecord(fileData, headers) {
+  const url = `${PB_URL}/api/collections/media/records`;
+  const formData = new FormData();
+
+  const blob = new Blob([fileData.buffer], { type: 'image/jpeg' });
+  formData.append('file', blob, fileData.name);
+  formData.append('source', 'Pexels');
+
+  const { 'Content-Type': _, ...headersWithoutContentType } = headers;
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: headersWithoutContentType,
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to create media record: ${res.status} ${error}`);
+  }
+
+  return res.json();
+}
+
 async function createPost(postData, headers) {
   const url = `${PB_URL}/api/collections/posts/records`;
 
+  // Convert uploaded media files to media records, then attach relation IDs to the post
+  if (postData.mediaFiles && postData.mediaFiles.length > 0) {
+    const attachmentIds = [...(postData.attachments || [])];
+
+    for (const mediaFile of postData.mediaFiles) {
+      const mediaRecord = await createMediaRecord(mediaFile, headers);
+      attachmentIds.push(mediaRecord.id);
+    }
+
+    postData.attachments = attachmentIds;
+  }
+
   // Check if we have any files (image or media)
-  const hasFiles = postData.imageFile || (postData.mediaFiles && postData.mediaFiles.length > 0);
+  const hasFiles = postData.imageFile;
 
   if (hasFiles) {
     const formData = new FormData();
@@ -136,18 +172,10 @@ async function createPost(postData, headers) {
       }
     }
 
-    // Add the single image file
+    // Add the featured image file
     if (postData.imageFile) {
       const blob = new Blob([postData.imageFile.buffer], { type: 'image/jpeg' });
       formData.append('image', blob, postData.imageFile.name);
-    }
-
-    // Add multiple media files
-    if (postData.mediaFiles) {
-      for (const file of postData.mediaFiles) {
-        const blob = new Blob([file.buffer], { type: 'image/jpeg' });
-        formData.append('media', blob, file.name);
-      }
     }
 
     // Remove Content-Type header to let fetch set it with boundary
@@ -253,7 +281,7 @@ async function generatePost(users, tags, pexelsPage) {
         };
         log(`  Downloaded main image (photographer: ${mainPhoto.photographer})`);
 
-        // Remaining photos for 'media' field
+        // Remaining photos become media records attached via relation IDs
         if (photos.length > 1) {
           postData.mediaFiles = [];
           for (let i = 1; i < photos.length; i++) {
@@ -264,7 +292,7 @@ async function generatePost(users, tags, pexelsPage) {
               name: `${slug}-media-${i}.jpg`,
             });
           }
-          log(`  Downloaded ${postData.mediaFiles.length} media images`);
+          log(`  Downloaded ${postData.mediaFiles.length} attachment images`);
         }
       }
     } catch (err) {

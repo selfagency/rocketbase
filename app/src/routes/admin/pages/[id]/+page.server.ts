@@ -1,8 +1,8 @@
+import { pageSchema } from '$lib/schemas/page';
 import type { PagesResponse } from '$lib/types/pocketbase';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
-import { pageSchema } from '../../../../lib/schemas/page';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
@@ -26,16 +26,19 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       }
     }
 
+    const collection = page.collection === 'posts' || page.collection === 'tags' ? page.collection : undefined;
+
     const form = await superValidate(
       {
         title: page.title || '',
         slug: page.slug,
         summary: page.summary || '',
         content: page.content || '',
-        collection: page.collection || '',
+        collection,
         published: page.published || false,
         visible: page.visible || true,
         order: page.order,
+        attachments: page.attachments || [],
         parent: page.parent,
         require_login: page.require_login || false,
         subscriber_only: page.subscriber_only || false,
@@ -49,7 +52,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       form,
       parentSlug,
     };
-  } catch (err) {
+  } catch {
     error(404, 'Page not found');
   }
 };
@@ -80,17 +83,29 @@ export const actions: Actions = {
         pbFormData.append('subscriber_only', form.data.subscriber_only.toString());
       if (form.data.custom_css) pbFormData.append('custom_css', form.data.custom_css);
 
-      // Handle featured image upload
       const image = formData.get('image') as File;
       if (image && image.size > 0) {
         pbFormData.append('image', image);
       }
 
-      // Handle multiple media files upload
+      const attachmentIds = [...(form.data.attachments ?? [])];
       const mediaFiles = formData.getAll('media') as File[];
       for (const file of mediaFiles) {
-        if (file && file.size > 0) {
-          pbFormData.append('media', file);
+        if (!file || file.size === 0) continue;
+
+        const mediaFormData = new FormData();
+        mediaFormData.append('file', file);
+        if (locals.user?.id) {
+          mediaFormData.append('uploaded_by', locals.user.id);
+        }
+
+        const mediaRecord = await locals.pb.collection('media').create(mediaFormData);
+        attachmentIds.push(mediaRecord.id);
+      }
+
+      for (const attachmentId of attachmentIds) {
+        if (attachmentId) {
+          pbFormData.append('attachments', attachmentId);
         }
       }
 

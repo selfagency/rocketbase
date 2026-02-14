@@ -1,8 +1,8 @@
+import { pageSchema } from '$lib/schemas/page';
 import { error, fail, redirect } from '@sveltejs/kit';
-import type { PageServerLoad, Actions } from './$types';
 import { superValidate } from 'sveltekit-superforms';
-import { pageSchema } from '../schema';
 import { zod4 } from 'sveltekit-superforms/adapters';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
   // Require authentication and editor/admin role

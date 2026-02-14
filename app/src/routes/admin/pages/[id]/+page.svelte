@@ -1,6 +1,6 @@
 <script lang="ts">
+  import PageForm from '$lib/components/admin/pages/page-form.svelte';
   import { MetaTags } from 'svelte-meta-tags';
-  import PageForm from '../page-form.svelte';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();

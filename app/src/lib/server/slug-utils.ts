@@ -1,5 +1,5 @@
-import { removeStopwords } from 'stopword';
 import { snake } from 'radashi';
+import { removeStopwords } from 'stopword';
 
 /**
  * Generate a URL-friendly slug from a title

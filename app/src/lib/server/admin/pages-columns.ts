@@ -1,3 +1,4 @@
+import DataTableActions from '$lib/components/admin/pages/data-table-actions.svelte';
 import { renderComponent, renderSnippet } from '$lib/components/ui/data-table';
 import * as m from '$lib/paraglide/messages.js';
 import type { PagesResponseWithAuthor } from '$lib/types/pocketbase-expanded';
@@ -6,7 +7,6 @@ import EyeOffIcon from '@lucide/svelte/icons/eye-off';
 import ImageIcon from '@lucide/svelte/icons/image';
 import type { ColumnDef } from '@tanstack/table-core';
 import { createRawSnippet } from 'svelte';
-import DataTableActions from './data-table-actions.svelte';
 
 export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
   {

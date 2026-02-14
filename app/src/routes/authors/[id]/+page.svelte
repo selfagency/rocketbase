@@ -84,9 +84,7 @@
 			<p class="p-job-title mb-4 text-xl text-muted-foreground">{data.author.title}</p>
 		{/if}
 		{#if data.author.bio}
-			<div
-				class="p-note prose mb-6 max-w-2xl text-lg text-muted-foreground dark:prose-invert"
-			>
+			<div class="p-note prose mb-6 max-w-2xl text-lg text-muted-foreground dark:prose-invert">
 				{@html data.author.bio}
 			</div>
 		{/if}

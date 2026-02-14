@@ -1,6 +1,6 @@
 ---
-description: 'IndieWeb and Microformats development standards'
-applyTo: '**/*.svelte, **/*.ts, **/*.js'
+description: "IndieWeb and Microformats development standards"
+applyTo: "**/*.svelte, **/*.ts, **/*.js"
 ---
 
 # IndieWeb and Microformats Best Practices

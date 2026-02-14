@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import * as AlertDialog from '$lib/components/ui/alert-dialog';
   import { Button } from '$lib/components/ui/button';
   import * as Tooltip from '$lib/components/ui/tooltip';
   import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
@@ -14,6 +15,8 @@
   let undeleteFormElement: HTMLFormElement | undefined = $state();
   let isDeleting = $state(false);
   let isRestoring = $state(false);
+  let showDeleteDialog = $state(false);
+  let showRestoreDialog = $state(false);
 
   function handlePreview() {
     if (!post.slug) return;
@@ -24,15 +27,15 @@
     window.location.href = `/admin/posts/${post.id}`;
   }
 
-  function handleDelete() {
-    if (confirm(`Are you sure you want to delete "${post.title || 'this post'}"?`)) {
-      isDeleting = true;
-      deleteFormElement?.requestSubmit();
-    }
+  function confirmDelete() {
+    isDeleting = true;
+    showDeleteDialog = false;
+    deleteFormElement?.requestSubmit();
   }
 
-  function handleUndelete() {
+  function confirmRestore() {
     isRestoring = true;
+    showRestoreDialog = false;
     undeleteFormElement?.requestSubmit();
   }
 </script>
@@ -84,7 +87,7 @@
             variant="ghost"
             size="icon"
             class="relative size-8 p-0 text-primary hover:text-primary"
-            onclick={handleUndelete}
+            onclick={() => (showRestoreDialog = true)}
             disabled={isRestoring}
             aria-label="Restore post"
           >
@@ -103,7 +106,7 @@
             variant="ghost"
             size="icon"
             class="relative size-8 p-0 text-destructive hover:text-destructive"
-            onclick={handleDelete}
+            onclick={() => (showDeleteDialog = true)}
             disabled={isDeleting}
             aria-label="Delete post"
           >
@@ -115,6 +118,38 @@
     </Tooltip.Root>
   {/if}
 </div>
+
+<AlertDialog.Root bind:open={showDeleteDialog}>
+  <AlertDialog.Content>
+    <AlertDialog.Header>
+      <AlertDialog.Title>Delete Post</AlertDialog.Title>
+      <AlertDialog.Description>
+        Are you sure you want to delete "{post.title || 'this post'}"? This will move it to the trash where it can be
+        restored or permanently deleted later.
+      </AlertDialog.Description>
+    </AlertDialog.Header>
+    <AlertDialog.Footer>
+      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+      <AlertDialog.Action onclick={confirmDelete}>Delete</AlertDialog.Action>
+    </AlertDialog.Footer>
+  </AlertDialog.Content>
+</AlertDialog.Root>
+
+<AlertDialog.Root bind:open={showRestoreDialog}>
+  <AlertDialog.Content>
+    <AlertDialog.Header>
+      <AlertDialog.Title>Restore Post</AlertDialog.Title>
+      <AlertDialog.Description>
+        Are you sure you want to restore "{post.title || 'this post'}"? This will remove it from the trash and return it
+        to draft status.
+      </AlertDialog.Description>
+    </AlertDialog.Header>
+    <AlertDialog.Footer>
+      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+      <AlertDialog.Action onclick={confirmRestore}>Restore</AlertDialog.Action>
+    </AlertDialog.Footer>
+  </AlertDialog.Content>
+</AlertDialog.Root>
 
 <form bind:this={deleteFormElement} method="POST" action="?/delete" use:enhance class="hidden">
   <input type="hidden" name="id" value={post.id} />

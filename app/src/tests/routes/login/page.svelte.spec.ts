@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import LoginPage from '../../../routes/login/+page.svelte';
 
-type PageData = { navItems: any[]; user: any; form: any; url: string; metadata: Record<string, string> };
+type PageData = {
+	navItems: any[];
+	user: any;
+	form: any;
+	url: string;
+	metadata: Record<string, string>;
+};
 
 describe('Login Page Component', () => {
 	const mockFormData: PageData = {

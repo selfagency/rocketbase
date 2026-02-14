@@ -29,8 +29,7 @@
 			article: {
 				publishedTime: data.post.date,
 				modifiedTime: data.post.updated,
-				authors:
-					(data.post.expand as any)?.author?.map((a: any) => a.name || a.email) || [],
+				authors: (data.post.expand as any)?.author?.map((a: any) => a.name || a.email) || [],
 				tags: (data.post.expand as any)?.tags?.map((t: any) => t.name) || []
 			}
 		},

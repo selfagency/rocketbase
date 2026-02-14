@@ -97,22 +97,6 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
       }),
   },
   {
-    accessorKey: 'created',
-    header: m['admin.pages.created'](),
-    cell: ({ row }) => {
-      const dateSnippet = createRawSnippet<[{ created: string }]>(getData => {
-        const { created } = getData();
-        const formatted = new Date(created).toLocaleDateString();
-        return {
-          render: () => `<div class="text-sm text-muted-foreground">${formatted}</div>`,
-        };
-      });
-      return renderSnippet(dateSnippet, {
-        created: row.original.created,
-      });
-    },
-  },
-  {
     accessorKey: 'updated',
     header: m['admin.pages.updated'](),
     cell: ({ row }) => {

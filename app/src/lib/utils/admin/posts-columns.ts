@@ -141,7 +141,7 @@ export const columns: ColumnDef<PostsResponseWithExpanded>[] = [
   },
   {
     accessorKey: 'published',
-    header: 'Published',
+    header: 'Status',
     cell: ({ row }) =>
       renderComponent(PublishVisibilityCell, {
         published: row.original.published || false,
@@ -157,7 +157,8 @@ export const columns: ColumnDef<PostsResponseWithExpanded>[] = [
         const { date } = getData();
         const formatted = date ? new Date(date).toLocaleDateString() : '-';
         return {
-          render: () => `<div class="text-sm text-muted-foreground">${formatted}</div>`,
+          render: () =>
+            `<div class="max-w-20 truncate text-sm text-muted-foreground sm:max-w-24 md:max-w-28">${formatted}</div>`,
         };
       });
       return renderSnippet(dateSnippet, {
@@ -174,7 +175,8 @@ export const columns: ColumnDef<PostsResponseWithExpanded>[] = [
         const { updated } = getData();
         const formatted = new Date(updated).toLocaleDateString();
         return {
-          render: () => `<div class="text-sm text-muted-foreground">${formatted}</div>`,
+          render: () =>
+            `<div class="max-w-20 truncate text-sm text-muted-foreground sm:max-w-24 md:max-w-28">${formatted}</div>`,
         };
       });
       return renderSnippet(dateSnippet, {

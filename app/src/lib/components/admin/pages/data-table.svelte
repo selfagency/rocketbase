@@ -50,6 +50,10 @@
     e.dataTransfer!.effectAllowed = 'move';
   }
 
+  function onDragEnd() {
+    draggingId = null;
+  }
+
   function onDragOver(e: DragEvent) {
     e.preventDefault();
     const tr = e.currentTarget as HTMLElement;
@@ -299,15 +303,17 @@
               data-id={rowId}
               draggable="true"
               ondragstart={e => onDragStart(e as DragEvent, rowId)}
+              ondragend={onDragEnd}
               ondragover={e => onDragOver(e as DragEvent)}
               ondragleave={e => onDragLeave(e as DragEvent)}
               ondrop={e => onDrop(e as DragEvent, rowId)}
+              class="cursor-grab"
               class:cursor-grabbing={draggingId === rowId}
             >
               <!-- Drag handle cell -->
               <Table.Cell class="w-8 text-center">
                 <button
-                  class="text-muted-foreground hover:text-foreground"
+                  class="cursor-grab text-muted-foreground hover:text-foreground"
                   aria-label="Drag to reorder"
                   title="Drag to reorder"
                 >

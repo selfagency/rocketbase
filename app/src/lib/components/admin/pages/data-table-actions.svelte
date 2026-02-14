@@ -2,8 +2,10 @@
   import { enhance } from '$app/forms';
   import * as AlertDialog from '$lib/components/ui/alert-dialog';
   import { Button } from '$lib/components/ui/button';
+  import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import * as Tooltip from '$lib/components/ui/tooltip';
   import type { PagesResponse } from '$lib/types/pocketbase';
+  import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
   import PencilIcon from '@lucide/svelte/icons/pencil';
   import TrashIcon from '@lucide/svelte/icons/trash';
   import Undo2Icon from '@lucide/svelte/icons/undo-2';
@@ -39,7 +41,8 @@
   }
 </script>
 
-<div class="flex items-center gap-1">
+<!-- Inline buttons for medium+ screens -->
+<div class="hidden items-center gap-1 md:flex">
   <Tooltip.Root>
     <Tooltip.Trigger>
       {#snippet child({ props })}
@@ -115,6 +118,46 @@
       <Tooltip.Content>Delete page</Tooltip.Content>
     </Tooltip.Root>
   {/if}
+</div>
+
+<!-- Dropdown menu for small screens -->
+<div class="md:hidden">
+  <DropdownMenu.Root>
+    <DropdownMenu.Trigger>
+      {#snippet child(props)}
+        <Button variant="ghost" size="icon" class="size-8 p-0" {...props}>
+          <EllipsisIcon class="size-4" />
+          <span class="sr-only">Actions</span>
+        </Button>
+      {/snippet}
+    </DropdownMenu.Trigger>
+    <DropdownMenu.Content align="end">
+      <DropdownMenu.Item onclick={handlePreview}>
+        <ViewIcon class="mr-2 size-4" />
+        Preview
+      </DropdownMenu.Item>
+      <DropdownMenu.Item onclick={handleEdit}>
+        <PencilIcon class="mr-2 size-4" />
+        Edit
+      </DropdownMenu.Item>
+      <DropdownMenu.Separator />
+      {#if page.in_trash}
+        <DropdownMenu.Item onclick={() => (showRestoreDialog = true)} disabled={isRestoring}>
+          <Undo2Icon class="mr-2 size-4" />
+          Restore
+        </DropdownMenu.Item>
+      {:else}
+        <DropdownMenu.Item
+          onclick={() => (showDeleteDialog = true)}
+          disabled={isDeleting}
+          class="text-destructive focus:text-destructive"
+        >
+          <TrashIcon class="mr-2 size-4" />
+          Delete
+        </DropdownMenu.Item>
+      {/if}
+    </DropdownMenu.Content>
+  </DropdownMenu.Root>
 </div>
 
 <AlertDialog.Root bind:open={showDeleteDialog}>

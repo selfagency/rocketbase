@@ -73,7 +73,7 @@ export const columns: ColumnDef<PostsResponseWithExpanded>[] = [
 
         return {
           render: () =>
-            `<a href="/admin/posts/${safeId}" class="block max-w-[18rem] truncate font-medium hover:underline" title="${safeTitle}">${safeTitle}</a>`,
+            `<a href="/admin/posts/${safeId}" class="block max-w-32 truncate font-medium hover:underline sm:max-w-48 md:max-w-64 lg:max-w-none" title="${safeTitle}">${safeTitle}</a>`,
         };
       });
 
@@ -93,7 +93,7 @@ export const columns: ColumnDef<PostsResponseWithExpanded>[] = [
         const safeSlug = escapeHtml(slug || '-');
         return {
           render: () =>
-            `<div class="max-w-40 truncate text-sm text-muted-foreground" title="${safeSlug}">${safeSlug}</div>`,
+            `<div class="max-w-24 truncate text-sm text-muted-foreground sm:max-w-32 md:max-w-40 lg:max-w-none" title="${safeSlug}">${safeSlug}</div>`,
         };
       });
 
@@ -112,7 +112,8 @@ export const columns: ColumnDef<PostsResponseWithExpanded>[] = [
         const labels = authors.map(getAuthorLabel).join(', ') || 'Unknown';
         const safeLabels = escapeHtml(labels);
         return {
-          render: () => `<div class="max-w-56 truncate text-sm" title="${safeLabels}">${safeLabels}</div>`,
+          render: () =>
+            `<div class="max-w-24 truncate text-sm sm:max-w-32 md:max-w-48 lg:max-w-56" title="${safeLabels}">${safeLabels}</div>`,
         };
       });
       return renderSnippet(authorSnippet, {
@@ -130,7 +131,7 @@ export const columns: ColumnDef<PostsResponseWithExpanded>[] = [
         const safeLabels = escapeHtml(labels || 'None');
         return {
           render: () =>
-            `<div class="max-w-48 truncate text-sm text-muted-foreground" title="${safeLabels}">${safeLabels}</div>`,
+            `<div class="max-w-20 truncate text-sm text-muted-foreground sm:max-w-28 md:max-w-36 lg:max-w-48" title="${safeLabels}">${safeLabels}</div>`,
         };
       });
       return renderSnippet(tagSnippet, {

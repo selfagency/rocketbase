@@ -14,9 +14,13 @@
   "scripts": {
     "db": "pocketbase serve --dev --dir db/pb_data --hooksDir db/pb_hooks --migrationsDir db/pb_migrations",
     "dev": "pnpm -C app dev:services; pnpm -C app dev",
-    "test": "pnpm -C app test"
+    "test": "pnpm -C app test",
+    "prepare": "husky"
   },
   "engines": {
     "node": "20.x"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   }
 }

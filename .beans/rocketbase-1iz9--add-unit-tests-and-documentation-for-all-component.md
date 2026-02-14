@@ -5,7 +5,7 @@ status: in-progress
 type: task
 priority: high
 created_at: 2026-02-13T22:51:45Z
-updated_at: 2026-02-14T16:13:11Z
+updated_at: 2026-02-14T16:17:39Z
 ---
 
 Ensure all components and functions have unit tests and are documented within the code with explanations of their purpose.
@@ -78,3 +78,23 @@ Ensure all components and functions have unit tests and are documented within th
 - **Total tests**: 257 passing
 - **Coverage**: 48.35% (no change - simple redirect routes)
 - **Quality gates**: lint ✓, check ✓, test ✓, build ✓
+
+
+
+## Load Function Tests Completed (2026-02-14 - Fourth Commit)
+- **register/+page.server.ts** - Added load function tests (2 tests)
+- **login/+page.server.ts** - Added load function tests (2 tests)  
+- **forgot-password/+page.server.ts** - Added load function test (1 test)
+
+**Coverage Improvements**:
+- register: 71% → 100% ✅
+- login: 72% → ~85% 
+- forgot-password: 84% → 100% ✅
+
+**Total Tests Now**: 262 passing (up from 257)
+**Coverage**: Improved from 48.35%
+
+## Remaining Work
+- [ ] lib/auth/mfa-helpers.ts (66% - defensive checks, disabled accounts, OTP errors)
+- [ ] routes/account/+page.server.ts (80% - error paths, avatar upload)
+- [ ] lib/server/fallthrough.ts (95% - one missing line)

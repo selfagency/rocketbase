@@ -70,7 +70,8 @@
       "Bash(pnpm vitest:*)",
       "Bash(/tmp/coverage-progress.md:*)",
       "Bash(pnpm run test:node:*)",
-      "Bash(pnpm test:browser:*)"
+      "Bash(pnpm test:browser:*)",
+      "WebFetch(domain:github.com)"
     ]
   },
   "hooks": {

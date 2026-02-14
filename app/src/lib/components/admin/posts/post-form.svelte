@@ -5,6 +5,7 @@
   import { Label } from '$lib/components/ui/label';
   import { Switch } from '$lib/components/ui/switch';
   import { Textarea } from '$lib/components/ui/textarea';
+  import TipexEditor from '$lib/components/ui/tipex-editor.svelte';
   import { postSchema, type PostSchema } from '$lib/schemas/post';
   import { toast } from '$lib/stores/toast';
   import { generateSlug as createSlug } from '$lib/utils/slug-utils';
@@ -91,10 +92,10 @@
       <Form.Control>
         {#snippet children({ props })}
           <Form.Label>Content</Form.Label>
-          <Textarea {...props} bind:value={$formData.content} placeholder="Post content (HTML supported)" rows={12} />
+          <TipexEditor bind:value={$formData.content} placeholder="Write your post content here..." />
         {/snippet}
       </Form.Control>
-      <Form.Description>Full post content (supports HTML)</Form.Description>
+      <Form.Description>Full post content (rich text editor)</Form.Description>
       <Form.FieldErrors />
     </Form.Field>
 

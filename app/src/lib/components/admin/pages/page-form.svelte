@@ -5,6 +5,7 @@
   import { Label } from '$lib/components/ui/label';
   import { Switch } from '$lib/components/ui/switch';
   import { Textarea } from '$lib/components/ui/textarea';
+  import TipexEditor from '$lib/components/ui/tipex-editor.svelte';
   import { pageSchema, type PageSchema } from '$lib/schemas/page';
   import { toast } from '$lib/stores/toast';
   import type { PagesResponse } from '$lib/types/pocketbase';
@@ -126,10 +127,10 @@
       <Form.Control>
         {#snippet children({ props })}
           <Form.Label>Content</Form.Label>
-          <Textarea {...props} bind:value={$formData.content} placeholder="Page content (HTML supported)" rows={10} />
+          <TipexEditor bind:value={$formData.content} placeholder="Write your page content here..." />
         {/snippet}
       </Form.Control>
-      <Form.Description>Full page content (supports HTML)</Form.Description>
+      <Form.Description>Full page content (rich text editor)</Form.Description>
       <Form.FieldErrors />
     </Form.Field>
 

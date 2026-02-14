@@ -58,3 +58,42 @@ export function handleVerifiedQueryFlag(verifiedFlag: string | null, toast: Toas
     toast(messages['account.email_verified_success'](), 'success');
   }
 }
+
+type ProfileResultPayload = { result: FormResult };
+
+export function createProfileHandlers(params: { toast: ToastFn; messages: MessageModule }) {
+  let avatarUploaded = false;
+
+  return {
+    markAvatarUploaded: () => {
+      avatarUploaded = true;
+    },
+    onResult: ({ result }: ProfileResultPayload) => {
+      avatarUploaded = handleProfileResult(result, avatarUploaded, params.toast, params.messages);
+    },
+  };
+}
+
+export function createProfileOnResultHandler(params: {
+  getAvatarUploaded: () => boolean;
+  setAvatarUploaded: (value: boolean) => void;
+  toast: ToastFn;
+  messages: MessageModule;
+}) {
+  return ({ result }: ProfileResultPayload) => {
+    const nextAvatarUploaded = handleProfileResult(result, params.getAvatarUploaded(), params.toast, params.messages);
+    params.setAvatarUploaded(nextAvatarUploaded);
+  };
+}
+
+export function createPasswordOnResultHandler(params: { toast: ToastFn; messages: MessageModule }) {
+  return ({ result }: ProfileResultPayload) => {
+    handlePasswordResult(result, params.toast, params.messages);
+  };
+}
+
+export function createMfaOnResultHandler(params: { toast: ToastFn; messages: MessageModule }) {
+  return ({ result }: ProfileResultPayload) => {
+    handleMfaResult(result, params.toast, params.messages);
+  };
+}

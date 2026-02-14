@@ -1,6 +1,10 @@
 import * as m from '$lib/paraglide/messages';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  createMfaOnResultHandler,
+  createPasswordOnResultHandler,
+  createProfileHandlers,
+  createProfileOnResultHandler,
   handleMfaResult,
   handlePasswordResult,
   handleProfileResult,
@@ -84,5 +88,60 @@ describe('account-page-handlers', () => {
 
     expect(toast).toHaveBeenCalledTimes(1);
     expect(toast).toHaveBeenCalledWith(expect.any(String), 'success');
+  });
+
+  it('createProfileOnResultHandler updates avatar state through getter/setter', () => {
+    const toast = vi.fn();
+    let avatarUploaded = true;
+
+    const handler = createProfileOnResultHandler({
+      getAvatarUploaded: () => avatarUploaded,
+      setAvatarUploaded: value => {
+        avatarUploaded = value;
+      },
+      toast,
+      messages: m,
+    });
+
+    handler({ result: { type: 'success' } });
+
+    expect(toast).toHaveBeenCalledTimes(2);
+    expect(avatarUploaded).toBe(false);
+  });
+
+  it('createPasswordOnResultHandler forwards result to password handler', () => {
+    const toast = vi.fn();
+    const handler = createPasswordOnResultHandler({ toast, messages: m });
+
+    handler({ result: { type: 'success' } });
+    handler({ result: { type: 'failure' } });
+
+    expect(toast).toHaveBeenCalledTimes(1);
+    expect(toast).toHaveBeenCalledWith(expect.any(String), 'success');
+  });
+
+  it('createMfaOnResultHandler forwards result to MFA handler', () => {
+    const toast = vi.fn();
+    const handler = createMfaOnResultHandler({ toast, messages: m });
+
+    handler({ result: { type: 'success', data: { mfaOptIn: false } } });
+
+    expect(toast).toHaveBeenCalledTimes(1);
+    expect(toast).toHaveBeenCalledWith(expect.any(String), 'info');
+  });
+
+  it('createProfileHandlers tracks avatar selection and clears it after success', () => {
+    const toast = vi.fn();
+    const handlers = createProfileHandlers({ toast, messages: m });
+
+    handlers.markAvatarUploaded();
+    handlers.onResult({ result: { type: 'success' } });
+
+    expect(toast).toHaveBeenCalledTimes(2);
+    expect(toast).toHaveBeenNthCalledWith(1, expect.any(String), 'success');
+    expect(toast).toHaveBeenNthCalledWith(2, expect.any(String), 'success');
+
+    handlers.onResult({ result: { type: 'success' } });
+    expect(toast).toHaveBeenCalledTimes(3);
   });
 });

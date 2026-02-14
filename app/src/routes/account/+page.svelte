@@ -7,9 +7,9 @@
   import { mfaSchema, passwordSchema, profileSchema } from '$lib/schemas/account';
   import { toast } from '$lib/stores/toast';
   import {
-    handleMfaResult,
-    handlePasswordResult,
-    handleProfileResult,
+    createProfileHandlers,
+    createMfaOnResultHandler,
+    createPasswordOnResultHandler,
     handleVerifiedQueryFlag,
   } from '$lib/utils/account-page-handlers';
   import { onMount } from 'svelte';
@@ -28,15 +28,17 @@
 
   const { data } = $props();
 
-  let avatarUploaded = $state(false);
+  const profileHandlers = createProfileHandlers({ toast, messages: m });
+  const profileOnResult = profileHandlers.onResult;
+
+  const passwordOnResult = createPasswordOnResultHandler({ toast, messages: m });
+  const mfaOnResult = createMfaOnResultHandler({ toast, messages: m });
 
   // svelte-ignore state_referenced_locally
   const superFormObj = superForm(data.profileForm, {
     validators: zod4Client(profileSchema),
     resetForm: false,
-    onResult: ({ result }) => {
-      avatarUploaded = handleProfileResult(result, avatarUploaded, toast, m);
-    },
+    onResult: profileOnResult,
   });
 
   const {
@@ -52,9 +54,7 @@
   const passwordFormObj = superForm(data.passwordForm, {
     validators: zod4Client(passwordSchema),
     resetForm: true,
-    onResult: ({ result }) => {
-      handlePasswordResult(result, toast, m);
-    },
+    onResult: passwordOnResult,
   });
 
   const { form: passwordForm, enhance: passwordEnhance, message: passwordMessage } = passwordFormObj;
@@ -64,9 +64,7 @@
   const mfaFormObj = superForm(data.mfaForm, {
     validators: zod4Client(mfaSchema),
     resetForm: false,
-    onResult: ({ result }) => {
-      handleMfaResult(result, toast, m);
-    },
+    onResult: mfaOnResult,
   });
 
   const { form: mfaForm, enhance: mfaEnhance } = mfaFormObj;
@@ -93,9 +91,7 @@
     {form}
     {profileEnhance}
     {profileMessage}
-    onAvatarSelected={() => {
-      avatarUploaded = true;
-    }}
+    onAvatarSelected={profileHandlers.markAvatarUploaded}
   />
 
   <MfaCard mfaRequired={data.mfaRequired} {mfaFormObj} {mfaForm} {mfaEnhance} />

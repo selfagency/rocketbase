@@ -5,7 +5,7 @@ status: in-progress
 type: task
 priority: high
 created_at: 2026-02-13T22:51:45Z
-updated_at: 2026-02-14T18:19:06Z
+updated_at: 2026-02-14T18:25:29Z
 ---
 
 Ensure all components and functions have unit tests and are documented within the code with explanations of their purpose.
@@ -153,3 +153,5 @@ Results remained:
   - `app/src/lib/components/global/Nav.auth.spec.ts`
   - `app/src/lib/components/account/ProfileCard.spec.ts`
 - Browser tests pass with coverage after these updates.
+
+### Coverage push (below-95 pass)\n- Extracted additional route callback logic into utility helpers:\n  - `app/src/lib/utils/forgot-password-handlers.ts` (new)\n  - `createProfileHandlers` added in `app/src/lib/utils/account-page-handlers.ts`\n- Refactored routes to consume extracted handlers:\n  - `app/src/routes/account/+page.svelte`\n  - `app/src/routes/forgot-password/+page.svelte`\n- Added/expanded utility tests:\n  - `app/src/tests/lib/utils/forgot-password-handlers.test.ts` (new)\n  - `app/src/tests/lib/utils/account-page-handlers.test.ts`\n- Browser suite: **23 files / 189 tests passing**.\n- Coverage now: **98.03% statements**, **84.75% branches**, **99.43% functions**, **99.82% lines**.\n- Previously sub-95 route files are now >=95 across statements/functions/lines.\n

@@ -5,6 +5,10 @@
   import * as Form from '$lib/components/ui/form';
   import { Input } from '$lib/components/ui/input';
   import * as m from '$lib/paraglide/messages';
+  import {
+    createForgotPasswordOnUpdateHandler,
+    shouldShowForgotPasswordSuccessFromAction,
+  } from '$lib/utils/forgot-password-handlers';
   import { onMount } from 'svelte';
   import { superForm } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
@@ -18,8 +22,14 @@
 
   let showSuccess = $state(false);
 
+  const forgotPasswordOnUpdate = createForgotPasswordOnUpdateHandler({
+    setShowSuccess: value => {
+      showSuccess = value;
+    },
+  });
+
   onMount(() => {
-    if ((actionData as { success?: boolean } | undefined)?.success) {
+    if (shouldShowForgotPasswordSuccessFromAction(actionData as { success?: boolean } | undefined)) {
       showSuccess = true;
     }
   });
@@ -27,14 +37,7 @@
   // svelte-ignore state_referenced_locally
   const superFormObj = superForm(data.form, {
     validators: zod4Client(forgotPasswordSchema),
-    onUpdate({ form, result }) {
-      if (form.valid) {
-        const resultData = result.data as any;
-        if (resultData?.success) {
-          showSuccess = true;
-        }
-      }
-    },
+    onUpdate: forgotPasswordOnUpdate,
   });
 
   const { form, enhance, capture, restore } = superFormObj;

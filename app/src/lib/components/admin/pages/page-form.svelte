@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button/index.js';
-  import * as Form from '$lib/components/ui/form/index.js';
-  import { Input } from '$lib/components/ui/input/index.js';
-  import { Label } from '$lib/components/ui/label/index.js';
-  import { Switch } from '$lib/components/ui/switch/index.js';
-  import { Textarea } from '$lib/components/ui/textarea/index.js';
+  import { Button } from '$lib/components/ui/button';
+  import * as Form from '$lib/components/ui/form';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '$lib/components/ui/label';
+  import { Switch } from '$lib/components/ui/switch';
+  import { Textarea } from '$lib/components/ui/textarea';
+  import { pageSchema, type PageSchema } from '$lib/schemas/page';
+  import { generateSlug as createSlug } from '$lib/server/slug-utils';
   import { toast } from '$lib/stores/toast';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
-  import { pageSchema, type PageSchema } from './schema';
-  import { generateSlug as createSlug } from './slug-utils';
 
   let {
     data,

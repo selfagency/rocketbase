@@ -1,9 +1,9 @@
 <script lang="ts">
+  import { enhance } from '$app/forms';
+  import { Button } from '$lib/components/ui/button';
+  import type { PagesResponse } from '$lib/types/pocketbase';
   import PencilIcon from '@lucide/svelte/icons/pencil';
   import TrashIcon from '@lucide/svelte/icons/trash';
-  import { Button } from '$lib/components/ui/button/index.js';
-  import type { PagesResponse } from '$lib/types/pocketbase';
-  import { enhance } from '$app/forms';
 
   let { page }: { page: PagesResponse } = $props();
 

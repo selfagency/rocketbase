@@ -22,7 +22,9 @@
     "pnpm": true,
     "timeout": true,
     "docker run": true,
-    "mv": true
+    "mv": true,
+    "git add": true,
+    "git commit": true
   },
   "oxc.fmt.configPath": ""
 }

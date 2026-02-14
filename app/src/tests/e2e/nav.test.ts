@@ -196,5 +196,11 @@ test.describe('Navigation: Admin dropdown', () => {
       await expect(page).toHaveURL('/admin/pages');
       await expect(page.getByRole('heading', { name: /pages/i })).toBeVisible();
     });
+
+    await test.step('assert posts admin route is accessible', async () => {
+      await page.goto('/admin/posts');
+      await expect(page).toHaveURL('/admin/posts');
+      await expect(page.getByRole('heading', { name: /^posts$/i })).toBeVisible();
+    });
   });
 });

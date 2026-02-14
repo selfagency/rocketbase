@@ -2,7 +2,7 @@ import logger from '$lib/server/logger';
 import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import type { RedirectsResponse } from '../types/pocketbase';
-import { getCachedRedirects } from './redirect-store.js';
+import { getCachedRedirects } from './redirect-store';
 
 export const handleRedirects: Handle = async ({ event, resolve }) => {
   // Skip redirects for API routes and static assets

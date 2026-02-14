@@ -1,14 +1,35 @@
 import { expect, test } from '@playwright/test';
 
 const API_BASE = process.env.POCKETBASE_URL || 'http://localhost:8090';
-const ADMIN_TOKEN = process.env.API_KEY;
+const ADMIN_EMAIL = process.env.PB_ADMIN_EMAIL || 'admin@example.com';
+const ADMIN_PASSWORD = process.env.PB_ADMIN_PASSWORD || 'test1234567890';
+
+// Get admin token using superuser authentication
+async function getAdminToken() {
+  const response = await fetch(`${API_BASE}/api/collections/_superusers/auth-with-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      identity: ADMIN_EMAIL,
+      password: ADMIN_PASSWORD,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to authenticate admin: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.token || data.tokenString || data?.admin?.token;
+}
 
 async function createUser(role: string, email: string, password: string, name = 'E2E User') {
-  if (!ADMIN_TOKEN) throw new Error('API_KEY must be set to create test users');
+  const token = await getAdminToken();
   const res = await fetch(`${API_BASE}/api/collections/users/records`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${ADMIN_TOKEN}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ email, password, passwordConfirm: password, name, role }),
@@ -21,8 +42,8 @@ async function createUser(role: string, email: string, password: string, name = 
 }
 
 async function cleanupTestUsers() {
-  if (!ADMIN_TOKEN) return;
-  const headers = { Authorization: `Bearer ${ADMIN_TOKEN}` };
+  const token = await getAdminToken();
+  const headers = { Authorization: `Bearer ${token}` };
   const listRes = await fetch(`${API_BASE}/api/collections/users/records?filter=email~"@example.com"&perPage=500`, {
     headers,
   });

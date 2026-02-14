@@ -1,15 +1,35 @@
 import { expect, test } from '@playwright/test';
 
-// Uses API_KEY env var for PocketBase admin operations
 const API_BASE = process.env.POCKETBASE_URL || 'http://localhost:8090';
-const ADMIN_TOKEN = process.env.API_KEY;
+const ADMIN_EMAIL = process.env.PB_ADMIN_EMAIL || 'admin@example.com';
+const ADMIN_PASSWORD = process.env.PB_ADMIN_PASSWORD || 'test1234567890';
+
+// Get admin token using superuser authentication
+async function getAdminToken() {
+  const response = await fetch(`${API_BASE}/api/collections/_superusers/auth-with-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      identity: ADMIN_EMAIL,
+      password: ADMIN_PASSWORD,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to authenticate admin: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.token || data.tokenString || data?.admin?.token;
+}
 
 async function createUser(role: string, email: string, password: string, name = 'E2E User') {
-  if (!ADMIN_TOKEN) throw new Error('API_KEY must be set to create test users');
+  const token = await getAdminToken();
   const res = await fetch(`${API_BASE}/api/collections/users/records`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${ADMIN_TOKEN}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ email, password, passwordConfirm: password, name, role }),
@@ -22,8 +42,8 @@ async function createUser(role: string, email: string, password: string, name = 
 }
 
 async function cleanupTestUsers() {
-  if (!ADMIN_TOKEN) return;
-  const headers = { Authorization: `Bearer ${ADMIN_TOKEN}` };
+  const token = await getAdminToken();
+  const headers = { Authorization: `Bearer ${token}` };
   const listRes = await fetch(`${API_BASE}/api/collections/users/records?filter=email~"@example.com"&perPage=500`, {
     headers,
   });
@@ -91,26 +111,20 @@ test.describe('Navigation: Admin dropdown', () => {
       await page.waitForURL(/\//, { timeout: 15000 });
     });
 
-    await test.step('assert admin dropdown exists and positioned after About', async () => {
+    await test.step('assert admin dropdown exists as last nav item', async () => {
       const nav = page.getByRole('navigation', { name: 'Primary' });
       const links = nav.locator('a');
 
-      // Find indexes for About and Admin
+      // Admin should be the last item in nav
       const count = await links.count();
-      let aboutIndex = -1;
-      let adminIndex = -1;
-      for (let i = 0; i < count; i++) {
-        const text = (await links.nth(i).innerText()).trim();
-        if (/^about$/i.test(text)) aboutIndex = i;
-        if (/^admin$/i.test(text)) adminIndex = i;
-      }
+      expect(count).toBeGreaterThan(0);
 
-      expect(adminIndex).toBeGreaterThan(-1);
-      expect(aboutIndex).toBeGreaterThan(-1);
-      expect(adminIndex).toBeGreaterThan(aboutIndex);
+      const lastLink = links.nth(count - 1);
+      const lastLinkText = (await lastLink.innerText()).trim();
+      expect(lastLinkText).toMatch(/^admin$/i);
 
       // Open admin dropdown and assert Pages visible for admin
-      await links.nth(adminIndex).click();
+      await lastLink.click();
       await expect(page.getByRole('link', { name: /pages/i })).toBeVisible();
     });
   });

@@ -19,17 +19,22 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   // Build filter for search and status
   const filters: string[] = [];
 
-  // Exclude trashed items by default
-  filters.push('in_trash != true');
+  // Handle trash filter separately
+  if (status === 'trash') {
+    filters.push('in_trash = true');
+  } else {
+    // Exclude trashed items from all other views
+    filters.push('in_trash != true');
+
+    if (status === 'draft') {
+      filters.push('published = false');
+    } else if (status === 'published') {
+      filters.push('published = true');
+    }
+  }
 
   if (search) {
     filters.push(`title ~ "${search}" || slug ~ "${search}"`);
-  }
-
-  if (status === 'draft') {
-    filters.push('published = false');
-  } else if (status === 'published') {
-    filters.push('published = true');
   }
 
   const filter = filters.length > 0 ? filters.join(' && ') : '';
@@ -83,6 +88,27 @@ export const actions: Actions = {
     } catch (err) {
       const error = err as Error;
       return fail(500, { error: error.message || 'Failed to delete page' });
+    }
+  },
+
+  undelete: async ({ locals, request }) => {
+    const data = await request.formData();
+    // oxlint-disable-next-line typescript/no-base-to-string
+    const id = data.get('id')?.toString();
+
+    if (!id) {
+      return fail(400, { error: 'Missing page ID' });
+    }
+
+    try {
+      // Restore from trash: set in_trash to false
+      await locals.pb.collection('pages').update(id, {
+        in_trash: false,
+      });
+      return { success: true };
+    } catch (err) {
+      const error = err as Error;
+      return fail(500, { error: error.message || 'Failed to restore page' });
     }
   },
 };

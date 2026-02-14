@@ -208,6 +208,15 @@
         >
           {m['admin.pages.published']()}
         </Button>
+        <Button
+          variant={statusValue === 'trash' ? 'default' : 'ghost'}
+          size="sm"
+          onclick={() => {
+            statusValue = 'trash';
+          }}
+        >
+          {m['admin.pages.trash']()}
+        </Button>
       </ButtonGroup.Root>
 
       <Button href="/admin/pages/new" class="ms-auto">{m['admin.pages.create_page']()}</Button>

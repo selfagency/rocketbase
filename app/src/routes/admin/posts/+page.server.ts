@@ -21,17 +21,22 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
   const filters: string[] = [];
 
-  // Exclude trashed items by default
-  filters.push('in_trash != true');
+  // Handle trash filter separately
+  if (status === 'trash') {
+    filters.push('in_trash = true');
+  } else {
+    // Exclude trashed items from all other views
+    filters.push('in_trash != true');
+
+    if (status === 'draft') {
+      filters.push('published = false');
+    } else if (status === 'published') {
+      filters.push('published = true');
+    }
+  }
 
   if (search) {
     filters.push(`title ~ "${search}" || slug ~ "${search}" || summary ~ "${search}"`);
-  }
-
-  if (status === 'draft') {
-    filters.push('published = false');
-  } else if (status === 'published') {
-    filters.push('published = true');
   }
 
   if (author) {
@@ -105,6 +110,27 @@ export const actions: Actions = {
     } catch (err) {
       const pbError = err as Error;
       return fail(500, { error: pbError.message || 'Failed to delete post' });
+    }
+  },
+
+  undelete: async ({ locals, request }) => {
+    const data = await request.formData();
+    // oxlint-disable-next-line typescript/no-base-to-string
+    const id = data.get('id')?.toString();
+
+    if (!id) {
+      return fail(400, { error: 'Missing post ID' });
+    }
+
+    try {
+      // Restore from trash: set in_trash to false
+      await locals.pb.collection('posts').update(id, {
+        in_trash: false,
+      });
+      return { success: true };
+    } catch (err) {
+      const pbError = err as Error;
+      return fail(500, { error: pbError.message || 'Failed to restore post' });
     }
   },
 };

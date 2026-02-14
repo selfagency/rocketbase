@@ -175,6 +175,15 @@
         >
           Published
         </Button>
+        <Button
+          variant={statusValue === 'trash' ? 'default' : 'ghost'}
+          size="sm"
+          onclick={() => {
+            statusValue = 'trash';
+          }}
+        >
+          Trash
+        </Button>
       </ButtonGroup.Root>
 
       <Button href="/admin/posts/new" class="ms-auto">Create Post</Button>

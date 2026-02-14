@@ -59,7 +59,7 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
     accessorKey: 'published',
     header: m['admin.pages.published'](),
     cell: ({ row }) =>
-      renderComponent(PublishVisibilityCell, {
+      renderComponent(PublishVisibilityCell as any, {
         published: row.original.published || false,
         visible: row.original.visible || false,
       }),

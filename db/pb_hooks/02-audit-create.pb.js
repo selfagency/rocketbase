@@ -2,19 +2,24 @@
 
 // Audit logging for record create
 onRecordAfterCreateSuccess(function (e) {
-  if (e.record.collection().name === 'audit_logs') {
-    return;
-  }
   try {
-    var auditCollection = $app.findCollectionByNameOrId('audit_logs');
-    if (!auditCollection) {
+    if (!e.record || e.record.collection().name === 'audit_logs') {
+      e.next();
       return;
     }
+
+    var auditCollection = $app.findCollectionByNameOrId('audit_logs');
+    if (!auditCollection) {
+      e.next();
+      return;
+    }
+
     var auditRecord = new Record(auditCollection);
     auditRecord.set('event_type', 'create');
     auditRecord.set('collection_name', e.record.collection().name);
     auditRecord.set('record_id', e.record.id);
     auditRecord.set('timestamp', new Date().toISOString());
+    auditRecord.set('after_changes', e.record.clone().withCustomData(true).publicExport());
     $app.save(auditRecord);
   } catch (err) {
     console.error('[Audit] create failed: ' + err.toString());

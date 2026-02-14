@@ -288,10 +288,30 @@ async function deleteAllTestUsers() {
     const searchData = (await searchResponse.json()) as any;
     const items = searchData?.items || searchData || [];
 
-    if (items && items.length > 0) {
-      console.debug('Bulk cleanup: Found', items.length, 'test user(s) to delete');
+    const testEmailPrefixes = [
+      'register-basic-',
+      'register-mismatch-',
+      '2fa-login-',
+      '2fa-invalid-',
+      'verify-email-',
+      'login-test-',
+      'account-test-',
+      'profile-test-',
+      '2fa-toggle-',
+      'password-test-',
+      '2fa-section-',
+      'logout-test-',
+    ];
+
+    const scopedItems = (items || []).filter((item: any) => {
+      const email = (item?.email || '').toString().toLowerCase();
+      return testEmailPrefixes.some(prefix => email.startsWith(prefix));
+    });
+
+    if (scopedItems.length > 0) {
+      console.debug('Bulk cleanup: Found', scopedItems.length, 'auth-flow test user(s) to delete');
       // Delete each user record found
-      for (const item of items) {
+      for (const item of scopedItems) {
         const id = item?.id || item?.ID || item?._id;
         if (!id) continue;
         const deleteUrl = `http://localhost:8090/api/collections/users/records/${id}`;
@@ -308,7 +328,7 @@ async function deleteAllTestUsers() {
         }
       }
     } else {
-      console.debug('Bulk cleanup: No test users found for @example.com');
+      console.debug('Bulk cleanup: No auth-flow test users found for cleanup');
     }
   } catch (err) {
     // Silently fail if cleanup doesn't work
@@ -472,7 +492,7 @@ test.describe('Authentication Flows', () => {
         // Now login with password
         await page.fill('input[name="email"]', email);
         await page.fill('input[name="password"]', password);
-        await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+        await page.getByRole('button', { name: /^login$/i }).click();
 
         // Wait for form submission to complete
         await page.waitForLoadState('networkidle');
@@ -481,7 +501,7 @@ test.describe('Authentication Flows', () => {
         await expect(page.locator('[data-slot="alert"]')).toBeVisible({ timeout: 3000 });
 
         // Code input should now be visible (conditionally shown when mfaId is set)
-        await expect(page.locator('[data-testid="mfa-code-input"]')).toBeVisible({ timeout: 3000 });
+        await expect(page.getByLabel(/verification code/i)).toBeVisible({ timeout: 3000 });
 
         // Get OTP from email - wait longer for email delivery
         await page.waitForTimeout(3000);
@@ -489,8 +509,8 @@ test.describe('Authentication Flows', () => {
         expect(otp).toBeTruthy();
 
         // Enter OTP and submit form
-        await page.locator('[data-testid="mfa-code-input"]').fill(otp!);
-        await page.locator('[data-testid="mfa-verify-button"]').click();
+        await page.getByLabel(/verification code/i).fill(otp!);
+        await page.getByRole('button', { name: /verify code/i }).click();
 
         // Should redirect to home after 2FA success
         await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
@@ -518,7 +538,7 @@ test.describe('Authentication Flows', () => {
         await test.step('Login and enable 2FA', async () => {
           await page.fill('input[name="email"]', email);
           await page.fill('input[name="password"]', password);
-          await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+          await page.getByRole('button', { name: /^login$/i }).click();
           await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
 
           await page.goto('/account');
@@ -543,11 +563,11 @@ test.describe('Authentication Flows', () => {
         await page.waitForLoadState('networkidle');
 
         // MFA code input should now be visible
-        await expect(page.locator('[data-testid="mfa-code-input"]')).toBeVisible({ timeout: 3000 });
+        await expect(page.getByLabel(/verification code/i)).toBeVisible({ timeout: 3000 });
 
         // Enter invalid OTP and submit
-        await page.locator('[data-testid="mfa-code-input"]').fill('00000000');
-        await page.locator('[data-testid="mfa-verify-button"]').click();
+        await page.getByLabel(/verification code/i).fill('00000000');
+        await page.getByRole('button', { name: /verify code/i }).click();
 
         // Should show error in an alert
         await expect(page.locator('[data-slot="alert"]')).toBeVisible({ timeout: 3000 });
@@ -579,7 +599,7 @@ test.describe('Authentication Flows', () => {
           // Login should succeed even for unverified users
           await page.fill('input[name="email"]', email);
           await page.fill('input[name="password"]', password);
-          await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+          await page.getByRole('button', { name: /^login$/i }).click();
 
           // Should redirect to home with login success
           await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
@@ -667,7 +687,7 @@ test.describe('Authentication Flows', () => {
         await test.step('Login with credentials', async () => {
           await page.fill('input[name="email"]', uniqueEmail);
           await page.fill('input[name="password"]', 'Password123!');
-          await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+          await page.getByRole('button', { name: /^login$/i }).click();
 
           // Should redirect to home with login success
           await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
@@ -694,7 +714,7 @@ test.describe('Authentication Flows', () => {
       await page.fill('input[name="password"]', 'WrongPassword123!');
 
       // Click the login button (not the MFA button)
-      await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+      await page.getByRole('button', { name: /^login$/i }).click();
 
       // Wait for form submission to complete (AJAX request, not page load)
       await page.waitForTimeout(1000); // Give time for the AJAX request to complete
@@ -749,7 +769,7 @@ test.describe('Authentication Flows', () => {
       await page.fill('input[name="password"]', 'Password123!');
 
       // Click login and wait for redirect
-      await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+      await page.getByRole('button', { name: /^login$/i }).click();
       await expect(page).toHaveURL('/?login=success', { timeout: 15000 });
 
       // Navigate to account page
@@ -758,8 +778,8 @@ test.describe('Authentication Flows', () => {
       // Wait for account page to load
       await page.waitForLoadState('networkidle');
 
-      // Should see account settings
-      await expect(page.locator('text=/account settings/i')).toBeVisible();
+      // Should see account settings heading
+      await expect(page.getByRole('heading', { name: /account settings/i })).toBeVisible();
 
       await expect(page.locator('input[name="email"]')).toHaveValue(uniqueEmail);
     });
@@ -790,7 +810,7 @@ test.describe('Authentication Flows', () => {
         await test.step('Login', async () => {
           await page.fill('input[name="email"]', uniqueEmail);
           await page.fill('input[name="password"]', 'Password123!');
-          await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+          await page.getByRole('button', { name: /^login$/i }).click();
           await expect(page).toHaveURL('/?login=success', { timeout: 10000 });
         });
 
@@ -936,14 +956,14 @@ test.describe('Authentication Flows', () => {
         // Try login with old password - should fail
         await page.fill('input[name="email"]', uniqueEmail);
         await page.fill('input[name="password"]', oldPassword);
-        await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+        await page.getByRole('button', { name: /^login$/i }).click();
 
         await expect(page.locator('text=/invalid email or password/i')).toBeVisible();
 
         // Login with new password - should succeed
         await page.fill('input[name="email"]', uniqueEmail);
         await page.fill('input[name="password"]', newPassword);
-        await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+        await page.getByRole('button', { name: /^login$/i }).click();
 
         await expect(page).toHaveURL('/?login=success');
       } finally {
@@ -1031,7 +1051,7 @@ test.describe('Authentication Flows', () => {
           await page.fill('input[name="password"]', 'Password123!');
 
           // Click login and wait for redirect
-          await page.click('button[type="submit"]:not([data-testid="mfa-verify-button"])');
+          await page.getByRole('button', { name: /^login$/i }).click();
           await expect(page).toHaveURL('/?login=success', { timeout: 15000 });
 
           // Logout

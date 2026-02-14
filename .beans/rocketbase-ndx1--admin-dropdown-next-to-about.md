@@ -1,3 +1,13 @@
+---
+# rocketbase-ndx1
+title: Admin dropdown next to About
+status: completed
+type: task
+priority: normal
+created_at: 2026-02-13T22:56:00Z
+updated_at: 2026-02-14T20:22:01Z
+---
+
 Title: Admin dropdown next to About
 Type: task
 Status: completed

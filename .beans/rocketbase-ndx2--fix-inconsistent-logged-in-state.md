@@ -1,3 +1,13 @@
+---
+# rocketbase-ndx2
+title: Fix inconsistent logged-in state (appears logged out on 404)
+status: completed
+type: task
+priority: normal
+created_at: 2026-02-13T22:56:00Z
+updated_at: 2026-02-14T20:22:18Z
+---
+
 Title: Fix inconsistent logged-in state (appears logged out on 404)
 Type: bug
 Status: completed

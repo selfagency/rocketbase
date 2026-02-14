@@ -40,7 +40,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     sort,
     filter,
     expand: 'author',
-    fields: 'id,title,slug,published,visible,order,parent,image,created,updated,expand.author.name,expand.author.email',
+    fields: 'id,title,slug,published,visible,order,parent,author,image,created,updated,expand.author.name,expand.author.email',
   });
 
   // Fetch all users to build complete authors map

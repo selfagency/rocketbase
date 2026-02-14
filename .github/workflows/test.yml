@@ -117,8 +117,13 @@ jobs:
       - name: Install Playwright browsers
         run: cd app && pnpm exec playwright install --with-deps chromium
 
-      - name: Run unit tests with coverage
-        run: cd app && pnpm run test:unit -- --coverage
+      - name: Run node tests with coverage
+        run: cd app && pnpm run test:node:coverage
+        env:
+          PUBLIC_POCKETBASE_URL: http://localhost:8090
+
+      - name: Run browser tests with coverage
+        run: cd app && pnpm run test:browser:coverage
         env:
           PUBLIC_POCKETBASE_URL: http://localhost:8090
 
@@ -137,19 +142,28 @@ jobs:
             sleep 2
           done
 
-      - name: Run e2e tests
-        run: cd app && pnpm run test:e2e
+      - name: Run e2e tests with coverage (Chromium)
+        run: cd app && pnpm run test:e2e:coverage
         env:
           CI: true
           PUBLIC_POCKETBASE_URL: http://localhost:8090
 
-      - name: Upload coverage reports
+      - name: Upload unit coverage reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-reports
+          name: coverage-unit
           path: |
             app/coverage/
+          retention-days: 30
+
+      - name: Upload e2e coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-e2e-playwright
+          path: |
+            app/coverage/e2e-playwright/
           retention-days: 30
 
       - name: Upload test results

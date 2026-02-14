@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/coverage';
 
 // Mailpit API helper functions
 const MAILPIT_LIST_API = 'http://localhost:8025/api/v1/messages';

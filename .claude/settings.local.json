@@ -61,7 +61,10 @@
       "WebFetch(domain:www.pexels.com)",
       "Bash(node:*)",
       "Bash(pnpm format:*)",
-      "WebFetch(domain:pocketbase.io)"
+      "WebFetch(domain:pocketbase.io)",
+      "Bash(cd:*)",
+      "Bash(pnpm dev:services:down:*)",
+      "Bash(pnpm dev:services:*)"
     ]
   },
   "hooks": {

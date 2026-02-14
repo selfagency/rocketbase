@@ -53,20 +53,27 @@
 
 		<div class="mb-4 flex items-center gap-3">
 			{#if post.author && post.author.length > 0}
-				{@const author = post.author[0]}
-				<Avatar class="h-8 w-8">
-					{#if author.avatar}
-						<AvatarImage
-							src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
-							alt={author.name || author.email}
-						/>
-					{/if}
-					<AvatarFallback class="text-xs">
-						{getAuthorInitials(author.name, author.email)}
-					</AvatarFallback>
-				</Avatar>
+				<div class="flex -space-x-2">
+					{#each post.author as author, i}
+						<Avatar class="h-8 w-8 ring-2 ring-background" title={author.name || author.email}>
+							{#if author.avatar}
+								<AvatarImage
+									src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
+									alt={author.name || author.email}
+								/>
+							{/if}
+							<AvatarFallback class="text-xs">
+								{getAuthorInitials(author.name, author.email)}
+							</AvatarFallback>
+						</Avatar>
+					{/each}
+				</div>
 				<div class="text-sm">
-					<p class="font-medium">{author.name || author.email}</p>
+					<p class="font-medium">
+						{#each post.author as author, i}
+							{author.name || author.email}{i < post.author.length - 1 ? ', ' : ''}
+						{/each}
+					</p>
 					<p class="text-muted-foreground">
 						{format(post.date || post.created, 'MMMM D, YYYY')}
 					</p>

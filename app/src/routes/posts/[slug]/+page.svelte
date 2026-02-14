@@ -35,14 +35,6 @@
 				authors: (data.post.expand as any)?.author?.map((a: any) => a.name || a.email) || [],
 				tags: (data.post.expand as any)?.tags?.map((t: any) => t.name) || []
 			}
-		},
-		twitter: {
-			cardType: 'summary_large_image' as const,
-			title: data.post.title,
-			description: data.post.summary,
-			image: data.post.image
-				? `${page.url.origin}${getFileUrl('posts', data.post.id, data.post.image, cdnUrl)}`
-				: undefined
 		}
 	});
 </script>

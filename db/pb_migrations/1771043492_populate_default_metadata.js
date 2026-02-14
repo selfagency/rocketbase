@@ -1,6 +1,6 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
-	() => {
+	(app) => {
 		// Default site metadata for SEO
 		const defaultMetadata = [
 			{
@@ -19,12 +19,12 @@ migrate(
 				type: 'string'
 			},
 			{
-				key: 'twitter_site',
+				key: 'fediverse_handle',
 				value: '',
 				type: 'string'
 			},
 			{
-				key: 'twitter_handle',
+				key: 'bluesky_handle',
 				value: '',
 				type: 'string'
 			},
@@ -35,37 +35,62 @@ migrate(
 			}
 		];
 
+		const collection = app.findCollectionByNameOrId('metadata');
+
 		// Insert each metadata entry
 		for (const meta of defaultMetadata) {
-			// Check if metadata already exists
-			const existing = $dbx
-				.newQuery('SELECT * FROM metadata WHERE key = {:key}')
-				.bind({ key: meta.key })
-				.one();
+			try {
+				// Try to find existing record
+				const records = app.findRecordsByFilter(
+					collection.id,
+					`key = "${meta.key}"`,
+					'',
+					1,
+					0
+				);
 
-			if (!existing) {
-				// Not found, create new record
-				$dbx.newQuery('INSERT INTO metadata (key, value, type) VALUES ({:key}, {:value}, {:type})').bind({
-					key: meta.key,
-					value: meta.value,
-					type: meta.type
-				}).execute();
+				if (records.length === 0) {
+					// Create new record
+					const record = new Record(collection);
+					record.set('key', meta.key);
+					record.set('value', meta.value);
+					record.set('type', meta.type);
+					app.save(record);
+				}
+			} catch (e) {
+				console.error('Error inserting metadata:', meta.key, e);
 			}
 		}
 	},
-	() => {
+	(app) => {
 		// Delete the default metadata entries on rollback
 		const keys = [
 			'site_title',
 			'site_description',
 			'og_image',
-			'twitter_site',
-			'twitter_handle',
+			'fediverse_handle',
+			'bluesky_handle',
 			'cdn_url'
 		];
 
+		const collection = app.findCollectionByNameOrId('metadata');
+
 		for (const key of keys) {
-			$dbx.newQuery('DELETE FROM metadata WHERE key = {:key}').bind({ key: key }).execute();
+			try {
+				const records = app.findRecordsByFilter(
+					collection.id,
+					`key = "${key}"`,
+					'',
+					1,
+					0
+				);
+
+				for (const record of records) {
+					app.delete(record);
+				}
+			} catch (e) {
+				console.error('Error deleting metadata:', key, e);
+			}
 		}
 	}
 );

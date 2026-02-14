@@ -33,20 +33,27 @@
 
 	<div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
 		{#if post.author && post.author.length > 0}
-			{@const author = post.author[0]}
 			<div class="flex items-center gap-2">
-				<Avatar class="h-6 w-6">
-					{#if author.avatar}
-						<AvatarImage
-							src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
-							alt={author.name || author.email}
-						/>
-					{/if}
-					<AvatarFallback class="text-xs">
-						{(author.name || author.email || 'U').charAt(0).toUpperCase()}
-					</AvatarFallback>
-				</Avatar>
-				<span>{author.name || author.email}</span>
+				<div class="flex -space-x-2">
+					{#each post.author as author}
+						<Avatar class="h-6 w-6 ring-2 ring-background" title={author.name || author.email}>
+							{#if author.avatar}
+								<AvatarImage
+									src={getFileUrl('users', author.id, author.avatar, cdnUrl)}
+									alt={author.name || author.email}
+								/>
+							{/if}
+							<AvatarFallback class="text-xs">
+								{(author.name || author.email || 'U').charAt(0).toUpperCase()}
+							</AvatarFallback>
+						</Avatar>
+					{/each}
+				</div>
+				<span>
+					{#each post.author as author, i}
+						{author.name || author.email}{i < post.author.length - 1 ? ', ' : ''}
+					{/each}
+				</span>
 			</div>
 		{/if}
 

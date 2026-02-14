@@ -21,9 +21,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
   const filters: string[] = [];
 
-  // Handle trash filter separately
+  // Handle trash filter
   if (status === 'trash') {
-    // Only show trashed items, ignore other filters for simplicity
     filters.push('in_trash = true');
   } else {
     // Exclude trashed items from all other views
@@ -34,15 +33,15 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     } else if (status === 'published') {
       filters.push('published = true');
     }
+  }
 
-    // Only apply search and author filters when NOT viewing trash
-    if (search) {
-      filters.push(`title ~ "${search}" || slug ~ "${search}" || summary ~ "${search}"`);
-    }
+  // Apply search and author filters to all views including trash
+  if (search) {
+    filters.push(`title ~ "${search}" || slug ~ "${search}" || summary ~ "${search}"`);
+  }
 
-    if (author) {
-      filters.push(`author ~ "${author}"`);
-    }
+  if (author) {
+    filters.push(`author ~ "${author}"`);
   }
 
   const filter = filters.length > 0 ? filters.join(' && ') : '';

@@ -46,8 +46,16 @@
 
   function onDragStart(e: DragEvent, id: string) {
     draggingId = id;
-    e.dataTransfer?.setData('text/plain', id);
-    e.dataTransfer!.effectAllowed = 'move';
+    if (e.dataTransfer) {
+      e.dataTransfer.setData('text/plain', id);
+      e.dataTransfer.effectAllowed = 'move';
+
+      const dragHandle = e.currentTarget as HTMLElement | null;
+      const dragRow = dragHandle?.closest('tr') as HTMLElement | null;
+      if (dragRow) {
+        e.dataTransfer.setDragImage(dragRow, 24, 18);
+      }
+    }
   }
 
   function onDragEnd() {
@@ -206,19 +214,41 @@
     </div>
 
     <div class="overflow-hidden rounded-md border">
-      <Table.Root>
+      <Table.Root class="w-full">
         <Table.Header>
           {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
             <Table.Row>
               <!-- Drag handle header cell to align with body drag handle -->
               <Table.Head class="w-8"></Table.Head>
               {#each headerGroup.headers as header (header.id)}
-                <Table.Head>
+                <Table.Head
+                  class={header.column.id === 'order'
+                    ? 'w-14 text-center'
+                    : header.column.id === 'image'
+                      ? 'w-16'
+                      : header.column.id === 'title'
+                        ? 'min-w-56'
+                        : header.column.id === 'slug'
+                          ? 'min-w-40'
+                          : header.column.id === 'summary'
+                            ? 'min-w-48'
+                            : header.column.id === 'published'
+                              ? 'w-28'
+                              : header.column.id === 'created'
+                                ? 'w-24 whitespace-nowrap'
+                                : header.column.id === 'updated'
+                                  ? 'w-24 whitespace-nowrap'
+                                  : header.column.id === 'actions'
+                                    ? 'w-24 px-1 text-right whitespace-nowrap'
+                                    : ''}
+                >
                   {#if !header.isPlaceholder}
                     {#if (header.column.columnDef as any)?.meta?.sortKey}
                       {@const tooltip = (header.column.columnDef as any)?.meta?.tooltip}
                       <button
-                        class="flex items-center gap-2 transition-colors hover:text-foreground"
+                        class={(header.column.columnDef as any).meta.sortKey === 'order'
+                          ? 'flex w-full items-center justify-center transition-colors hover:text-foreground'
+                          : 'flex items-center gap-2 transition-colors hover:text-foreground'}
                         onclick={() => navigateToSort((header.column.columnDef as any).meta.sortKey)}
                       >
                         <FlexRender content={header.column.columnDef.header} context={header.getContext()} />
@@ -301,19 +331,19 @@
             {@const rowId = (row as any).original?.id || (row as any).id}
             <tr
               data-id={rowId}
-              draggable="true"
-              ondragstart={e => onDragStart(e as DragEvent, rowId)}
-              ondragend={onDragEnd}
               ondragover={e => onDragOver(e as DragEvent)}
               ondragleave={e => onDragLeave(e as DragEvent)}
               ondrop={e => onDrop(e as DragEvent, rowId)}
-              class="cursor-grab"
-              class:cursor-grabbing={draggingId === rowId}
             >
               <!-- Drag handle cell -->
               <Table.Cell class="w-8 text-center">
                 <button
-                  class="cursor-grab text-muted-foreground hover:text-foreground"
+                  type="button"
+                  draggable="true"
+                  ondragstart={e => onDragStart(e as DragEvent, rowId)}
+                  ondragend={onDragEnd}
+                  class="inline-flex cursor-grab items-center justify-center rounded-md p-1.5 text-muted-foreground hover:text-foreground"
+                  class:cursor-grabbing={draggingId === rowId}
                   aria-label="Drag to reorder"
                   title="Drag to reorder"
                 >
@@ -321,7 +351,27 @@
                 </button>
               </Table.Cell>
               {#each row.getVisibleCells() as cell (cell.id)}
-                <Table.Cell>
+                <Table.Cell
+                  class={cell.column.id === 'title'
+                    ? 'min-w-56'
+                    : cell.column.id === 'image'
+                      ? 'w-16'
+                      : cell.column.id === 'order'
+                        ? 'w-14'
+                        : cell.column.id === 'slug'
+                          ? 'min-w-40'
+                          : cell.column.id === 'summary'
+                            ? 'min-w-48'
+                            : cell.column.id === 'published'
+                              ? 'w-28'
+                              : cell.column.id === 'created'
+                                ? 'w-24 whitespace-nowrap'
+                                : cell.column.id === 'updated'
+                                  ? 'w-24 whitespace-nowrap'
+                                  : cell.column.id === 'actions'
+                                    ? 'w-24 px-1 text-right whitespace-nowrap'
+                                    : ''}
+                >
                   <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
                 </Table.Cell>
               {/each}

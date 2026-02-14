@@ -56,8 +56,27 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
     meta: { sortKey: 'slug' },
   },
   {
+    accessorKey: 'summary',
+    header: 'Summary',
+    meta: { sortKey: 'summary' },
+    cell: ({ row }) => {
+      const summarySnippet = createRawSnippet<[{ summary: string }]>(getData => {
+        const { summary } = getData();
+        const safeSummary = summary?.trim() || '—';
+        return {
+          render: () =>
+            `<div class="max-w-full truncate text-sm text-muted-foreground" title="${safeSummary.replace(/"/g, '&quot;')}">${safeSummary}</div>`,
+        };
+      });
+
+      return renderSnippet(summarySnippet, {
+        summary: (row.original as any).summary || '',
+      });
+    },
+  },
+  {
     accessorKey: 'published',
-    header: m['admin.pages.published'](),
+    header: 'Status',
     cell: ({ row }) =>
       renderComponent(PublishVisibilityCell as any, {
         published: row.original.published || false,

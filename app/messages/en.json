@@ -61,7 +61,7 @@
   "admin.pages.drafts": "Drafts",
   "admin.pages.image": "Image",
   "admin.pages.order": "Page Order",
-  "admin.pages.order_tooltip": "Order number for sorting pages",
+  "admin.pages.order_tooltip": "Page order",
   "admin.pages.published": "Published",
   "admin.pages.search_placeholder": "Search by title or slug...",
   "admin.pages.select_author": "Select author...",

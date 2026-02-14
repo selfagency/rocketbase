@@ -41,7 +41,7 @@ import {
   randWord,
 } from '@ngneat/falso';
 import 'dotenv/config';
-import { snake } from 'radashi';
+import { dash } from 'radashi';
 
 const PB_URL = process.env.PUBLIC_POCKETBASE_URL || process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
 const API_USER = process.env.API_USER || 'admin@example.com';
@@ -226,7 +226,7 @@ async function generatePost(users, tags, pexelsPage) {
   const title = randNumber({ min: 0, max: 1 }) === 0 ? randCatchPhrase() : `${randJobTitle()} ${randProductName()}`;
 
   // Add random number to slug to prevent duplicates
-  const slug = snake(title) + '-' + randNumber({ min: 1000, max: 9999 });
+  const slug = dash(title) + '-' + randNumber({ min: 1000, max: 9999 });
   const summary = randSentence();
 
   // Generate 4-10 paragraphs for content
@@ -346,7 +346,7 @@ void (async function main() {
     for (let i = 0; i < tagCountToGenerate; i++) {
       const word = randWord();
       const tag = word.charAt(0).toUpperCase() + word.slice(1);
-      const slug = snake(tag) + '-' + randNumber({ min: 100, max: 999 });
+      const slug = dash(tag) + '-' + randNumber({ min: 100, max: 999 });
       try {
         const newTag = await createTag({ tag, slug }, headers);
         log(`Created tag ${i + 1}/${tagCountToGenerate}: "${newTag.tag}" (${newTag.id})`);

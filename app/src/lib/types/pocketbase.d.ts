@@ -183,6 +183,7 @@ export type PagesRecord = {
   custom_css?: string;
   id: string;
   image?: FileNameString;
+  in_trash?: boolean;
   order?: number;
   parent?: RecordIdString;
   published?: boolean;
@@ -201,11 +202,13 @@ export type PortfolioRecord<Tmetadata = unknown> = {
   image?: FileNameString;
   media?: RecordIdString[];
   metadata?: null | Tmetadata;
+  published?: boolean;
   slug?: string;
   summary?: string;
   title?: string;
   updated: IsoAutoDateString;
   url?: string;
+  visible?: boolean;
 };
 
 export type PostsRecord = {
@@ -218,6 +221,7 @@ export type PostsRecord = {
   enclosure?: string;
   id: string;
   image?: FileNameString;
+  in_trash?: boolean;
   published?: boolean;
   require_login?: boolean;
   slug: string;

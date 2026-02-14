@@ -1,4 +1,4 @@
-import { snake } from 'radashi';
+import { dash } from 'radashi';
 import { removeStopwords } from 'stopword';
 
 /**
@@ -29,8 +29,8 @@ export function generateSlug(title: string): string {
   // If all words were stop words, keep the original words
   const finalWords = wordsWithoutStopwords.length > 0 ? wordsWithoutStopwords : words;
 
-  // Join with snake case (hyphenated)
-  const slug = snake(finalWords.join(' '));
+  // Join with dash case (hyphenated)
+  const slug = dash(finalWords.join(' '));
 
   return slug;
 }

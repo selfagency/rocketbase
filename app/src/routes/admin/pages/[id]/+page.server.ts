@@ -5,6 +5,27 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 
+// Helper function to get all descendant page IDs
+function getDescendantIds(pageId: string, allPages: PagesResponse[]): Set<string> {
+  const descendants = new Set<string>();
+  const queue = [pageId];
+
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
+    descendants.add(currentId);
+
+    // Find all children of current page
+    const children = allPages.filter(p => p.parent === currentId);
+    for (const child of children) {
+      if (!descendants.has(child.id)) {
+        queue.push(child.id);
+      }
+    }
+  }
+
+  return descendants;
+}
+
 export const load: PageServerLoad = async ({ locals, params }) => {
   // Require authentication and editor/admin role
   if (!locals.user) error(401, 'Unauthorized');
@@ -14,6 +35,18 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   try {
     const page = await locals.pb.collection('pages').getOne<PagesResponse>(params.id);
+
+    // Fetch all pages for parent selection
+    const allPages = await locals.pb.collection('pages').getFullList<PagesResponse>({
+      sort: 'title',
+      fields: 'id,title,slug,parent',
+    });
+
+    // Get descendant IDs to exclude (prevent circular references)
+    const excludedIds = getDescendantIds(params.id, allPages);
+
+    // Filter out current page and its descendants
+    const availableParents = allPages.filter(p => !excludedIds.has(p.id));
 
     // Fetch parent page if exists to get its slug
     let parentSlug: string | null = null;
@@ -51,6 +84,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       page,
       form,
       parentSlug,
+      availableParents,
     };
   } catch {
     error(404, 'Page not found');

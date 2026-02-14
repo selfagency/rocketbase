@@ -14,5 +14,5 @@
     <p class="mt-2 text-muted-foreground">Add a new page to your site.</p>
   </div>
 
-  <PageForm {data} isEdit={false} />
+  <PageForm {data} isEdit={false} availableParents={data.availableParents} />
 </div>

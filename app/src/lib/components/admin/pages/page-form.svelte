@@ -7,6 +7,7 @@
   import { Textarea } from '$lib/components/ui/textarea';
   import { pageSchema, type PageSchema } from '$lib/schemas/page';
   import { toast } from '$lib/stores/toast';
+  import type { PagesResponse } from '$lib/types/pocketbase';
   import { generateSlug as createSlug } from '$lib/utils/slug-utils';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
@@ -16,11 +17,13 @@
     isEdit = false,
     parentSlug = null,
     pageId,
+    availableParents = [],
   }: {
     data: { form: SuperValidated<Infer<PageSchema>> };
     isEdit?: boolean;
     parentSlug?: string | null;
     pageId?: string;
+    availableParents?: PagesResponse[];
   } = $props();
 
   // svelte-ignore state_referenced_locally
@@ -83,6 +86,27 @@
         {/snippet}
       </Form.Control>
       <Form.Description>URL-friendly identifier (lowercase, numbers, hyphens)</Form.Description>
+      <Form.FieldErrors />
+    </Form.Field>
+
+    <!-- Parent Page -->
+    <Form.Field {form} name="parent" class="md:col-span-2">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Parent Page</Form.Label>
+          <select
+            {...props}
+            bind:value={$formData.parent}
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">None (Top Level)</option>
+            {#each availableParents as page}
+              <option value={page.id}>{page.title}</option>
+            {/each}
+          </select>
+        {/snippet}
+      </Form.Control>
+      <Form.Description>Select a parent page to create a hierarchy</Form.Description>
       <Form.FieldErrors />
     </Form.Field>
 

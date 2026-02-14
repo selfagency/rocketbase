@@ -1,4 +1,5 @@
 import { pageSchema } from '$lib/schemas/page';
+import type { PagesResponse } from '$lib/types/pocketbase';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
@@ -11,8 +12,15 @@ export const load: PageServerLoad = async ({ locals }) => {
     error(403, 'Forbidden - Requires editor or admin role');
   }
 
+  // Fetch all pages for parent selection
+  const pages = await locals.pb.collection('pages').getFullList<PagesResponse>({
+    sort: 'title',
+    fields: 'id,title,slug,parent',
+  });
+
   return {
     form: await superValidate(zod4(pageSchema)),
+    availableParents: pages,
   };
 };
 

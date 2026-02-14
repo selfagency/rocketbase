@@ -14,5 +14,11 @@
     <p class="mt-2 text-muted-foreground">Update "{data.page.title || 'Untitled'}"</p>
   </div>
 
-  <PageForm {data} isEdit={true} parentSlug={data.parentSlug} pageId={data.page.id} />
+  <PageForm
+    {data}
+    isEdit={true}
+    parentSlug={data.parentSlug}
+    pageId={data.page.id}
+    availableParents={data.availableParents}
+  />
 </div>

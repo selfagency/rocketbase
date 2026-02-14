@@ -7,6 +7,7 @@
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table';
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
+	import ArrowDownUpIcon from '@lucide/svelte/icons/arrow-down-up';
 	import GripVerticalIcon from '@lucide/svelte/icons/grip-vertical';
 	import { type ColumnDef, getCoreRowModel } from '@tanstack/table-core';
 
@@ -45,7 +46,8 @@
 		return (data || []).map((item: any) => {
 			const out = { ...item } as any;
 			out.expand = out.expand ?? {};
-			if (!out.expand.author && out.author) {
+			// Augment if expand.author doesn't exist OR if it exists but lacks name
+			if (out.author && (!out.expand.author || !out.expand.author.name)) {
 				const found = authorsMap.get(out.author);
 				if (found) {
 					out.expand.author = { id: found.id, name: found.name };
@@ -248,18 +250,17 @@
 								{#if !header.isPlaceholder}
 									{#if (header.column.columnDef as any)?.meta?.sortKey}
 										<button
-											class="flex items-center gap-2"
-											onclick={() => navigateToSort((header.column.columnDef as any).meta.sortKey)}
-										>
-											<FlexRender
-												content={header.column.columnDef.header}
-												context={header.getContext()}
-											/>
-											{#if isSortState((header.column.columnDef as any).meta.sortKey).asc}
-												<span aria-hidden="true">▴</span>
-											{:else if isSortState((header.column.columnDef as any).meta.sortKey).desc}
-												<span aria-hidden="true">▾</span>
-											{/if}
+										class="flex items-center gap-2 hover:text-foreground transition-colors"
+										onclick={() => navigateToSort((header.column.columnDef as any).meta.sortKey)}
+									>
+										<FlexRender
+											content={header.column.columnDef.header}
+											context={header.getContext()}
+										/>
+										<ArrowDownUpIcon
+											class="w-4 h-4 {isSortState((header.column.columnDef as any).meta.sortKey).asc || isSortState((header.column.columnDef as any).meta.sortKey).desc ? 'text-foreground' : 'text-muted-foreground'}"
+											aria-hidden="true"
+										/>
 										</button>
 									{:else}
 										<FlexRender

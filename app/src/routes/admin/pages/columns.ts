@@ -114,7 +114,7 @@ export const columns: ColumnDef<PagesResponse>[] = [
   {
     accessorKey: 'author',
     header: 'Author',
-    meta: { sortKey: 'expand.author.name' },
+    meta: { sortKey: 'author' },
     cell: ({ row }) => {
       const authorSnippet = createRawSnippet<[{ expand: any }]>(getData => {
         const { expand } = getData();

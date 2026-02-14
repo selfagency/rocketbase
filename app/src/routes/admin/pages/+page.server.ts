@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const search = url.searchParams.get('search') || '';
   const status = url.searchParams.get('status') || 'all';
   const author = url.searchParams.get('author') || '';
-  const sort = url.searchParams.get('sort') || 'order,created';
+  const sort = url.searchParams.get('sort') || '-created';
 
   // Build filter for search and status
   const filters: string[] = [];

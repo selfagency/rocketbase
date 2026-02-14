@@ -24,6 +24,7 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.config.{js,ts}',
         'src/lib/types/',
+        'src/lib/paraglide/',
         'build/',
         '.svelte-kit/',
       ],

@@ -1,2 +1,37 @@
-pnpm -C app lint:fix
-pnpm -C app format
+#!/usr/bin/env sh
+set -eu
+
+staged_files="$(git diff --cached --name-only --diff-filter=ACMR -- app || true)"
+
+if [ -z "$staged_files" ]; then
+  exit 0
+fi
+
+echo "$staged_files" | while IFS= read -r file; do
+  [ -z "$file" ] && continue
+  [ ! -f "$file" ] && continue
+  rel="${file#app/}"
+
+  # Formatting: only staged files
+  pnpm -C app exec prettier --write --ignore-unknown "$rel"
+done
+
+echo "$staged_files" | while IFS= read -r file; do
+  [ -z "$file" ] && continue
+  [ ! -f "$file" ] && continue
+  rel="${file#app/}"
+
+  # Linting/fixes: only staged JS/TS/Svelte files
+  case "$rel" in
+  *.js | *.mjs | *.cjs | *.ts | *.tsx | *.jsx | *.svelte)
+    pnpm -C app exec oxlint --fix "$rel"
+    ;;
+  esac
+done
+
+# Re-stage any auto-fixed files before commit
+echo "$staged_files" | while IFS= read -r file; do
+  [ -z "$file" ] && continue
+  [ ! -f "$file" ] && continue
+  git add "$file"
+done

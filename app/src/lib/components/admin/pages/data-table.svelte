@@ -135,6 +135,11 @@
 
   function isSortState(sortKey: string) {
     const current = page.url.searchParams.get('sort') || '';
+
+    if (!current && sortKey === 'order') {
+      return { asc: true, desc: false };
+    }
+
     return { asc: current === sortKey, desc: current === `-${sortKey}` };
   }
 
@@ -196,7 +201,7 @@
       <Button href="/admin/pages/new" class="ms-auto">{m['admin.pages.create_page']()}</Button>
     </div>
 
-    <div class="rounded-md border">
+    <div class="overflow-hidden rounded-md border">
       <Table.Root>
         <Table.Header>
           {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}

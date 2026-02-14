@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const perPage = parseInt(url.searchParams.get('perPage') || '10');
   const search = url.searchParams.get('search') || '';
   const status = url.searchParams.get('status') || 'all';
-  const sort = url.searchParams.get('sort') || '-created';
+  const sort = url.searchParams.get('sort') || 'order';
 
   // Build filter for search and status
   const filters: string[] = [];

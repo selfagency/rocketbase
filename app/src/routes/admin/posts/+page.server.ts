@@ -46,11 +46,16 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
   const filter = filters.length > 0 ? filters.join(' && ') : '';
 
+  console.log('[Posts Load] Status:', status);
+  console.log('[Posts Load] Filter:', filter);
+
   const result = await locals.pb.collection('posts').getList<PostsResponseWithExpanded>(page, perPage, {
     sort,
     filter,
     expand: 'author,tags,attachments',
   });
+
+  console.log('[Posts Load] Found', result.totalItems, 'posts');
 
   const allUsers = await locals.pb.collection('users').getFullList({
     filter: 'role != "user"',

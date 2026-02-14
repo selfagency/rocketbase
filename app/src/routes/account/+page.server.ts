@@ -4,377 +4,375 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 import {
-	mfaSchema,
-	passwordSchema,
-	profileSchema,
-	type MfaSchema,
-	type PasswordSchema,
-	type ProfileSchema
+  mfaSchema,
+  passwordSchema,
+  profileSchema,
+  type MfaSchema,
+  type PasswordSchema,
+  type ProfileSchema,
 } from './schemas';
 
 // Roles that require MFA per PocketBase collection config
 const MFA_REQUIRED_ROLES = ['admin', 'editor', 'contributor'];
 
 export const load: PageServerLoad = async ({ locals }) => {
-	if (!locals.user) {
-		redirect(303, '/login');
-	}
+  if (!locals.user) {
+    redirect(303, '/login');
+  }
 
-	const profileForm = await superValidate<ProfileSchema>(
-		{
-			name: locals.user.name,
-			email: locals.user.email,
-			title: locals.user.title || '',
-			bio: locals.user.bio || '',
-			website: locals.user.website || ''
-		},
-		zod4(profileSchema),
-		{ id: 'profileForm' }
-	);
+  const profileForm = await superValidate<ProfileSchema>(
+    {
+      name: locals.user.name,
+      email: locals.user.email,
+      title: locals.user.title || '',
+      bio: locals.user.bio || '',
+      website: locals.user.website || '',
+    },
+    zod4(profileSchema),
+    { id: 'profileForm' }
+  );
 
-	const passwordForm = await superValidate<PasswordSchema>(zod4(passwordSchema), {
-		id: 'passwordForm'
-	});
+  const passwordForm = await superValidate<PasswordSchema>(zod4(passwordSchema), {
+    id: 'passwordForm',
+  });
 
-	const mfaForm = await superValidate<MfaSchema>(
-		{ mfaOptIn: Boolean((locals.user as { mfaOptIn?: boolean }).mfaOptIn) },
-		zod4(mfaSchema),
-		{ id: 'mfaForm' }
-	);
+  const mfaForm = await superValidate<MfaSchema>(
+    { mfaOptIn: Boolean((locals.user as { mfaOptIn?: boolean }).mfaOptIn) },
+    zod4(mfaSchema),
+    { id: 'mfaForm' }
+  );
 
-	// MFA is enforced automatically by PocketBase based on the user's role
-	const mfaRequired = MFA_REQUIRED_ROLES.includes(locals.user.role || '');
-	const mfaOptIn = Boolean((locals.user as { mfaOptIn?: boolean }).mfaOptIn);
-	const mfaEnabled = mfaRequired || mfaOptIn;
+  // MFA is enforced automatically by PocketBase based on the user's role
+  const mfaRequired = MFA_REQUIRED_ROLES.includes(locals.user.role || '');
+  const mfaOptIn = Boolean((locals.user as { mfaOptIn?: boolean }).mfaOptIn);
+  const mfaEnabled = mfaRequired || mfaOptIn;
 
-	return {
-		profileForm,
-		passwordForm,
-		mfaForm,
-		mfaRequired,
-		mfaOptIn,
-		mfaEnabled,
-		user: locals.user
-	};
+  return {
+    profileForm,
+    passwordForm,
+    mfaForm,
+    mfaRequired,
+    mfaOptIn,
+    mfaEnabled,
+    user: locals.user,
+  };
 };
 
 export const actions: Actions = {
-	updateProfile: async ({ request, locals, url }) => {
-		if (!locals.user) {
-			return fail(401, { message: m['auth.unauthorized']() });
-		}
+  updateProfile: async ({ request, locals, url }) => {
+    if (!locals.user) {
+      return fail(401, { message: m['auth.unauthorized']() });
+    }
 
-		const formData = await request.formData();
-		const form = await superValidate<ProfileSchema>(formData, zod4(profileSchema), {
-			id: 'profileForm'
-		});
+    const formData = await request.formData();
+    const form = await superValidate<ProfileSchema>(formData, zod4(profileSchema), {
+      id: 'profileForm',
+    });
 
-		if (!form.valid) {
-			return fail(400, { profileForm: form });
-		}
+    if (!form.valid) {
+      return fail(400, { profileForm: form });
+    }
 
-		try {
-			const updateData: Record<string, any> = {
-				name: form.data.name,
-				email: form.data.email,
-				title: form.data.title || '',
-				bio: form.data.bio || '',
-				website: form.data.website || ''
-			};
+    try {
+      const updateData: Record<string, any> = {
+        name: form.data.name,
+        email: form.data.email,
+        title: form.data.title || '',
+        bio: form.data.bio || '',
+        website: form.data.website || '',
+      };
 
-			// Handle avatar upload
-			const avatarFile = formData.get('avatar') as File;
-			if (avatarFile && avatarFile.size > 0) {
-				updateData.avatar = avatarFile;
-			}
+      // Handle avatar upload
+      const avatarFile = formData.get('avatar') as File;
+      if (avatarFile && avatarFile.size > 0) {
+        updateData.avatar = avatarFile;
+      }
 
-			await locals.pb.collection('users').update(locals.user.id, updateData);
+      await locals.pb.collection('users').update(locals.user.id, updateData);
 
-			// Refresh user data
-			await locals.pb.collection('users').authRefresh();
-			locals.user = locals.pb.authStore.record as any;
+      // Refresh user data
+      await locals.pb.collection('users').authRefresh();
+      locals.user = locals.pb.authStore.record as any;
 
-			// Re-validate with the latest data from the database
-			const updatedForm = await superValidate<ProfileSchema>(
-				{
-					name: locals.user?.name,
-					email: locals.user?.email,
-					title: locals.user?.title || '',
-					bio: locals.user?.bio || '',
-					website: locals.user?.website || ''
-				},
-				zod4(profileSchema),
-				{ id: 'profileForm' }
-			);
+      // Re-validate with the latest data from the database
+      const updatedForm = await superValidate<ProfileSchema>(
+        {
+          name: locals.user?.name,
+          email: locals.user?.email,
+          title: locals.user?.title || '',
+          bio: locals.user?.bio || '',
+          website: locals.user?.website || '',
+        },
+        zod4(profileSchema),
+        { id: 'profileForm' }
+      );
 
-			return {
-				profileForm: updatedForm,
-				success: true,
-				message: m['account.success_message']()
-			};
-		} catch (err: any) {
-			locals.logger
-				.withContext({
-					route: url.pathname,
-					userId: locals.pb?.authStore?.record?.id,
-					requestId: locals.requestId
-				})
-				.withMetadata(err)
-				.error('Profile update error:');
-			return fail(400, {
-				profileForm: form,
-				message: err?.message || m['account.error_message']()
-			});
-		}
-	},
+      return {
+        profileForm: updatedForm,
+        success: true,
+        message: m['account.success_message'](),
+      };
+    } catch (err: any) {
+      locals.logger
+        .withContext({
+          route: url.pathname,
+          userId: locals.pb?.authStore?.record?.id,
+          requestId: locals.requestId,
+        })
+        .withMetadata(err)
+        .error('Profile update error:');
+      return fail(400, {
+        profileForm: form,
+        message: err?.message || m['account.error_message'](),
+      });
+    }
+  },
 
-	toggleMfaOptIn: async ({ request, locals, url }) => {
-		if (!locals.user) {
-			return fail(401, { message: m['auth.unauthorized']() });
-		}
+  toggleMfaOptIn: async ({ request, locals, url }) => {
+    if (!locals.user) {
+      return fail(401, { message: m['auth.unauthorized']() });
+    }
 
-		const formData = await request.formData();
-		const form = await superValidate<MfaSchema>(formData, zod4(mfaSchema), {
-			id: 'mfaForm'
-		});
+    const formData = await request.formData();
+    const form = await superValidate<MfaSchema>(formData, zod4(mfaSchema), {
+      id: 'mfaForm',
+    });
 
-		if (!form.valid) {
-			return fail(400, { mfaForm: form });
-		}
+    if (!form.valid) {
+      return fail(400, { mfaForm: form });
+    }
 
-		const nextOptIn = form.data.mfaOptIn;
-		const mfaRequired = MFA_REQUIRED_ROLES.includes(locals.user.role || '');
+    const nextOptIn = form.data.mfaOptIn;
+    const mfaRequired = MFA_REQUIRED_ROLES.includes(locals.user.role || '');
 
-		if (mfaRequired && !nextOptIn) {
-			return fail(400, { mfaForm: form, message: m['account.error_message']() });
-		}
+    if (mfaRequired && !nextOptIn) {
+      return fail(400, { mfaForm: form, message: m['account.error_message']() });
+    }
 
-		try {
-			await locals.pb.collection('users').update(locals.user.id, {
-				mfaOptIn: nextOptIn
-			});
+    try {
+      await locals.pb.collection('users').update(locals.user.id, {
+        mfaOptIn: nextOptIn,
+      });
 
-			await locals.pb.collection('users').authRefresh();
-			locals.user = locals.pb.authStore.record as any;
+      await locals.pb.collection('users').authRefresh();
+      locals.user = locals.pb.authStore.record as any;
 
-			return {
-				mfaForm: await superValidate<MfaSchema>({ mfaOptIn: nextOptIn }, zod4(mfaSchema), {
-					id: 'mfaForm'
-				}),
-				success: true,
-				mfaOptIn: nextOptIn,
-				mfaEnabled: mfaRequired || nextOptIn
-			};
-		} catch (err: any) {
-			locals.logger
-				.withContext({
-					route: url.pathname,
-					userId: locals.pb?.authStore?.record?.id,
-					requestId: locals.requestId
-				})
-				.withMetadata(err)
-				.error('MFA opt-in update error:');
-			return fail(400, {
-				mfaForm: form,
-				message: err?.message || m['account.error_message']()
-			});
-		}
-	},
+      return {
+        mfaForm: await superValidate<MfaSchema>({ mfaOptIn: nextOptIn }, zod4(mfaSchema), {
+          id: 'mfaForm',
+        }),
+        success: true,
+        mfaOptIn: nextOptIn,
+        mfaEnabled: mfaRequired || nextOptIn,
+      };
+    } catch (err: any) {
+      locals.logger
+        .withContext({
+          route: url.pathname,
+          userId: locals.pb?.authStore?.record?.id,
+          requestId: locals.requestId,
+        })
+        .withMetadata(err)
+        .error('MFA opt-in update error:');
+      return fail(400, {
+        mfaForm: form,
+        message: err?.message || m['account.error_message'](),
+      });
+    }
+  },
 
-	sendVerificationEmail: async ({ locals, url }) => {
-		if (!locals.user) {
-			return fail(401, { message: m['auth.unauthorized']() });
-		}
+  sendVerificationEmail: async ({ locals, url }) => {
+    if (!locals.user) {
+      return fail(401, { message: m['auth.unauthorized']() });
+    }
 
-		try {
-			await locals.pb.collection('users').requestVerification(locals.user.email);
-			return {
-				success: true,
-				message: m['account.email_verification_sent']()
-			};
-		} catch (err: any) {
-			locals.logger
-				.withContext({
-					route: url.pathname,
-					userId: locals.pb?.authStore?.record?.id,
-					requestId: locals.requestId
-				})
-				.withMetadata(err)
-				.error('Email verification error:');
-			const message = err?.data?.message || err?.message || m['account.error_message']();
-			return fail(400, { message });
-		}
-	},
+    try {
+      await locals.pb.collection('users').requestVerification(locals.user.email);
+      return {
+        success: true,
+        message: m['account.email_verification_sent'](),
+      };
+    } catch (err: any) {
+      locals.logger
+        .withContext({
+          route: url.pathname,
+          userId: locals.pb?.authStore?.record?.id,
+          requestId: locals.requestId,
+        })
+        .withMetadata(err)
+        .error('Email verification error:');
+      const message = err?.data?.message || err?.message || m['account.error_message']();
+      return fail(400, { message });
+    }
+  },
 
-	changePassword: async ({ request, locals, url }) => {
-		if (!locals.user) {
-			return fail(401, { message: m['auth.unauthorized']() });
-		}
+  changePassword: async ({ request, locals, url }) => {
+    if (!locals.user) {
+      return fail(401, { message: m['auth.unauthorized']() });
+    }
 
-		const formData = await request.formData();
-		const form = await superValidate<PasswordSchema>(formData, zod4(passwordSchema), {
-			id: 'passwordForm'
-		});
+    const formData = await request.formData();
+    const form = await superValidate<PasswordSchema>(formData, zod4(passwordSchema), {
+      id: 'passwordForm',
+    });
 
-		if (!form.valid) {
-			return fail(400, { passwordForm: form });
-		}
+    if (!form.valid) {
+      return fail(400, { passwordForm: form });
+    }
 
-		try {
-			// Update password with old password verification
-			// PocketBase validates oldPassword internally, keeping auth state intact
-			await locals.pb.collection('users').update(locals.user.id, {
-				oldPassword: form.data.oldPassword,
-				password: form.data.password,
-				passwordConfirm: form.data.passwordConfirm
-			});
+    try {
+      // Update password with old password verification
+      // PocketBase validates oldPassword internally, keeping auth state intact
+      await locals.pb.collection('users').update(locals.user.id, {
+        oldPassword: form.data.oldPassword,
+        password: form.data.password,
+        passwordConfirm: form.data.passwordConfirm,
+      });
 
-			// Refresh auth to maintain session with new password
-			// Password update clears auth, so we need to re-authenticate
-			await locals.pb.collection('users').authWithPassword(locals.user.email, form.data.password);
-			locals.user = locals.pb.authStore.record as any;
+      // Refresh auth to maintain session with new password
+      // Password update clears auth, so we need to re-authenticate
+      await locals.pb.collection('users').authWithPassword(locals.user.email, form.data.password);
+      locals.user = locals.pb.authStore.record as any;
 
-			return {
-				passwordForm: await superValidate<PasswordSchema>(zod4(passwordSchema), {
-					id: 'passwordForm'
-				}),
-				success: true,
-				message: 'Password changed successfully'
-			};
-		} catch (err: any) {
-			locals.logger
-				.withContext({
-					route: url.pathname,
-					userId: locals.pb?.authStore?.record?.id,
-					requestId: locals.requestId
-				})
-				.withMetadata(err)
-				.error('Password change error:');
-			// Check if it's an old password validation error
-			if (
-				err?.message?.toLowerCase().includes('old password') ||
-				err?.message?.toLowerCase().includes('oldpassword') ||
-				err?.data?.data?.oldPassword
-			) {
-				form.message = 'Invalid current password';
-			} else {
-				form.message = err?.message || m['account.error_message']();
-			}
-			return fail(400, { passwordForm: form });
-		}
-	},
+      return {
+        passwordForm: await superValidate<PasswordSchema>(zod4(passwordSchema), {
+          id: 'passwordForm',
+        }),
+        success: true,
+        message: 'Password changed successfully',
+      };
+    } catch (err: any) {
+      locals.logger
+        .withContext({
+          route: url.pathname,
+          userId: locals.pb?.authStore?.record?.id,
+          requestId: locals.requestId,
+        })
+        .withMetadata(err)
+        .error('Password change error:');
+      // Check if it's an old password validation error
+      if (
+        err?.message?.toLowerCase().includes('old password') ||
+        err?.message?.toLowerCase().includes('oldpassword') ||
+        err?.data?.data?.oldPassword
+      ) {
+        form.message = 'Invalid current password';
+      } else {
+        form.message = err?.message || m['account.error_message']();
+      }
+      return fail(400, { passwordForm: form });
+    }
+  },
 
-	requestTwoFactor: async ({ request, locals, url }) => {
-		if (!locals.user) {
-			return fail(401, { message: m['auth.unauthorized']() });
-		}
+  requestTwoFactor: async ({ request, locals, url }) => {
+    if (!locals.user) {
+      return fail(401, { message: m['auth.unauthorized']() });
+    }
 
-		try {
-			const formData = await request.formData();
-			// oxlint-disable-next-line typescript/no-base-to-string
-			const email = formData.get('email')?.toString() || locals.user.email;
+    try {
+      const formData = await request.formData();
+      // oxlint-disable-next-line typescript/no-base-to-string
+      const email = formData.get('email')?.toString() || locals.user.email;
 
-			const response = await locals.pb.collection('users').requestOTP(email);
+      const response = await locals.pb.collection('users').requestOTP(email);
 
-			return {
-				otpId: response.otpId,
-				otpRequested: true
-			};
-		} catch (err: any) {
-			locals.logger
-				.withContext({
-					route: url.pathname,
-					userId: locals.pb?.authStore?.record?.id,
-					requestId: locals.requestId
-				})
-				.withMetadata(err)
-				.error('OTP request error:');
-			return fail(400, { message: err?.message || m['account.error_message']() });
-		}
-	},
+      return {
+        otpId: response.otpId,
+        otpRequested: true,
+      };
+    } catch (err: any) {
+      locals.logger
+        .withContext({
+          route: url.pathname,
+          userId: locals.pb?.authStore?.record?.id,
+          requestId: locals.requestId,
+        })
+        .withMetadata(err)
+        .error('OTP request error:');
+      return fail(400, { message: err?.message || m['account.error_message']() });
+    }
+  },
 
-	verifyTwoFactor: async ({ request, locals, url }) => {
-		if (!locals.user) {
-			return fail(401, { message: m['auth.unauthorized']() });
-		}
+  verifyTwoFactor: async ({ request, locals, url }) => {
+    if (!locals.user) {
+      return fail(401, { message: m['auth.unauthorized']() });
+    }
 
-		try {
-			const formData = await request.formData();
-			// oxlint-disable-next-line typescript/no-base-to-string
-			const otpId = formData.get('otpId')?.toString();
-			// oxlint-disable-next-line typescript/no-base-to-string
-			const code = formData.get('code')?.toString();
+    try {
+      const formData = await request.formData();
+      // oxlint-disable-next-line typescript/no-base-to-string
+      const otpId = formData.get('otpId')?.toString();
+      // oxlint-disable-next-line typescript/no-base-to-string
+      const code = formData.get('code')?.toString();
 
-			if (!otpId || !code) {
-				return fail(400, { message: m['auth.missing_otp']() });
-			}
+      if (!otpId || !code) {
+        return fail(400, { message: m['auth.missing_otp']() });
+      }
 
-			// Verify the OTP code
-			const otps = await locals.pb
-				.collection('_otps')
-				.getFullList({ filter: `id = "${otpId}" && recordRef = "${locals.user.id}"` });
+      // Verify the OTP code
+      const otps = await locals.pb
+        .collection('_otps')
+        .getFullList({ filter: `id = "${otpId}" && recordRef = "${locals.user.id}"` });
 
-			if (otps.length === 0) {
-				return fail(400, { message: m['auth.invalid_otp']() });
-			}
+      if (otps.length === 0) {
+        return fail(400, { message: m['auth.invalid_otp']() });
+      }
 
-			// Authenticate with OTP to verify the code
-			await locals.pb.collection('users').authWithOTP(otpId, code);
+      // Authenticate with OTP to verify the code
+      await locals.pb.collection('users').authWithOTP(otpId, code);
 
-			// Create MFA record
-			await locals.pb.collection('_mfas').create({
-				collectionRef: 'users',
-				recordRef: locals.user.id,
-				method: 'otp'
-			});
+      // Create MFA record
+      await locals.pb.collection('_mfas').create({
+        collectionRef: 'users',
+        recordRef: locals.user.id,
+        method: 'otp',
+      });
 
-			return {
-				twoFactorEnabled: true,
-				success: true
-			};
-		} catch (err: any) {
-			locals.logger
-				.withContext({
-					route: url.pathname,
-					userId: locals.pb?.authStore?.record?.id,
-					requestId: locals.requestId
-				})
-				.withMetadata(err)
-				.error('2FA verification error:');
-			return fail(400, { message: err?.message || m['auth.invalid_code']() });
-		}
-	},
+      return {
+        twoFactorEnabled: true,
+        success: true,
+      };
+    } catch (err: any) {
+      locals.logger
+        .withContext({
+          route: url.pathname,
+          userId: locals.pb?.authStore?.record?.id,
+          requestId: locals.requestId,
+        })
+        .withMetadata(err)
+        .error('2FA verification error:');
+      return fail(400, { message: err?.message || m['auth.invalid_code']() });
+    }
+  },
 
-	disableTwoFactor: async ({ locals, url }) => {
-		if (!locals.user) {
-			return fail(401, { message: m['auth.unauthorized']() });
-		}
+  disableTwoFactor: async ({ locals, url }) => {
+    if (!locals.user) {
+      return fail(401, { message: m['auth.unauthorized']() });
+    }
 
-		try {
-			// Get all MFA records for this user
-			const mfas = await locals.pb
-				.collection('_mfas')
-				.getFullList({ filter: `recordRef = "${locals.user.id}"` });
+    try {
+      // Get all MFA records for this user
+      const mfas = await locals.pb.collection('_mfas').getFullList({ filter: `recordRef = "${locals.user.id}"` });
 
-			// Delete all MFA records
-			for (const mfa of mfas) {
-				await locals.pb.collection('_mfas').delete(mfa.id);
-			}
+      // Delete all MFA records
+      for (const mfa of mfas) {
+        await locals.pb.collection('_mfas').delete(mfa.id);
+      }
 
-			return {
-				twoFactorEnabled: false,
-				success: true
-			};
-		} catch (err: any) {
-			locals.logger
-				.withContext({
-					route: url.pathname,
-					userId: locals.pb?.authStore?.record?.id,
-					requestId: locals.requestId
-				})
-				.withMetadata(err)
-				.error('2FA disable error:');
-			return fail(400, { message: err?.message || m['account.error_message']() });
-		}
-	}
+      return {
+        twoFactorEnabled: false,
+        success: true,
+      };
+    } catch (err: any) {
+      locals.logger
+        .withContext({
+          route: url.pathname,
+          userId: locals.pb?.authStore?.record?.id,
+          requestId: locals.requestId,
+        })
+        .withMetadata(err)
+        .error('2FA disable error:');
+      return fail(400, { message: err?.message || m['account.error_message']() });
+    }
+  },
 };

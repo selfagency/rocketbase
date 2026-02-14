@@ -1,16 +1,22 @@
 {
-	"plugins": ["prettier-plugin-svelte", "prettier-plugin-tailwindcss", "@prettier/plugin-oxc"],
-	"useTabs": true,
-	"singleQuote": true,
-	"trailingComma": "none",
-	"printWidth": 100,
-	"tailwindStylesheet": "./src/app.css",
-	"overrides": [
-		{
-			"files": "*.svelte",
-			"options": {
-				"parser": "svelte"
-			}
-		}
-	]
+  "plugins": ["prettier-plugin-svelte", "prettier-plugin-tailwindcss", "@prettier/plugin-oxc"],
+  "arrowParens": "avoid",
+  "bracketSpacing": true,
+  "jsxBracketSameLine": true,
+  "printWidth": 120,
+  "proseWrap": "preserve",
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "useTabs": false,
+  "tailwindStylesheet": "./src/app.css",
+  "overrides": [
+    {
+      "files": "*.svelte",
+      "options": {
+        "parser": "svelte"
+      }
+    }
+  ]
 }

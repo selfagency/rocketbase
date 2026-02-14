@@ -12,20 +12,20 @@ const __dirname = dirname(__filename);
 config({ path: resolve(__dirname, '.env'), quiet: true });
 
 export default defineConfig({
-	webServer: process.env.CI
-		? undefined
-		: {
-				command: 'pnpm run test:setup',
-				url: 'http://localhost:3000',
-				timeout: 180000,
-				reuseExistingServer: !process.env.CI
-			},
-	testDir: 'src/tests/e2e',
-	use: {
-		baseURL: 'http://localhost:3000'
-	},
-	globalTeardown: './util/global-teardown.ts',
-	// Disable HTML report in CI/local e2e runs to avoid starting the server that serves
-	// the report during automated runs. Use 'line' for concise console output.
-	reporter: [['line']]
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: 'pnpm run test:setup',
+        url: 'http://localhost:3000',
+        timeout: 180000,
+        reuseExistingServer: !process.env.CI,
+      },
+  testDir: 'src/tests/e2e',
+  use: {
+    baseURL: 'http://localhost:3000',
+  },
+  globalTeardown: './util/global-teardown.ts',
+  // Disable HTML report in CI/local e2e runs to avoid starting the server that serves
+  // the report during automated runs. Use 'line' for concise console output.
+  reporter: [['line']],
 });

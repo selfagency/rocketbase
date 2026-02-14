@@ -9,28 +9,28 @@ import { snake } from 'radashi';
  * - Hyphenates spaces
  */
 export function generateSlug(title: string): string {
-	if (!title) return '';
+  if (!title) return '';
 
-	// Split into words
-	const words = title
-		.toLowerCase()
-		// Normalize special characters (é -> e, ñ -> n, etc.)
-		.normalize('NFD')
-		.replace(/[\u0300-\u036f]/g, '')
-		// Remove or replace special characters
-		.replace(/[^\w\s-]/g, '')
-		// Split into words
-		.split(/\s+/)
-		.filter(Boolean);
+  // Split into words
+  const words = title
+    .toLowerCase()
+    // Normalize special characters (é -> e, ñ -> n, etc.)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    // Remove or replace special characters
+    .replace(/[^\w\s-]/g, '')
+    // Split into words
+    .split(/\s+/)
+    .filter(Boolean);
 
-	// Remove stop words
-	const wordsWithoutStopwords = removeStopwords(words);
+  // Remove stop words
+  const wordsWithoutStopwords = removeStopwords(words);
 
-	// If all words were stop words, keep the original words
-	const finalWords = wordsWithoutStopwords.length > 0 ? wordsWithoutStopwords : words;
+  // If all words were stop words, keep the original words
+  const finalWords = wordsWithoutStopwords.length > 0 ? wordsWithoutStopwords : words;
 
-	// Join with snake case (hyphenated)
-	const slug = snake(finalWords.join(' '));
+  // Join with snake case (hyphenated)
+  const slug = snake(finalWords.join(' '));
 
-	return slug;
+  return slug;
 }

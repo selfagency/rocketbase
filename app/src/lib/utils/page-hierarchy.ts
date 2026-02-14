@@ -5,11 +5,11 @@
 import type { PagesResponseWithAuthor } from '$lib/types/pocketbase-expanded';
 
 export type PageWithChildren = PagesResponseWithAuthor & {
-	children: PageWithChildren[];
+  children: PageWithChildren[];
 };
 
 export type PageWithDepth = PagesResponseWithAuthor & {
-	depth: number;
+  depth: number;
 };
 
 /**
@@ -18,25 +18,25 @@ export type PageWithDepth = PagesResponseWithAuthor & {
  * @returns Array of root pages with nested children
  */
 export function buildPageHierarchy(pages: PagesResponseWithAuthor[]): PageWithChildren[] {
-	const pageMap = new Map<string, PageWithChildren>();
-	const rootPages: PageWithChildren[] = [];
+  const pageMap = new Map<string, PageWithChildren>();
+  const rootPages: PageWithChildren[] = [];
 
-	// First pass: create map and add children array
-	for (const pageItem of pages) {
-		pageMap.set(pageItem.id, { ...pageItem, children: [] } as PageWithChildren);
-	}
+  // First pass: create map and add children array
+  for (const pageItem of pages) {
+    pageMap.set(pageItem.id, { ...pageItem, children: [] } as PageWithChildren);
+  }
 
-	// Second pass: build tree structure
-	for (const pageItem of pages) {
-		const page = pageMap.get(pageItem.id)!;
-		if (pageItem.parent && pageMap.has(pageItem.parent)) {
-			pageMap.get(pageItem.parent)!.children.push(page);
-		} else {
-			rootPages.push(page);
-		}
-	}
+  // Second pass: build tree structure
+  for (const pageItem of pages) {
+    const page = pageMap.get(pageItem.id)!;
+    if (pageItem.parent && pageMap.has(pageItem.parent)) {
+      pageMap.get(pageItem.parent)!.children.push(page);
+    } else {
+      rootPages.push(page);
+    }
+  }
 
-	return rootPages;
+  return rootPages;
 }
 
 /**
@@ -47,26 +47,26 @@ export function buildPageHierarchy(pages: PagesResponseWithAuthor[]): PageWithCh
  * @returns Flat array of pages with depth property
  */
 export function flattenPageHierarchy(pages: PageWithChildren[], depth = 0): PageWithDepth[] {
-	const flat: PageWithDepth[] = [];
+  const flat: PageWithDepth[] = [];
 
-	for (const page of pages) {
-		const { children, ...pageData } = page;
+  for (const page of pages) {
+    const { children, ...pageData } = page;
 
-		// Add page with depth information
-		flat.push({
-			...pageData,
-			depth
-		} as PageWithDepth);
+    // Add page with depth information
+    flat.push({
+      ...pageData,
+      depth,
+    } as PageWithDepth);
 
-		if (children.length > 0) {
-			// Sort children by order field
-			children.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
-			// Recursively flatten children with increased depth
-			flat.push(...flattenPageHierarchy(children, depth + 1));
-		}
-	}
+    if (children.length > 0) {
+      // Sort children by order field
+      children.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+      // Recursively flatten children with increased depth
+      flat.push(...flattenPageHierarchy(children, depth + 1));
+    }
+  }
 
-	return flat;
+  return flat;
 }
 
 /**
@@ -75,6 +75,6 @@ export function flattenPageHierarchy(pages: PageWithChildren[], depth = 0): Page
  * @returns Flat array of pages with depth property, in hierarchical display order
  */
 export function buildAndFlattenPageHierarchy(pages: PagesResponseWithAuthor[]): PageWithDepth[] {
-	const hierarchy = buildPageHierarchy(pages);
-	return flattenPageHierarchy(hierarchy);
+  const hierarchy = buildPageHierarchy(pages);
+  return flattenPageHierarchy(hierarchy);
 }

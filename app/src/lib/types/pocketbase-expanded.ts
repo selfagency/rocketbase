@@ -6,26 +6,19 @@
  * afterSend hook.
  */
 
-import type {
-	PagesResponse,
-	PostsResponse,
-	TagsRecord,
-	TagsResponse,
-	UsersRecord,
-	UsersResponse
-} from './pocketbase';
+import type { PagesResponse, PostsResponse, TagsRecord, TagsResponse, UsersRecord, UsersResponse } from './pocketbase';
 
 /**
  * Augmented Pages type with author expanded and flattened
  */
 export type PagesResponseWithAuthor = Omit<PagesResponse, 'author'> & {
-	author?: UsersRecord | UsersResponse;
+  author?: UsersRecord | UsersResponse;
 };
 
 /**
  * Augmented Posts type with author and tags expanded and flattened
  */
 export type PostsResponseWithExpanded = Omit<PostsResponse, 'author' | 'tags'> & {
-	author: (UsersRecord | UsersResponse)[];
-	tags: (TagsRecord | TagsResponse)[];
+  author: (UsersRecord | UsersResponse)[];
+  tags: (TagsRecord | TagsResponse)[];
 };

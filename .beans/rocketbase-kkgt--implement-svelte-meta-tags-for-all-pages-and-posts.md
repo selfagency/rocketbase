@@ -5,7 +5,7 @@ status: completed
 type: feature
 priority: normal
 created_at: 2026-02-14T04:19:27Z
-updated_at: 2026-02-14T04:27:19Z
+updated_at: 2026-02-14T04:33:39Z
 ---
 
 Add SEO meta tags using svelte-meta-tags library across all pages and posts in the application
@@ -56,3 +56,29 @@ Replaced `<svelte:head>` with `MetaTags` component in:
 - `app/src/routes/account/+page.svelte`
 - `app/src/lib/components/PageContent.svelte`
 - Test files: `page.svelte.spec.ts`, `account/page.svelte.spec.ts`, `login/page.svelte.spec.ts`, `register/page.svelte.spec.ts`
+
+
+
+## Additional Changes (Post-Completion)
+
+Added metadata population to ensure the metadata collection is populated with default values:
+
+### Files Added
+- **Migration**: `db/pb_migrations/1771043492_populate_default_metadata.js`
+  - Automatically populates metadata collection on PocketBase startup
+  - Creates default entries for: site_title, site_description, og_image, twitter_site, twitter_handle
+  - Safe to run multiple times (checks for existing entries before inserting)
+  
+- **Utility Script**: `db/util/populate-metadata.js`
+  - Manual utility to populate metadata if needed
+  - Can be run with: `node db/util/populate-metadata.js`
+
+### Default Metadata Values
+The migration creates these default metadata entries:
+- `site_title`: "Rocketbase"
+- `site_description`: "A production-ready full-stack application built with PocketBase and SvelteKit"
+- `og_image`: "" (empty, to be customized)
+- `twitter_site`: "" (empty, to be customized)
+- `twitter_handle`: "" (empty, to be customized)
+
+These values can be customized in the PocketBase admin panel at any time.

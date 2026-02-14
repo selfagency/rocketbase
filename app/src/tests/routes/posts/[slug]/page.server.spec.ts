@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { load } from '../../../../routes/posts/[slug]/+page.server';
 
 // Mock the messages module
@@ -64,7 +64,11 @@ describe('Individual Post Page Server Load', () => {
 
       mockPb.getFirstListItem.mockResolvedValue(mockPost);
 
-      const result: any = await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
+      const result: any = await load({
+        params: mockParams,
+        locals: mockLocals,
+        url: mockUrl,
+      } as any);
 
       expect(result.post).toEqual(mockPost);
       expect(mockPb.collection).toHaveBeenCalledWith('posts');
@@ -84,7 +88,11 @@ describe('Individual Post Page Server Load', () => {
 
       mockPb.getFirstListItem.mockResolvedValue(mockPost);
 
-      const result: any = await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
+      const result: any = await load({
+        params: mockParams,
+        locals: mockLocals,
+        url: mockUrl,
+      } as any);
 
       expect(result.post.slug).toBe('another-post-slug');
       expect(mockPb.getFirstListItem).toHaveBeenCalledWith('slug = "another-post-slug"', expect.any(Object));
@@ -143,7 +151,7 @@ describe('Individual Post Page Server Load', () => {
 
       try {
         await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
-      } catch (e) {
+      } catch {
         // Expected to throw
       }
 
@@ -168,7 +176,7 @@ describe('Individual Post Page Server Load', () => {
 
       try {
         await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
-      } catch (e) {
+      } catch {
         // Expected to throw
       }
 
@@ -185,7 +193,7 @@ describe('Individual Post Page Server Load', () => {
 
       try {
         await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
-      } catch (e) {
+      } catch {
         // Expected to throw
       }
 
@@ -199,7 +207,7 @@ describe('Individual Post Page Server Load', () => {
 
       try {
         await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
-      } catch (e) {
+      } catch {
         // Expected to throw
       }
 
@@ -215,7 +223,7 @@ describe('Individual Post Page Server Load', () => {
 
       try {
         await load({ params: mockParams, locals: mockLocals, url: mockUrl } as any);
-      } catch (e) {
+      } catch {
         // Expected to throw
       }
 

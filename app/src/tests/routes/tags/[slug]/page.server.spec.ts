@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { load } from '../../../../routes/tags/[slug]/+page.server';
 
 describe('Individual Tag Page Server Load', () => {
@@ -57,7 +57,11 @@ describe('Individual Tag Page Server Load', () => {
         if (name === 'posts') return postsCollection;
       });
 
-      const result: any = await load({ params: mockParams, url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({
+        params: mockParams,
+        url: mockUrl,
+        locals: mockLocals,
+      } as any);
 
       expect(result.tag).toEqual(mockTag);
       expect(result.posts).toEqual(mockPosts.items);
@@ -105,7 +109,11 @@ describe('Individual Tag Page Server Load', () => {
         if (name === 'posts') return postsCollection;
       });
 
-      const result: any = await load({ params: mockParams, url: mockUrl, locals: mockLocals } as any);
+      const result: any = await load({
+        params: mockParams,
+        url: mockUrl,
+        locals: mockLocals,
+      } as any);
 
       expect(postsCollection.getList).toHaveBeenCalledWith(2, 20, expect.any(Object));
       expect(result.pagination.page).toBe(2);
@@ -209,7 +217,7 @@ describe('Individual Tag Page Server Load', () => {
 
       try {
         await load({ params: mockParams, url: mockUrl, locals: mockLocals } as any);
-      } catch (e) {
+      } catch {
         // Expected to throw
       }
 

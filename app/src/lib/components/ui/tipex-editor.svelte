@@ -42,7 +42,7 @@
 
 <style>
   .tipex-wrapper {
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border);
     border-radius: 0.375rem;
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   }

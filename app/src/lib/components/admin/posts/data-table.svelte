@@ -190,7 +190,7 @@
     </div>
 
     <div class="overflow-hidden rounded-md border">
-      <Table.Root>
+      <Table.Root class="w-full table-fixed">
         <Table.Header>
           {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
             <Table.Row>

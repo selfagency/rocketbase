@@ -1,8 +1,4 @@
 import * as m from '$lib/paraglide/messages.js';
-import { fail, redirect } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms';
-import { zod4 } from 'sveltekit-superforms/adapters';
-import type { Actions, PageServerLoad } from './$types';
 import {
   mfaSchema,
   passwordSchema,
@@ -10,7 +6,11 @@ import {
   type MfaSchema,
   type PasswordSchema,
   type ProfileSchema,
-} from './schemas';
+} from '$lib/schemas/account.js';
+import { fail, redirect } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms';
+import { zod4 } from 'sveltekit-superforms/adapters';
+import type { Actions, PageServerLoad } from './$types';
 
 // Roles that require MFA per PocketBase collection config
 const MFA_REQUIRED_ROLES = ['admin', 'editor', 'contributor'];

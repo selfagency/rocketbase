@@ -1,15 +1,15 @@
 <script lang="ts">
   import { page } from '$app/state';
+  import MfaCard from '$lib/components/account/MfaCard.svelte';
+  import PasswordCard from '$lib/components/account/PasswordCard.svelte';
+  import ProfileCard from '$lib/components/account/ProfileCard.svelte';
   import * as m from '$lib/paraglide/messages.js';
+  import { mfaSchema, passwordSchema, profileSchema } from '$lib/schemas/account.js';
   import { toast } from '$lib/stores/toast';
   import { onMount } from 'svelte';
   import { MetaTags } from 'svelte-meta-tags';
   import { superForm } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
-  import MfaCard from './components/MfaCard.svelte';
-  import PasswordCard from './components/PasswordCard.svelte';
-  import ProfileCard from './components/ProfileCard.svelte';
-  import { mfaSchema, passwordSchema, profileSchema } from './schemas';
 
   const metaTags = {
     title: 'Account Settings',

@@ -32,9 +32,7 @@
 <MetaTags {...metaTags} />
 
 {#if pageData.custom_css}
-	<style>
-		{pageData.custom_css}
-	</style>
+	{@html `<style>${pageData.custom_css}</style>`}
 {/if}
 
 <div class="container mx-auto max-w-4xl px-4 py-8">

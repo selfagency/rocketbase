@@ -5,7 +5,7 @@ status: in-progress
 type: task
 priority: high
 created_at: 2026-02-13T22:51:45Z
-updated_at: 2026-02-14T07:45:53Z
+updated_at: 2026-02-14T07:51:12Z
 ---
 
 Ensure all components and functions have unit tests and are documented within the code with explanations of their purpose.
@@ -47,3 +47,13 @@ Ensure all components and functions have unit tests and are documented within th
 **Total Tests Now**: 203 passing (17 test files)
 **Coverage Now**: 48.35% (slight improvement from utility tests)
 **Files with 100% Coverage**: 13 files (feed, posts, tags, logout, utilities)
+
+
+
+### API Routes Completed (2026-02-14 - Third Commit)
+- **api/auth/confirm-verification** (13 tests) ✅ - email verification API endpoint
+- **api/files/[...path]** (14 tests) ✅ - PocketBase file proxy with header forwarding
+
+**Total Tests Now**: 230 passing (19 test files)
+**Coverage**: 48.35% (unchanged - API routes are simple proxies)
+**Files with 100% Coverage**: 15 files (feed, posts, tags, logout, utilities, API routes)

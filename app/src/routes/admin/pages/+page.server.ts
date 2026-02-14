@@ -21,6 +21,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
   // Handle trash filter separately
   if (status === 'trash') {
+    // Only show trashed items, ignore other filters for simplicity
     filters.push('in_trash = true');
   } else {
     // Exclude trashed items from all other views
@@ -31,10 +32,11 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     } else if (status === 'published') {
       filters.push('published = true');
     }
-  }
 
-  if (search) {
-    filters.push(`title ~ "${search}" || slug ~ "${search}"`);
+    // Only apply search filter when NOT viewing trash
+    if (search) {
+      filters.push(`title ~ "${search}" || slug ~ "${search}"`);
+    }
   }
 
   const filter = filters.length > 0 ? filters.join(' && ') : '';
@@ -43,7 +45,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const result = await locals.pb.collection('pages').getList<PagesResponseWithAuthor>(1, 500, {
     sort,
     filter,
-    fields: 'id,title,slug,parent,order,published,visible,attachments,created,updated',
+    fields: 'id,title,slug,parent,order,published,visible,attachments,created,updated,in_trash',
   });
 
   // Build and flatten hierarchical page structure

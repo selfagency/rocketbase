@@ -1,5 +1,6 @@
-import { pageSchema } from '$lib/schemas/page';
 import { env } from '$env/dynamic/private';
+import { pageSchema } from '$lib/schemas/page';
+import { mapPageSnapshotToUpdate } from '$lib/server/mappers/content-mapper';
 import { getRestoreSnapshot, getRevisionHistory } from '$lib/server/revision-history';
 import type { PagesResponse, UsersResponse } from '$lib/types/pocketbase';
 import type { AuditSnapshot } from '$lib/types/revision-history';
@@ -34,77 +35,6 @@ function ensureEditorAccess(user: UsersResponse | null) {
   if (user.role !== 'admin' && user.role !== 'editor') {
     error(403, 'Forbidden - Requires editor or admin role');
   }
-}
-
-function asString(value: unknown): string | undefined {
-  return typeof value === 'string' ? value : undefined;
-}
-
-function asBoolean(value: unknown): boolean | undefined {
-  return typeof value === 'boolean' ? value : undefined;
-}
-
-function asStringArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-
-  return value
-    .map(item => {
-      if (typeof item === 'string') return item;
-      if (item && typeof item === 'object' && 'id' in item) {
-        const id = (item as { id?: string }).id;
-        return id || '';
-      }
-
-      return '';
-    })
-    .filter(Boolean);
-}
-
-function asNumber(value: unknown): number | undefined {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
-  return Math.max(0, Math.floor(value));
-}
-
-function buildPageRestorePayload(snapshot: AuditSnapshot): Record<string, unknown> {
-  const payload: Record<string, unknown> = {};
-
-  const title = asString(snapshot.title);
-  if (title !== undefined) payload.title = title;
-
-  const slug = asString(snapshot.slug);
-  if (slug !== undefined) payload.slug = slug;
-
-  payload.summary = asString(snapshot.summary) ?? '';
-
-  payload.content = asString(snapshot.content) ?? '';
-
-  payload.collection = asString(snapshot.collection) ?? '';
-
-  payload.parent = asString(snapshot.parent) ?? '';
-
-  payload.custom_css = asString(snapshot.custom_css) ?? '';
-
-  const published = asBoolean(snapshot.published);
-  if (published !== undefined) payload.published = published;
-
-  const visible = asBoolean(snapshot.visible);
-  if (visible !== undefined) payload.visible = visible;
-
-  const requireLogin = asBoolean(snapshot.require_login);
-  if (requireLogin !== undefined) payload.require_login = requireLogin;
-
-  const subscriberOnly = asBoolean(snapshot.subscriber_only);
-  if (subscriberOnly !== undefined) payload.subscriber_only = subscriberOnly;
-
-  const inTrash = asBoolean(snapshot.in_trash);
-  if (inTrash !== undefined) payload.in_trash = inTrash;
-
-  const order = asNumber(snapshot.order);
-  if (order !== undefined) payload.order = order;
-
-  payload.attachments = asStringArray(snapshot.attachments) ?? [];
-
-  return payload;
 }
 
 export const load: PageServerLoad = async ({ locals, params }) => {
@@ -276,7 +206,7 @@ export const actions: Actions = {
         return fail(400, { error: 'No snapshot data found for the selected revision.' });
       }
 
-      const payload = buildPageRestorePayload(snapshot);
+      const payload = mapPageSnapshotToUpdate(snapshot);
 
       if (!payload.title || !payload.slug) {
         return fail(400, { error: 'Revision is missing required page fields and cannot be restored.' });

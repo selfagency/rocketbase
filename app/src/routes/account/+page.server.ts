@@ -7,6 +7,13 @@ import {
   type PasswordSchema,
   type ProfileSchema,
 } from '$lib/schemas/account';
+import {
+  disableTwoFactor,
+  requestTwoFactorOtp,
+  updateMfaOptIn,
+  verifyTwoFactorOtp,
+} from '$lib/server/services/mfa-service';
+import { updateUserProfile } from '$lib/server/services/profile-service';
 import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
@@ -74,25 +81,19 @@ export const actions: Actions = {
     }
 
     try {
-      const updateData: Record<string, any> = {
-        name: form.data.name,
-        email: form.data.email,
-        title: form.data.title || '',
-        bio: form.data.bio || '',
-        website: form.data.website || '',
-      };
-
-      // Handle avatar upload
       const avatarFile = formData.get('avatar') as File;
-      if (avatarFile && avatarFile.size > 0) {
-        updateData.avatar = avatarFile;
-      }
-
-      await locals.pb.collection('users').update(locals.user.id, updateData);
-
-      // Refresh user data
-      await locals.pb.collection('users').authRefresh();
-      locals.user = locals.pb.authStore.record as any;
+      locals.user = (await updateUserProfile(
+        locals.pb as any,
+        locals.user.id,
+        {
+          name: form.data.name,
+          email: form.data.email,
+          title: form.data.title,
+          bio: form.data.bio,
+          website: form.data.website,
+        },
+        avatarFile
+      )) as any;
 
       // Re-validate with the latest data from the database
       const updatedForm = await superValidate<ProfileSchema>(
@@ -150,12 +151,7 @@ export const actions: Actions = {
     }
 
     try {
-      await locals.pb.collection('users').update(locals.user.id, {
-        mfaOptIn: nextOptIn,
-      });
-
-      await locals.pb.collection('users').authRefresh();
-      locals.user = locals.pb.authStore.record as any;
+      locals.user = (await updateMfaOptIn(locals.pb as any, locals.user.id, nextOptIn)) as any;
 
       return {
         mfaForm: await superValidate<MfaSchema>({ mfaOptIn: nextOptIn }, zod4(mfaSchema), {
@@ -274,7 +270,7 @@ export const actions: Actions = {
       // oxlint-disable-next-line typescript/no-base-to-string
       const email = formData.get('email')?.toString() || locals.user.email;
 
-      const response = await locals.pb.collection('users').requestOTP(email);
+      const response = await requestTwoFactorOtp(locals.pb as any, email);
 
       return {
         otpId: response.otpId,
@@ -309,24 +305,10 @@ export const actions: Actions = {
         return fail(400, { message: m['auth.missing_otp']() });
       }
 
-      // Verify the OTP code
-      const otps = await locals.pb
-        .collection('_otps')
-        .getFullList({ filter: `id = "${otpId}" && recordRef = "${locals.user.id}"` });
-
-      if (otps.length === 0) {
+      const verified = await verifyTwoFactorOtp(locals.pb as any, locals.user.id, otpId, code);
+      if (!verified) {
         return fail(400, { message: m['auth.invalid_otp']() });
       }
-
-      // Authenticate with OTP to verify the code
-      await locals.pb.collection('users').authWithOTP(otpId, code);
-
-      // Create MFA record
-      await locals.pb.collection('_mfas').create({
-        collectionRef: 'users',
-        recordRef: locals.user.id,
-        method: 'otp',
-      });
 
       return {
         twoFactorEnabled: true,
@@ -351,13 +333,7 @@ export const actions: Actions = {
     }
 
     try {
-      // Get all MFA records for this user
-      const mfas = await locals.pb.collection('_mfas').getFullList({ filter: `recordRef = "${locals.user.id}"` });
-
-      // Delete all MFA records
-      for (const mfa of mfas) {
-        await locals.pb.collection('_mfas').delete(mfa.id);
-      }
+      await disableTwoFactor(locals.pb as any, locals.user.id);
 
       return {
         twoFactorEnabled: false,

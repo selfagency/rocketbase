@@ -7,6 +7,12 @@
   import { Input } from '$lib/components/ui/input';
   import * as Table from '$lib/components/ui/table';
   import * as Tooltip from '$lib/components/ui/tooltip';
+  import {
+    getResponsiveColumnVisibility,
+    getColumnCellClass as getSharedColumnCellClass,
+    getColumnWidthClass as getSharedColumnWidthClass,
+    getSortState,
+  } from '$lib/utils/admin/data-table-utils';
   import ArrowDownUpIcon from '@lucide/svelte/icons/arrow-down-up';
   import { type ColumnDef, type VisibilityState, getCoreRowModel } from '@tanstack/table-core';
   import { onMount } from 'svelte';
@@ -42,13 +48,11 @@
   let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 
   function syncColumnVisibility(width: number) {
-    const showExtendedColumns = width >= 1280;
-
-    columnVisibility = {
-      ...columnVisibility,
-      slug: showExtendedColumns,
-      summary: showExtendedColumns,
-    };
+    columnVisibility = getResponsiveColumnVisibility({
+      current: columnVisibility,
+      width,
+      breakpoint: 1280,
+    });
   }
 
   onMount(() => {
@@ -123,8 +127,10 @@
   }
 
   function isSortState(sortKey: string) {
-    const current = page.url.searchParams.get('sort') || '';
-    return { asc: current === sortKey, desc: current === `-${sortKey}` };
+    return getSortState({
+      currentSort: page.url.searchParams.get('sort') || '',
+      sortKey,
+    });
   }
 
   const columnWidthClasses: Record<string, string> = {
@@ -145,13 +151,15 @@
   };
 
   function getColumnWidthClass(columnId: string) {
-    return columnWidthClasses[columnId] ?? '';
+    return getSharedColumnWidthClass(columnWidthClasses, columnId);
   }
 
   function getColumnCellClass(columnId: string) {
-    const widthClass = getColumnWidthClass(columnId);
-    const behaviorClass = columnCellBehaviorClasses[columnId] ?? '';
-    return `${widthClass} ${behaviorClass}`.trim();
+    return getSharedColumnCellClass({
+      columnWidthClasses,
+      columnBehaviorClasses: columnCellBehaviorClasses,
+      columnId,
+    });
   }
 
   function onAuthorChange(value: string) {

@@ -1,25 +1,16 @@
 import { env } from '$env/dynamic/private';
+import {
+  buildMediaSearchFilter,
+  listAttachedMedia,
+  mapMediaItem,
+  parseAttachmentIds,
+  resolveAttachedIds,
+} from '$lib/server/repositories/media-repository';
+import { downloadPexelsImage, importPexelsMedia } from '$lib/server/services/pexels-service';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 type ScopeType = 'attached' | 'all';
 type EntityType = 'post' | 'page';
-
-type MediaItem = {
-  id: string;
-  url: string;
-  altText: string;
-  caption: string;
-  source: string;
-  sourceUrl: string;
-  created: string;
-  updated: string;
-  attribution?: {
-    photographer?: string;
-    photographerUrl?: string;
-    photoUrl?: string;
-    provider?: string;
-  };
-};
 
 function ensureEditorAccess(user: App.Locals['user']) {
   if (!user) {
@@ -29,97 +20,6 @@ function ensureEditorAccess(user: App.Locals['user']) {
   if (user.role !== 'admin' && user.role !== 'editor') {
     error(403, 'Forbidden - Requires editor or admin role');
   }
-}
-
-function parseAttachmentIds(raw: string | null): string[] {
-  if (!raw) return [];
-
-  return raw
-    .split(',')
-    .map(value => value.trim())
-    .filter(Boolean);
-}
-
-function escapeFilterValue(value: string): string {
-  return value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-}
-
-function safeJsonParse<T>(value: unknown, fallback: T): T {
-  if (typeof value !== 'string') return fallback;
-
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function mapMediaItem(pb: App.Locals['pb'], record: any): MediaItem {
-  const metadata = safeJsonParse<Record<string, string | undefined>>(record.metadata, {});
-
-  return {
-    id: record.id,
-    url: pb.files.getURL(record, record.file),
-    altText: record.alt_text || '',
-    caption: record.caption || '',
-    source: record.source || 'upload',
-    sourceUrl: record.source_url || '',
-    created: record.created,
-    updated: record.updated,
-    attribution:
-      metadata.photographer || metadata.photoUrl
-        ? {
-            photographer: metadata.photographer,
-            photographerUrl: metadata.photographerUrl,
-            photoUrl: metadata.photoUrl,
-            provider: metadata.provider,
-          }
-        : undefined,
-  };
-}
-
-function isAllowedPexelsHost(url: URL): boolean {
-  const host = url.hostname.toLowerCase();
-  return host === 'pexels.com' || host.endsWith('.pexels.com');
-}
-
-async function resolveAttachedIds(
-  locals: App.Locals,
-  entityType: EntityType | null,
-  entityId: string | null,
-  postedIds: string[]
-): Promise<string[]> {
-  const ids = [...postedIds];
-
-  if (!entityType || !entityId) {
-    return [...new Set(ids)];
-  }
-
-  const collectionName = entityType === 'post' ? 'posts' : 'pages';
-  const record = await locals.pb.collection(collectionName).getOne(entityId, { fields: 'attachments' });
-  const existing = Array.isArray(record.attachments) ? record.attachments : [];
-
-  for (const id of existing) {
-    if (id) ids.push(id);
-  }
-
-  return [...new Set(ids)];
-}
-
-async function listAttachedMedia(locals: App.Locals, ids: string[]): Promise<MediaItem[]> {
-  if (ids.length === 0) return [];
-
-  const records = await Promise.all(
-    ids.map(async id => {
-      try {
-        return await locals.pb.collection('media').getOne(id);
-      } catch {
-        return null;
-      }
-    })
-  );
-
-  return records.filter(Boolean).map(record => mapMediaItem(locals.pb, record));
 }
 
 async function searchPexels(request: Request): Promise<Response> {
@@ -217,15 +117,12 @@ export const GET: RequestHandler = async ({ locals, request }) => {
     const entityType = searchParams.get('entityType') as EntityType | null;
     const entityId = searchParams.get('entityId');
     const postedIds = parseAttachmentIds(searchParams.get('attachmentIds'));
-    const ids = await resolveAttachedIds(locals, entityType, entityId, postedIds);
-    const items = await listAttachedMedia(locals, ids);
+    const ids = await resolveAttachedIds(locals.pb as any, entityType, entityId, postedIds);
+    const items = await listAttachedMedia(locals.pb as any, ids);
     return json({ items });
   }
 
-  const escaped = escapeFilterValue(query);
-  const filter = query
-    ? `alt_text~"${escaped}" || caption~"${escaped}" || source~"${escaped}" || source_url~"${escaped}"`
-    : '';
+  const filter = buildMediaSearchFilter(query);
 
   const list = await locals.pb.collection('media').getList(page, perPage, {
     sort: '-created',
@@ -258,48 +155,25 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       return json({ error: 'Missing required Pexels import fields.' }, { status: 400 });
     }
 
-    let parsedSource: URL;
+    let imageFile: File;
     try {
-      parsedSource = new URL(sourceUrl);
-    } catch {
-      return json({ error: 'Invalid source URL.' }, { status: 400 });
+      imageFile = await downloadPexelsImage(sourceUrl);
+    } catch (downloadError) {
+      const message = downloadError instanceof Error ? downloadError.message : 'Invalid source URL.';
+      const status = message === 'Unable to download image from Pexels.' ? 502 : 400;
+      return json({ error: message }, { status });
     }
 
-    if (!isAllowedPexelsHost(parsedSource)) {
-      return json({ error: 'Only Pexels image hosts are allowed.' }, { status: 400 });
-    }
+    const record = await importPexelsMedia(locals.pb as any, imageFile, {
+      sourceUrl,
+      photoUrl,
+      photographer,
+      photographerUrl,
+      altText,
+      uploadedBy: locals.user?.id,
+    });
 
-    const imageResponse = await fetch(parsedSource);
-    if (!imageResponse.ok) {
-      return json({ error: 'Unable to download image from Pexels.' }, { status: 502 });
-    }
-
-    const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
-    const extension = mimeType.split('/')[1]?.split(';')[0] || 'jpg';
-    const imageBytes = await imageResponse.arrayBuffer();
-    const imageFile = new File([imageBytes], `pexels-${Date.now()}.${extension}`, { type: mimeType });
-
-    const createFormData = new FormData();
-    createFormData.append('file', imageFile);
-    createFormData.append('source', 'pexels');
-    createFormData.append('source_url', photoUrl);
-    createFormData.append('alt_text', altText || `Photo by ${photographer} on Pexels`);
-    createFormData.append(
-      'metadata',
-      JSON.stringify({
-        provider: 'Pexels',
-        photographer,
-        photographerUrl,
-        photoUrl,
-      })
-    );
-
-    if (locals.user?.id) {
-      createFormData.append('uploaded_by', locals.user.id);
-    }
-
-    const record = await locals.pb.collection('media').create(createFormData);
-    return json({ media: mapMediaItem(locals.pb, record) });
+    return json({ media: mapMediaItem(locals.pb as any, record) });
   }
 
   const file = formData.get('file');

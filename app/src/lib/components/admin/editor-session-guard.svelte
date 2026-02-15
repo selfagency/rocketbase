@@ -1,7 +1,9 @@
 <script lang="ts">
   import { env } from '$env/dynamic/public';
-  import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
-  import { Button } from '$lib/components/ui/button';
+  import EditorActiveWarningAlert from '$lib/components/admin/editor-active-warning-alert.svelte';
+  import EditorRecordChangedAlert from '$lib/components/admin/editor-record-changed-alert.svelte';
+  import EditorRecoveryAlert from '$lib/components/admin/editor-recovery-alert.svelte';
+  import { serializeSnapshot } from '$lib/utils/snapshot-serializer';
   import { createEventDispatcher, onMount } from 'svelte';
 
   type ActiveEditor = {
@@ -56,43 +58,6 @@
   let syncStartedAt = 0;
   let syncClearTimer: ReturnType<typeof setTimeout> | null = null;
   const MIN_SYNC_VISIBLE_MS = 900;
-
-  function serializeSnapshot(snapshot: unknown): string {
-    const seen = new WeakSet<object>();
-
-    return JSON.stringify(snapshot, (_key, value) => {
-      if (value instanceof Date) {
-        return value.toISOString();
-      }
-
-      if (typeof File !== 'undefined' && value instanceof File) {
-        return {
-          __type: 'file',
-          name: value.name,
-          size: value.size,
-          type: value.type,
-          lastModified: value.lastModified,
-        };
-      }
-
-      if (typeof Blob !== 'undefined' && value instanceof Blob) {
-        return {
-          __type: 'blob',
-          size: value.size,
-          type: value.type,
-        };
-      }
-
-      if (typeof value === 'object' && value !== null) {
-        if (seen.has(value)) {
-          return '[Circular]';
-        }
-        seen.add(value);
-      }
-
-      return value;
-    });
-  }
 
   function hasRecoverableChanges(snapshot: unknown): boolean {
     if (snapshot == null) return false;
@@ -350,57 +315,19 @@
 
 <div class="space-y-3" aria-live="polite">
   {#if recoverableSnapshot}
-    <Alert class="border-amber-400/60 bg-amber-50/80 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
-      <AlertTitle>Recovered unsaved draft available</AlertTitle>
-      <AlertDescription>
-        {#if snapshotTimestamp}
-          We found unsaved work from {formatDate(snapshotTimestamp)}.
-        {:else}
-          We found unsaved work from a previous session.
-        {/if}
-        <div class="mt-2 flex flex-wrap gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            class="border-amber-500/60 bg-amber-100/80 text-amber-950 hover:bg-amber-200 dark:border-amber-300/40 dark:bg-amber-900/50 dark:text-amber-100"
-            onclick={restoreDraft}
-          >
-            Restore draft
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            class="text-amber-900 hover:bg-amber-100 dark:text-amber-100 dark:hover:bg-amber-900/30"
-            onclick={dismissRecoveryNotice}
-          >
-            Dismiss
-          </Button>
-        </div>
-      </AlertDescription>
-    </Alert>
+    <EditorRecoveryAlert
+      snapshotTimestamp={snapshotTimestamp ? formatDate(snapshotTimestamp) : null}
+      onRestore={restoreDraft}
+      onDismiss={dismissRecoveryNotice}
+    />
   {/if}
 
   {#if activeEditorCount > 0}
-    <Alert class="border-blue-400/60 bg-blue-50/80 text-blue-900 dark:bg-blue-950/40 dark:text-blue-100">
-      <AlertTitle>Another editor is active</AlertTitle>
-      <AlertDescription>
-        {activeEditorCount === 1
-          ? 'Someone else is actively editing this record right now.'
-          : `${activeEditorCount} other editors are currently active on this record.`}
-      </AlertDescription>
-    </Alert>
+    <EditorActiveWarningAlert {activeEditorCount} />
   {/if}
 
   {#if recordChangedSinceStart}
-    <Alert variant="destructive">
-      <AlertTitle>This record changed while you were editing</AlertTitle>
-      <AlertDescription>
-        Another update was detected {recordChangedAt ? `at ${formatDate(recordChangedAt)}` : 'in a parallel session'}.
-        Review carefully before saving to avoid overwriting someone else's changes.
-      </AlertDescription>
-    </Alert>
+    <EditorRecordChangedAlert recordChangedAt={recordChangedAt ? formatDate(recordChangedAt) : null} />
   {/if}
 
   {#if warningMessage}

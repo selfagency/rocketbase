@@ -1,50 +1,11 @@
 <script lang="ts">
-  import PexelsLogo from '$lib/assets/pexels_logo.svg?component';
-  import { Badge } from '$lib/components/ui/badge';
+  import TipexMediaLibraryTabs from '$lib/components/ui/tipex-media-library-tabs.svelte';
+  import TipexMediaManagePanel from '$lib/components/ui/tipex-media-manage-panel.svelte';
+  import type { EntityType, PexelsPhoto, TipexMediaItem } from '$lib/components/ui/tipex-media-modal.types';
   import { Button } from '$lib/components/ui/button';
   import * as Dialog from '$lib/components/ui/dialog';
-  import { Input } from '$lib/components/ui/input';
-  import { Label } from '$lib/components/ui/label';
-  import * as ScrollArea from '$lib/components/ui/scroll-area';
-  import Spinner from '$lib/components/ui/spinner/spinner.svelte';
-  import * as Tabs from '$lib/components/ui/tabs';
-  import { Textarea } from '$lib/components/ui/textarea';
   import { getStandardImageUrl, STANDARD_IMAGE_SIZE_PRESETS, type StandardImageSizeKey } from '$lib/utils/image-sizes';
-
-  type EntityType = 'post' | 'page';
-
-  export type TipexMediaItem = {
-    id: string;
-    url: string;
-    altText: string;
-    caption: string;
-    source: string;
-    sourceUrl: string;
-    created: string;
-    updated: string;
-    attribution?: {
-      photographer?: string;
-      photographerUrl?: string;
-      photoUrl?: string;
-      provider?: string;
-    };
-  };
-
-  type PexelsPhoto = {
-    id: number;
-    alt: string;
-    width: number;
-    height: number;
-    src: {
-      tiny: string;
-      medium: string;
-      large: string;
-      original: string;
-    };
-    photoUrl: string;
-    photographer: string;
-    photographerUrl: string;
-  };
+  export type { TipexMediaItem };
 
   let {
     open = $bindable(false),
@@ -414,283 +375,52 @@
     </Dialog.Header>
 
     {#if editingMedia}
-      <section class="space-y-4 p-4 sm:p-6">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <h3 class="text-sm font-semibold">Manage media</h3>
-          <Button type="button" variant="outline" onclick={() => (editingMedia = null)}>Back to library</Button>
-        </div>
-
-        {#if errorMessage}
-          <p class="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {errorMessage}
-          </p>
-        {/if}
-
-        {#if successMessage}
-          <p
-            class="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300"
-          >
-            {successMessage}
-          </p>
-        {/if}
-
-        <div class="grid gap-4 md:grid-cols-[1fr_1.2fr]">
-          <img
-            src={editingMedia.url}
-            alt={editingMedia.altText || 'Media preview'}
-            class="h-72 w-full rounded-md border object-cover"
-          />
-
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <Label for="media-alt-text">Alt text</Label>
-              <Input id="media-alt-text" bind:value={editAltText} placeholder="Describe this image" />
-            </div>
-
-            <div class="space-y-2">
-              <Label for="media-caption">Caption</Label>
-              <Textarea id="media-caption" bind:value={editCaption} rows={4} placeholder="Optional caption" />
-            </div>
-
-            <p class="text-xs text-muted-foreground">Uploaded {formatDate(editingMedia.created)}</p>
-
-            <div class="flex flex-wrap gap-2">
-              <Button type="button" onclick={saveManagedMedia}>Save</Button>
-              <Button type="button" variant="destructive" onclick={deleteManagedMedia}>Delete</Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TipexMediaManagePanel
+        media={editingMedia}
+        bind:editAltText
+        bind:editCaption
+        {errorMessage}
+        {successMessage}
+        {formatDate}
+        onBack={() => (editingMedia = null)}
+        onSave={saveManagedMedia}
+        onDelete={deleteManagedMedia}
+      />
     {:else}
-      <section class="space-y-3 p-4 sm:p-6">
-        {#if errorMessage}
-          <p class="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {errorMessage}
-          </p>
-        {/if}
-
-        {#if successMessage}
-          <p
-            class="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300"
-          >
-            {successMessage}
-          </p>
-        {/if}
-
-        <Tabs.Root bind:value={activeTab} class="space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/20 px-3 py-2">
-            <p class="text-xs text-muted-foreground">Choose image size to insert into the editor.</p>
-            <div class="flex items-center gap-2">
-              <Label for="insert-size" class="text-xs">Insert size</Label>
-              <select
-                id="insert-size"
-                bind:value={selectedInsertSize}
-                class="flex h-8 rounded-md border border-input bg-background px-2 text-xs"
-              >
-                {#each STANDARD_IMAGE_SIZE_PRESETS as preset (preset.key)}
-                  <option value={preset.key}>{preset.label}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-
-          <Tabs.List class={`grid w-full ${pexelsEnabled ? 'grid-cols-3' : 'grid-cols-2'}`}>
-            <Tabs.Trigger value="attached">This entry</Tabs.Trigger>
-            <Tabs.Trigger value="all">All media</Tabs.Trigger>
-            {#if pexelsEnabled}
-              <Tabs.Trigger value="pexels">Pexels</Tabs.Trigger>
-            {/if}
-          </Tabs.List>
-
-          <Tabs.Content value="attached" class="space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-muted/30 px-3 py-2">
-              <div class="space-y-1">
-                <p class="text-sm font-medium">Upload media</p>
-                <p class="text-xs text-muted-foreground">
-                  Images are uploaded to your media library and linked to this entry.
-                </p>
-              </div>
-              <div class="flex items-center gap-2">
-                <Label for="upload-media-input" class="sr-only">Upload media file</Label>
-                <Input
-                  id="upload-media-input"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  oninput={onUploadInputChange}
-                  class="max-w-[16rem]"
-                />
-              </div>
-            </div>
-
-            {#if uploadInProgress}
-              <div class="space-y-2 rounded-md border px-3 py-2">
-                <p class="text-xs text-muted-foreground">Uploading... {uploadPercent}%</p>
-                <progress value={uploadPercent} max="100" class="h-2 w-full" aria-label="Upload progress"></progress>
-              </div>
-            {/if}
-
-            <ScrollArea.Root class="h-[52vh] rounded-md border p-3">
-              {#if loadingAttached}
-                <div class="flex h-full items-center justify-center">
-                  <Spinner class="size-5" />
-                </div>
-              {:else if attachedItems.length === 0}
-                <p class="text-sm text-muted-foreground">No media linked yet. Upload an image to get started.</p>
-              {:else}
-                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {#each attachedItems as item (item.id)}
-                    <article class="space-y-2 rounded-md border p-2">
-                      <img
-                        src={item.url}
-                        alt={item.altText || 'Media preview'}
-                        class="h-40 w-full rounded-sm object-cover"
-                      />
-                      <div class="space-y-1">
-                        <div class="flex items-center justify-between gap-2">
-                          <Badge variant="outline">{item.source || 'upload'}</Badge>
-                          <span class="text-xs text-muted-foreground">{formatDate(item.updated)}</span>
-                        </div>
-                        <p class="line-clamp-2 text-xs text-muted-foreground">
-                          {item.caption || item.altText || 'No description yet.'}
-                        </p>
-                      </div>
-                      <div class="flex gap-2">
-                        <Button type="button" size="sm" variant="outline" onclick={() => beginManage(item)}
-                          >Manage</Button
-                        >
-                        <Button type="button" size="sm" onclick={() => insertMedia(item)}>Insert</Button>
-                      </div>
-                    </article>
-                  {/each}
-                </div>
-              {/if}
-            </ScrollArea.Root>
-          </Tabs.Content>
-
-          <Tabs.Content value="all" class="space-y-4">
-            <form
-              class="flex flex-col gap-2 sm:flex-row"
-              onsubmit={event => {
-                event.preventDefault();
-                void loadAllItems();
-              }}
-            >
-              <Label for="all-media-search" class="sr-only">Search all media</Label>
-              <Input id="all-media-search" bind:value={allQuery} placeholder="Search by alt text, caption, source" />
-              <Button type="submit" variant="outline">Search</Button>
-            </form>
-
-            <ScrollArea.Root class="h-[58vh] rounded-md border p-3">
-              {#if loadingAll}
-                <div class="flex h-full items-center justify-center">
-                  <Spinner class="size-5" />
-                </div>
-              {:else if allItems.length === 0}
-                <p class="text-sm text-muted-foreground">No media found.</p>
-              {:else}
-                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {#each allItems as item (item.id)}
-                    <article class="space-y-2 rounded-md border p-2">
-                      <img
-                        src={item.url}
-                        alt={item.altText || 'Media preview'}
-                        class="h-40 w-full rounded-sm object-cover"
-                      />
-                      <div class="space-y-1">
-                        <div class="flex items-center justify-between gap-2">
-                          <Badge variant="outline">{item.source || 'upload'}</Badge>
-                          {#if currentAttachments().includes(item.id)}
-                            <Badge>Linked</Badge>
-                          {/if}
-                        </div>
-                        <p class="line-clamp-2 text-xs text-muted-foreground">
-                          {item.caption || item.altText || 'No description yet.'}
-                        </p>
-                      </div>
-                      <div class="flex gap-2">
-                        <Button type="button" size="sm" variant="outline" onclick={() => beginManage(item)}
-                          >Manage</Button
-                        >
-                        <Button type="button" size="sm" onclick={() => insertMedia(item)}>Insert</Button>
-                      </div>
-                    </article>
-                  {/each}
-                </div>
-              {/if}
-            </ScrollArea.Root>
-          </Tabs.Content>
-
-          {#if pexelsEnabled}
-            <Tabs.Content value="pexels" class="space-y-4">
-              <div class="flex items-center gap-2 rounded-md border bg-muted/20 px-3 py-2">
-                <PexelsLogo role="img" aria-label="Pexels logo" class="h-5 w-auto" />
-                <p class="text-xs text-muted-foreground">
-                  Imported images include attribution metadata. Please keep credit links where possible.
-                </p>
-              </div>
-
-              <form
-                class="flex flex-col gap-2 sm:flex-row"
-                onsubmit={event => {
-                  event.preventDefault();
-                  void searchPexels();
-                }}
-              >
-                <Label for="pexels-search" class="sr-only">Search Pexels</Label>
-                <Input id="pexels-search" bind:value={pexelsQuery} placeholder="Search Pexels photos" />
-                <Button type="submit" variant="outline">Search Pexels</Button>
-              </form>
-
-              <ScrollArea.Root class="h-[56vh] rounded-md border p-3">
-                {#if loadingPexels}
-                  <div class="flex h-full items-center justify-center">
-                    <Spinner class="size-5" />
-                  </div>
-                {:else if pexelsItems.length === 0}
-                  <p class="text-sm text-muted-foreground">Search to browse photos from Pexels.</p>
-                {:else}
-                  <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {#each pexelsItems as item (item.id)}
-                      <article class="space-y-2 rounded-md border p-2">
-                        <img
-                          src={item.src.medium}
-                          alt={item.alt || `Photo by ${item.photographer}`}
-                          class="h-40 w-full rounded-sm object-cover"
-                        />
-                        <p class="line-clamp-2 text-xs text-muted-foreground">Photo by {item.photographer} on Pexels</p>
-                        <div class="flex gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            onclick={() => importPexels(item)}
-                            disabled={importInProgressId === item.id}
-                          >
-                            {#if importInProgressId === item.id}
-                              <Spinner class="size-4" />
-                            {/if}
-                            Import &amp; Insert
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            href={item.photoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            View
-                          </Button>
-                        </div>
-                      </article>
-                    {/each}
-                  </div>
-                {/if}
-              </ScrollArea.Root>
-            </Tabs.Content>
-          {/if}
-        </Tabs.Root>
-      </section>
+      <TipexMediaLibraryTabs
+        bind:activeTab
+        bind:selectedInsertSize
+        bind:allQuery
+        bind:pexelsQuery
+        {pexelsEnabled}
+        {errorMessage}
+        {successMessage}
+        {uploadInProgress}
+        {uploadPercent}
+        {loadingAttached}
+        {loadingAll}
+        {loadingPexels}
+        {importInProgressId}
+        {attachedItems}
+        {allItems}
+        {pexelsItems}
+        attachmentIds={currentAttachments()}
+        {formatDate}
+        onUploadInputChange={event => {
+          void onUploadInputChange(event);
+        }}
+        onSearchAll={() => {
+          void loadAllItems();
+        }}
+        onSearchPexels={() => {
+          void searchPexels();
+        }}
+        onManage={beginManage}
+        onInsert={insertMedia}
+        onImportPexels={item => {
+          void importPexels(item);
+        }}
+      />
     {/if}
   </Dialog.Content>
 </Dialog.Root>

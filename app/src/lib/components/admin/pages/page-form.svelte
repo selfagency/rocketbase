@@ -11,6 +11,12 @@
   import { toast } from '$lib/stores/toast';
   import type { PagesResponse } from '$lib/types/pocketbase';
   import type { RevisionHistoryEntry } from '$lib/types/revision-history';
+  import {
+    captureAdminFormSnapshot,
+    getDraftFormId,
+    getDraftSlug,
+    restoreAdminFormSnapshot,
+  } from '$lib/utils/admin/form-snapshot-utils';
   import { generateSlug as createSlug } from '$lib/utils/slug-utils';
   import { createEventDispatcher } from 'svelte';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
@@ -71,59 +77,15 @@
 
   const { form: formData, enhance } = form;
 
-  type SnapshotPayload = {
-    formData: Infer<PageSchema>;
-  };
-
-  function sanitizeSnapshotValue<T>(input: T): T {
-    const seen = new WeakSet<object>();
-
-    return JSON.parse(
-      JSON.stringify(input, (_key, value) => {
-        if (value instanceof Date) {
-          return value.toISOString();
-        }
-
-        if (typeof File !== 'undefined' && value instanceof File) {
-          return undefined;
-        }
-
-        if (typeof Blob !== 'undefined' && value instanceof Blob) {
-          return undefined;
-        }
-
-        if (typeof value === 'object' && value !== null) {
-          if (seen.has(value)) return undefined;
-          seen.add(value);
-        }
-
-        return value;
-      })
-    ) as T;
-  }
-
   export function captureFormSnapshot() {
-    const safeFormData = sanitizeSnapshotValue($formData) as Infer<PageSchema>;
-
-    return {
-      formData: {
-        ...safeFormData,
-        content: safeFormData.content ?? '',
-      },
-    } satisfies SnapshotPayload;
+    return captureAdminFormSnapshot($formData as Infer<PageSchema>);
   }
 
   export function restoreFormSnapshot(snapshot: unknown) {
-    if (!snapshot || typeof snapshot !== 'object') return;
+    const restored = restoreAdminFormSnapshot<Infer<PageSchema>>(snapshot);
+    if (!restored) return;
 
-    const payload = snapshot as Partial<SnapshotPayload>;
-    if (!payload.formData || typeof payload.formData !== 'object') return;
-
-    const restored = sanitizeSnapshotValue(payload.formData) as Infer<PageSchema>;
-    Object.assign($formData, restored, {
-      content: restored.content ?? '',
-      attachments: Array.isArray(restored.attachments) ? restored.attachments : [],
-    });
+    Object.assign($formData, restored);
   }
 
   // Generate slug from title using stopword removal and snake case
@@ -133,34 +95,23 @@
     }
   }
 
-  function getDraftSlug(): string {
-    const explicitSlug = ($formData.slug ?? '').trim();
-    if (explicitSlug) {
-      return createSlug(explicitSlug) || 'untitled-page';
-    }
-
-    const titleSlug = createSlug(($formData.title ?? '').trim());
-    return titleSlug || 'untitled-page';
-  }
-
-  function getDraftFormId(): string {
-    if (isEdit && pageId) {
-      return `admin-page-edit-${pageId}`;
-    }
-
-    if (typeof data.form.id === 'string' && data.form.id.trim()) {
-      return data.form.id;
-    }
-
-    return 'admin-page-create';
-  }
-
   $effect(() => {
     if (isEdit) return;
 
     dispatch('draftIdentityChanged', {
-      formId: getDraftFormId(),
-      slug: getDraftSlug(),
+      formId: getDraftFormId({
+        isEdit,
+        recordId: pageId,
+        editPrefix: 'admin-page-edit-',
+        existingFormId: data.form.id,
+        createId: 'admin-page-create',
+      }),
+      slug: getDraftSlug({
+        slug: $formData.slug,
+        title: $formData.title,
+        fallback: 'untitled-page',
+        slugify: createSlug,
+      }),
     });
   });
 </script>

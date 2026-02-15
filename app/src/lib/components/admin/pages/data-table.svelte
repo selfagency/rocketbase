@@ -8,6 +8,11 @@
   import * as Table from '$lib/components/ui/table';
   import * as Tooltip from '$lib/components/ui/tooltip';
   import * as m from '$lib/paraglide/messages';
+  import {
+    getResponsiveColumnVisibility,
+    getColumnWidthClass as getSharedColumnWidthClass,
+    getSortState,
+  } from '$lib/utils/admin/data-table-utils';
   import ArrowDown01Icon from '@lucide/svelte/icons/arrow-down-0-1';
   import ArrowDown10Icon from '@lucide/svelte/icons/arrow-down-1-0';
   import ArrowDownUpIcon from '@lucide/svelte/icons/arrow-down-up';
@@ -35,13 +40,11 @@
   let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 
   function syncColumnVisibility(width: number) {
-    const showExtendedColumns = width >= 1024;
-
-    columnVisibility = {
-      ...columnVisibility,
-      slug: showExtendedColumns,
-      summary: showExtendedColumns,
-    };
+    columnVisibility = getResponsiveColumnVisibility({
+      current: columnVisibility,
+      width,
+      breakpoint: 1024,
+    });
   }
 
   onMount(() => {
@@ -181,13 +184,11 @@
   }
 
   function isSortState(sortKey: string) {
-    const current = page.url.searchParams.get('sort') || '';
-
-    if (!current && sortKey === 'order') {
-      return { asc: true, desc: false };
-    }
-
-    return { asc: current === sortKey, desc: current === `-${sortKey}` };
+    return getSortState({
+      currentSort: page.url.searchParams.get('sort') || '',
+      sortKey,
+      defaultAscSortKey: 'order',
+    });
   }
 
   const columnWidthClasses: Record<string, string> = {
@@ -203,7 +204,7 @@
   };
 
   function getColumnWidthClass(columnId: string) {
-    return columnWidthClasses[columnId] ?? '';
+    return getSharedColumnWidthClass(columnWidthClasses, columnId);
   }
 
   // Watch for status changes

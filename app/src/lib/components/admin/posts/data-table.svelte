@@ -7,11 +7,8 @@
   import { Input } from '$lib/components/ui/input';
   import * as Table from '$lib/components/ui/table';
   import * as Tooltip from '$lib/components/ui/tooltip';
-  import ArrowDown01Icon from '@lucide/svelte/icons/arrow-down-0-1';
-  import ArrowDown10Icon from '@lucide/svelte/icons/arrow-down-1-0';
   import ArrowDownUpIcon from '@lucide/svelte/icons/arrow-down-up';
   import { type ColumnDef, getCoreRowModel } from '@tanstack/table-core';
-  import { fade } from 'svelte/transition';
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
@@ -95,6 +92,33 @@
     return { asc: current === sortKey, desc: current === `-${sortKey}` };
   }
 
+  const columnWidthClasses: Record<string, string> = {
+    image: 'w-16 min-w-16 max-w-16 pr-2',
+    title: 'min-w-72 max-w-[36rem]',
+    slug: 'min-w-7 max-w-10',
+    summary: 'min-w-24 max-w-32',
+    author: 'min-w-9 max-w-12',
+    published: 'w-28 min-w-28 max-w-28',
+    date: 'w-24 min-w-24 max-w-28 whitespace-nowrap',
+    updated: 'w-28 min-w-28 max-w-36 whitespace-nowrap',
+    actions: 'w-12 min-w-12 max-w-12 pr-2 pl-1 text-right whitespace-nowrap',
+  };
+
+  const columnCellBehaviorClasses: Record<string, string> = {
+    title: 'whitespace-normal wrap-break-word align-middle',
+    author: 'whitespace-normal wrap-break-word align-middle',
+  };
+
+  function getColumnWidthClass(columnId: string) {
+    return columnWidthClasses[columnId] ?? '';
+  }
+
+  function getColumnCellClass(columnId: string) {
+    const widthClass = getColumnWidthClass(columnId);
+    const behaviorClass = columnCellBehaviorClasses[columnId] ?? '';
+    return `${widthClass} ${behaviorClass}`.trim();
+  }
+
   function onAuthorChange(value: string) {
     authorValue = value;
     const params = new URLSearchParams(page.url.searchParams);
@@ -133,9 +157,9 @@
       />
 
       <div class="flex items-center gap-2">
-        <label for="author-filter" class="text-sm font-medium">Author</label>
         <select
           id="author-filter"
+          aria-label="Filter by author"
           value={authorValue}
           onchange={e => onAuthorChange(e.currentTarget.value)}
           class="flex h-10 min-w-48 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -147,7 +171,7 @@
         </select>
       </div>
 
-      <ButtonGroup.Root class="rounded-lg border bg-white">
+      <ButtonGroup.Root class="rounded-lg border bg-white [&_button]:font-normal">
         <Button
           variant={statusValue === 'all' ? 'default' : 'ghost'}
           size="sm"
@@ -195,39 +219,21 @@
           {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
             <Table.Row>
               {#each headerGroup.headers as header (header.id)}
-                <Table.Head>
+                <Table.Head class={`${getColumnWidthClass(header.column.id)} text-xs`}>
                   {#if !header.isPlaceholder}
                     {#if (header.column.columnDef as any)?.meta?.sortKey}
                       <button
-                        class="flex items-center gap-2 transition-colors hover:text-foreground"
+                        class="flex items-center gap-2 text-xs transition-colors hover:text-foreground"
                         onclick={() => navigateToSort((header.column.columnDef as any).meta.sortKey)}
                       >
                         <FlexRender content={header.column.columnDef.header} context={header.getContext()} />
-                        {#if (header.column.columnDef as any).meta.sortKey === 'date'}
-                          {@const sortState = isSortState((header.column.columnDef as any).meta.sortKey)}
-                          <div class="relative h-4 w-4">
-                            {#if sortState.desc}
-                              <span class="absolute inset-0" transition:fade={{ duration: 150 }}>
-                                <ArrowDown10Icon class="h-4 w-4 text-foreground" aria-hidden="true" />
-                              </span>
-                            {:else}
-                              <span class="absolute inset-0" transition:fade={{ duration: 150 }}>
-                                <ArrowDown01Icon
-                                  class="h-4 w-4 {sortState.asc ? 'text-foreground' : 'text-muted-foreground'}"
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            {/if}
-                          </div>
-                        {:else}
-                          <ArrowDownUpIcon
-                            class="h-4 w-4 {isSortState((header.column.columnDef as any).meta.sortKey).asc ||
-                            isSortState((header.column.columnDef as any).meta.sortKey).desc
-                              ? 'text-foreground'
-                              : 'text-muted-foreground'}"
-                            aria-hidden="true"
-                          />
-                        {/if}
+                        <ArrowDownUpIcon
+                          class="h-3.5 w-3.5 {isSortState((header.column.columnDef as any).meta.sortKey).asc ||
+                          isSortState((header.column.columnDef as any).meta.sortKey).desc
+                            ? 'text-foreground'
+                            : 'text-muted-foreground'}"
+                          aria-hidden="true"
+                        />
                       </button>
                     {:else}
                       <FlexRender content={header.column.columnDef.header} context={header.getContext()} />
@@ -242,7 +248,7 @@
           {#each table.getRowModel().rows as row (row.id)}
             <Table.Row>
               {#each row.getVisibleCells() as cell (cell.id)}
-                <Table.Cell>
+                <Table.Cell class={getColumnCellClass(cell.column.id)}>
                   <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
                 </Table.Cell>
               {/each}

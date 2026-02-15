@@ -2,10 +2,9 @@
   import { enhance } from '$app/forms';
   import * as AlertDialog from '$lib/components/ui/alert-dialog';
   import { Button } from '$lib/components/ui/button';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import * as Tooltip from '$lib/components/ui/tooltip';
+  import * as Popover from '$lib/components/ui/popover';
   import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
-  import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
+  import EllipsisVerticalIcon from '@lucide/svelte/icons/ellipsis-vertical';
   import PencilIcon from '@lucide/svelte/icons/pencil';
   import TrashIcon from '@lucide/svelte/icons/trash';
   import Undo2Icon from '@lucide/svelte/icons/undo-2';
@@ -17,6 +16,7 @@
   let undeleteFormElement: HTMLFormElement | undefined = $state();
   let isDeleting = $state(false);
   let isRestoring = $state(false);
+  let actionsOpen = $state(false);
   let showDeleteDialog = $state(false);
   let showRestoreDialog = $state(false);
 
@@ -40,127 +40,82 @@
     showRestoreDialog = false;
     undeleteFormElement?.requestSubmit();
   }
+
+  function openDeleteDialog() {
+    actionsOpen = false;
+    showDeleteDialog = true;
+  }
+
+  function openRestoreDialog() {
+    actionsOpen = false;
+    showRestoreDialog = true;
+  }
 </script>
 
-<!-- Inline buttons for medium+ screens -->
-<div class="hidden items-center gap-1 md:flex">
-  <Tooltip.Root>
-    <Tooltip.Trigger>
-      {#snippet child({ props })}
-        <Button
-          {...props}
-          variant="ghost"
-          size="icon"
-          class="relative size-8 p-0"
-          onclick={handlePreview}
-          disabled={!post.slug}
-          aria-label="Preview post"
-        >
-          <ViewIcon class="size-4" />
-        </Button>
-      {/snippet}
-    </Tooltip.Trigger>
-    <Tooltip.Content>Preview post</Tooltip.Content>
-  </Tooltip.Root>
-
-  <Tooltip.Root>
-    <Tooltip.Trigger>
-      {#snippet child({ props })}
-        <Button
-          {...props}
-          variant="ghost"
-          size="icon"
-          class="relative size-8 p-0"
-          onclick={handleEdit}
-          aria-label="Edit post"
-        >
-          <PencilIcon class="size-4" />
-        </Button>
-      {/snippet}
-    </Tooltip.Trigger>
-    <Tooltip.Content>Edit post</Tooltip.Content>
-  </Tooltip.Root>
-
-  {#if post.in_trash}
-    <Tooltip.Root>
-      <Tooltip.Trigger>
-        {#snippet child({ props })}
-          <Button
-            {...props}
-            variant="ghost"
-            size="icon"
-            class="relative size-8 p-0 text-primary hover:text-primary"
-            onclick={() => (showRestoreDialog = true)}
-            disabled={isRestoring}
-            aria-label="Restore post"
-          >
-            <Undo2Icon class="size-4" />
-          </Button>
-        {/snippet}
-      </Tooltip.Trigger>
-      <Tooltip.Content>Restore post</Tooltip.Content>
-    </Tooltip.Root>
-  {:else}
-    <Tooltip.Root>
-      <Tooltip.Trigger>
-        {#snippet child({ props })}
-          <Button
-            {...props}
-            variant="ghost"
-            size="icon"
-            class="relative size-8 p-0 text-destructive hover:text-destructive"
-            onclick={() => (showDeleteDialog = true)}
-            disabled={isDeleting}
-            aria-label="Delete post"
-          >
-            <TrashIcon class="size-4" />
-          </Button>
-        {/snippet}
-      </Tooltip.Trigger>
-      <Tooltip.Content>Delete post</Tooltip.Content>
-    </Tooltip.Root>
-  {/if}
-</div>
-
-<!-- Dropdown menu for small screens -->
-<div class="md:hidden">
-  <DropdownMenu.Root>
-    <DropdownMenu.Trigger>
-      {#snippet child(props)}
-        <Button variant="ghost" size="icon" class="size-8 p-0" {...props}>
-          <EllipsisIcon class="size-4" />
-          <span class="sr-only">Actions</span>
-        </Button>
-      {/snippet}
-    </DropdownMenu.Trigger>
-    <DropdownMenu.Content align="end">
-      <DropdownMenu.Item onclick={handlePreview} disabled={!post.slug}>
+<Popover.Root bind:open={actionsOpen}>
+  <Popover.Trigger>
+    {#snippet child({ props })}
+      <Button variant="ghost" size="icon" class="size-8 p-0" {...props} aria-label="Post actions">
+        <EllipsisVerticalIcon class="size-4" />
+        <span class="sr-only">Post actions</span>
+      </Button>
+    {/snippet}
+  </Popover.Trigger>
+  <Popover.Content class="w-40 p-2" align="end" sideOffset={6}>
+    <div class="flex flex-col gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        class="w-full justify-start"
+        onclick={() => {
+          actionsOpen = false;
+          handlePreview();
+        }}
+        disabled={!post.slug}
+      >
         <ViewIcon class="mr-2 size-4" />
         Preview
-      </DropdownMenu.Item>
-      <DropdownMenu.Item onclick={handleEdit}>
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        class="w-full justify-start"
+        onclick={() => {
+          actionsOpen = false;
+          handleEdit();
+        }}
+      >
         <PencilIcon class="mr-2 size-4" />
         Edit
-      </DropdownMenu.Item>
-      <DropdownMenu.Separator />
+      </Button>
+
       {#if post.in_trash}
-        <DropdownMenu.Item onclick={() => (showRestoreDialog = true)} disabled={isRestoring}>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="w-full justify-start text-primary hover:text-primary"
+          onclick={openRestoreDialog}
+          disabled={isRestoring}
+        >
           <Undo2Icon class="mr-2 size-4" />
           Restore
-        </DropdownMenu.Item>
+        </Button>
       {:else}
-        <DropdownMenu.Item
-          onclick={() => (showDeleteDialog = true)}
+        <Button
+          variant="ghost"
+          size="sm"
+          class="w-full justify-start text-destructive hover:text-destructive"
+          onclick={openDeleteDialog}
           disabled={isDeleting}
-          class="text-destructive focus:text-destructive"
         >
           <TrashIcon class="mr-2 size-4" />
           Delete
-        </DropdownMenu.Item>
+        </Button>
       {/if}
-    </DropdownMenu.Content>
-  </DropdownMenu.Root>
-</div>
+    </div>
+  </Popover.Content>
+</Popover.Root>
 
 <AlertDialog.Root bind:open={showDeleteDialog}>
   <AlertDialog.Content>

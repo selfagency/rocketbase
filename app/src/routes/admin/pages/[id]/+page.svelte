@@ -1,9 +1,20 @@
 <script lang="ts">
+  import EditorSessionGuard from '$lib/components/admin/editor-session-guard.svelte';
   import PageForm from '$lib/components/admin/pages/page-form.svelte';
   import { MetaTags } from 'svelte-meta-tags';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
+  let pageFormRef = $state<any>(null);
+
+  export const snapshot = {
+    capture: () => pageFormRef?.captureFormSnapshot() ?? null,
+    restore: (snapshotState: unknown) => pageFormRef?.restoreFormSnapshot(snapshotState),
+  };
+
+  function restoreDraftSnapshot(event: CustomEvent<{ snapshot: unknown }>) {
+    pageFormRef?.restoreFormSnapshot(event.detail.snapshot);
+  }
 </script>
 
 <MetaTags title={`Edit Page: ${data.page.title} | Admin`} robots="noindex, nofollow" />
@@ -14,7 +25,17 @@
     <p class="mt-2 text-muted-foreground">Update "{data.page.title || 'Untitled'}"</p>
   </div>
 
+  <EditorSessionGuard
+    collectionId="pages"
+    recordId={data.page.id}
+    recordUpdatedAt={data.page.updated}
+    userId={data.user?.id ?? ''}
+    getSnapshot={() => pageFormRef?.captureFormSnapshot?.() ?? null}
+    on:restoreDraft={restoreDraftSnapshot}
+  />
+
   <PageForm
+    bind:this={pageFormRef}
     {data}
     isEdit={true}
     parentSlug={data.parentSlug}

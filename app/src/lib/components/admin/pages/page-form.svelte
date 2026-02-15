@@ -22,7 +22,7 @@
     pageId,
     availableParents = [],
   }: {
-    data: { form: SuperValidated<Infer<PageSchema>>; revisions?: RevisionHistoryEntry[] };
+    data: { form: SuperValidated<Infer<PageSchema>>; revisions?: RevisionHistoryEntry[]; pexelsEnabled?: boolean };
     isEdit?: boolean;
     parentSlug?: string | null;
     pageId?: string;
@@ -39,6 +39,7 @@
 
   // svelte-ignore state_referenced_locally
   const form = superForm(data.form, {
+    id: isEdit && pageId ? `admin-page-edit-${pageId}` : 'admin-page-create',
     validators: zod4Client(pageSchema),
     resetForm: false,
     onResult: ({ result }) => {
@@ -50,7 +51,34 @@
     },
   });
 
-  const { form: formData, enhance } = form;
+  const { form: formData, enhance, capture, restore } = form;
+
+  export function captureFormSnapshot() {
+    return {
+      superform: capture(),
+      content: $formData.content ?? '',
+    };
+  }
+
+  export function restoreFormSnapshot(
+    snapshot: ReturnType<typeof capture> | { superform?: unknown; content?: string }
+  ) {
+    if (snapshot && typeof snapshot === 'object' && 'superform' in snapshot) {
+      const payload = snapshot as { superform?: ReturnType<typeof capture>; content?: string };
+
+      if (payload.superform) {
+        restore(payload.superform);
+      }
+
+      if (typeof payload.content === 'string') {
+        $formData.content = payload.content;
+      }
+
+      return;
+    }
+
+    restore(snapshot as ReturnType<typeof capture>);
+  }
 
   // Generate slug from title using stopword removal and snake case
   function generateSlug() {
@@ -137,12 +165,25 @@
       <Form.Control>
         {#snippet children({ props })}
           <Form.Label>Content</Form.Label>
-          <TipexEditor bind:value={$formData.content} placeholder="Write your page content here..." />
+          <TipexEditor
+            bind:value={$formData.content}
+            bind:attachments={$formData.attachments}
+            entityType="page"
+            entityId={pageId}
+            pexelsEnabled={Boolean(data.pexelsEnabled)}
+            placeholder="Write your page content here..."
+          />
         {/snippet}
       </Form.Control>
       <Form.Description>Full page content (rich text editor)</Form.Description>
       <Form.FieldErrors />
     </Form.Field>
+
+    {#if $formData.attachments?.length}
+      {#each $formData.attachments as attachmentId (attachmentId)}
+        <input type="hidden" name="attachments" value={attachmentId} />
+      {/each}
+    {/if}
 
     <!-- Collection -->
     <Form.Field {form} name="collection">

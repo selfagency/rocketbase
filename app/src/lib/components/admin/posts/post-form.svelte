@@ -19,6 +19,7 @@
     form: SuperValidated<Infer<PostSchema>>;
     authors: { id: string; name: string }[];
     tags: { id: string; name: string }[];
+    pexelsEnabled?: boolean;
     revisions?: RevisionHistoryEntry[];
     post?: {
       id: string;
@@ -48,6 +49,7 @@
 
   // svelte-ignore state_referenced_locally
   const form = superForm(data.form, {
+    id: isEdit && postId ? `admin-post-edit-${postId}` : 'admin-post-create',
     validators: zod4Client(postSchema),
     resetForm: false,
     onResult: ({ result }) => {
@@ -59,7 +61,34 @@
     },
   });
 
-  const { form: formData, enhance } = form;
+  const { form: formData, enhance, capture, restore } = form;
+
+  export function captureFormSnapshot() {
+    return {
+      superform: capture(),
+      content: $formData.content ?? '',
+    };
+  }
+
+  export function restoreFormSnapshot(
+    snapshot: ReturnType<typeof capture> | { superform?: unknown; content?: string }
+  ) {
+    if (snapshot && typeof snapshot === 'object' && 'superform' in snapshot) {
+      const payload = snapshot as { superform?: ReturnType<typeof capture>; content?: string };
+
+      if (payload.superform) {
+        restore(payload.superform);
+      }
+
+      if (typeof payload.content === 'string') {
+        $formData.content = payload.content;
+      }
+
+      return;
+    }
+
+    restore(snapshot as ReturnType<typeof capture>);
+  }
 
   const authorOptions = $derived<MultiSelectOption[]>(
     data.authors.map(author => ({
@@ -125,12 +154,25 @@
       <Form.Control>
         {#snippet children({ props })}
           <Form.Label>Content</Form.Label>
-          <TipexEditor bind:value={$formData.content} placeholder="Write your post content here..." />
+          <TipexEditor
+            bind:value={$formData.content}
+            bind:attachments={$formData.attachments}
+            entityType="post"
+            entityId={data.post?.id}
+            pexelsEnabled={Boolean(data.pexelsEnabled)}
+            placeholder="Write your post content here..."
+          />
         {/snippet}
       </Form.Control>
       <Form.Description>Full post content (rich text editor)</Form.Description>
       <Form.FieldErrors />
     </Form.Field>
+
+    {#if $formData.attachments?.length}
+      {#each $formData.attachments as attachmentId (attachmentId)}
+        <input type="hidden" name="attachments" value={attachmentId} />
+      {/each}
+    {/if}
 
     <Form.Field {form} name="date">
       <Form.Control>

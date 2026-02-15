@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-12T20:11:21Z
-updated_at: 2026-02-13T16:04:23Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-iaak
 ---
 
 Imported from issues.jsonl (rocketbase-2ah). Owner: daniel@self.agency. Created by Daniel Sieradski 2026-02-11T00:42:33.147234-05:00.

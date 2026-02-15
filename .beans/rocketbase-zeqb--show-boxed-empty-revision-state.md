@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-15T02:28:22Z
-updated_at: 2026-02-15T02:30:03Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-90wn
 ---
 
 Keep revision history box visible even with zero revisions and center the empty-state message inside the box.

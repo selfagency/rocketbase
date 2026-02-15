@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T22:28:15Z
-updated_at: 2026-02-14T22:31:41Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-90wn
 ---
 
 Replace textarea with Tipex rich text editor for content bodies in page and post forms. Package is already installed.

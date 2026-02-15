@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T21:35:36Z
-updated_at: 2026-02-14T21:35:52Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-jl6x
 ---
 
 Adjust /admin/posts column order so Publish Date is directly next to Updated.

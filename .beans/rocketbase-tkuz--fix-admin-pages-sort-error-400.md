@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: high
 created_at: 2026-02-14T02:25:33Z
-updated_at: 2026-02-14T02:31:49Z
+updated_at: 2026-02-15T08:19:48Z
+parent: rocketbase-alnr
 ---
 
 The admin/pages view is throwing a 400 error when trying to sort:

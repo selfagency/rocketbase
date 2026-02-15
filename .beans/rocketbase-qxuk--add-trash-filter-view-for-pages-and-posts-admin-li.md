@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: normal
 created_at: 2026-02-14T21:11:20Z
-updated_at: 2026-02-14T22:50:06Z
+updated_at: 2026-02-15T08:24:17Z
+parent: rocketbase-alnr
 ---
 
 Add a trash filter tab/view alongside All/Drafts/Published in /admin/pages and /admin/posts for records marked in_trash=true.

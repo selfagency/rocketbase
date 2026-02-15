@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-15T02:36:52Z
-updated_at: 2026-02-15T02:54:13Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-90wn
 ---
 
 Adjust multi-select UX/behavior to closely match provided reference component; improve chips-in-trigger layout, controls, and interactions in post form.

@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: high
 created_at: 2026-02-13T22:51:50Z
-updated_at: 2026-02-14T06:02:37Z
+updated_at: 2026-02-15T08:20:03Z
+parent: rocketbase-inji
 ---
 
 Add permanent links to post headers for better sharing and linking.

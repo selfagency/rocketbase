@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T05:06:49Z
-updated_at: 2026-02-14T05:50:44Z
+updated_at: 2026-02-15T08:22:51Z
+parent: rocketbase-jl6x
 ---
 
 ## Description

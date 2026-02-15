@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T00:17:16Z
-updated_at: 2026-02-15T00:18:49Z
+updated_at: 2026-02-15T08:23:08Z
+parent: rocketbase-alnr
 ---
 
 Make admin/pages list thumbnails render at the same size as admin/posts list thumbnails.

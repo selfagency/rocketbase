@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T00:01:13Z
-updated_at: 2026-02-15T00:02:31Z
+updated_at: 2026-02-15T08:21:37Z
+parent: rocketbase-alnr
 ---
 
 ## Problem\nChanging  doesn't visibly affect truncation because text cells are forced into non-wrapping/truncate behavior.\n\n## Checklist\n- [x] Verify nowrap/truncate constraints in posts table\n- [x] Allow wrapping/clamped text for selected posts columns\n- [x] Validate diagnostics

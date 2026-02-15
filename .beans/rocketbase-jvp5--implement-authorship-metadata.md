@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: high
 created_at: 2026-02-13T22:51:51Z
-updated_at: 2026-02-14T06:10:17Z
+updated_at: 2026-02-15T08:20:11Z
+parent: rocketbase-inji
 ---
 
 Add authorship metadata following https://authorship.rocks/ standards.

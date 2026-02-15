@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T22:08:54Z
-updated_at: 2026-02-14T22:09:16Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-iaak
 ---
 
 Restrict drag interaction in admin pages index to the handle button area and show a four-arrow move icon while dragging.

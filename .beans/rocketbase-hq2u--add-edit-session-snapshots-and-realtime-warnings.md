@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: normal
 created_at: 2026-02-15T05:04:05Z
-updated_at: 2026-02-15T05:06:24Z
+updated_at: 2026-02-15T08:24:06Z
+parent: rocketbase-90wn
 ---
 
 Implement snapshots-backed autosave/recovery for admin post/page editors, plus realtime active-editor and record-changed warnings using a web worker and PocketBase subscriptions.

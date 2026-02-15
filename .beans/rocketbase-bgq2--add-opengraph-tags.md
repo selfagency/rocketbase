@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: high
 created_at: 2026-02-13T22:51:53Z
-updated_at: 2026-02-14T05:59:56Z
+updated_at: 2026-02-15T08:19:59Z
+parent: rocketbase-inji
 ---
 
 Implement OpenGraph meta tags for better social media sharing. See: https://ogp.me/

@@ -5,7 +5,8 @@ status: todo
 type: feature
 priority: normal
 created_at: 2026-02-14T02:15:00Z
-updated_at: 2026-02-14T02:15:00Z
+updated_at: 2026-02-15T08:06:34Z
+parent: rocketbase-3s0i
 ---
 
 Create an admin interface for managing URL redirects. This should be accessible only to admins and added to the admin dropdown menu.

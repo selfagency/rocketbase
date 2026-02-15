@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T20:46:20Z
-updated_at: 2026-02-14T20:47:34Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-iaak
 ---
 
 Display admin page order using hierarchical labels (e.g., parent order-child index like 3-1 for subpages) instead of flat sequence for nested pages.

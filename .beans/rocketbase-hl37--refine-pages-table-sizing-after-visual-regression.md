@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T22:17:22Z
-updated_at: 2026-02-14T22:17:57Z
+updated_at: 2026-02-15T08:23:12Z
+parent: rocketbase-alnr
 ---
 
 Replace aggressive percentage-based widths with balanced utility/content sizing for pages index table.

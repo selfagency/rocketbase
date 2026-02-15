@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: normal
 created_at: 2026-02-13T23:52:29Z
-updated_at: 2026-02-14T02:08:01Z
+updated_at: 2026-02-15T08:34:31Z
+parent: rocketbase-3s0i
 ---
 
 Implement server-side redirect handling that queries the PocketBase redirects collection and performs redirects before the catch-all [...slug] route is reached.

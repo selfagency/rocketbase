@@ -1,8 +1,12 @@
 ---
-title: "Integrate Webmentions for posts"
-type: task
+# rocketbase-ndx4
+title: Integrate Webmentions for posts
 status: todo
+type: task
 priority: normal
+created_at: 2026-02-13T22:56:00Z
+updated_at: 2026-02-15T08:05:55Z
+parent: rocketbase-inji
 ---
 
 Summary

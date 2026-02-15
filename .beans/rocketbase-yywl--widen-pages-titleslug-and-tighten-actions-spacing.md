@@ -3,8 +3,10 @@
 title: Widen pages title/slug and tighten actions spacing
 status: completed
 type: task
+priority: normal
 created_at: 2026-02-14T21:57:48Z
-updated_at: 2026-02-14T22:00:30Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-iaak
 ---
 
 On admin pages index, give title and slug columns more room and remove excess whitespace around actions.

@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T04:38:24Z
-updated_at: 2026-02-14T04:52:46Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-jl6x
 ---
 
 Create a utility script that generates 25 realistic blog posts using the falso library and inserts them into PocketBase posts collection

@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T00:11:37Z
-updated_at: 2026-02-15T01:45:33Z
+updated_at: 2026-02-15T08:23:28Z
+parent: rocketbase-alnr
 ---
 
 ## Problem\nPosts index needs a wider title minimum, tighter slug/authors, slightly wider status, and a compact working actions control using vertical dots + popover.\n\n## Checklist\n- [x] Rebalance posts table width classes\n- [x] Replace dropdown actions with vertical-dots popover buttons\n- [x] Ensure actions UI works and fits within column\n- [x] Validate with diagnostics\n\n## Summary of Changes\n- Updated :\n  -  widened (, larger max)\n  -  narrowed\n  -  narrowed\n  -  slightly widened\n  -  tightened to compact trigger width\n- Updated :\n  - Replaced  with \n  - Switched trigger icon to vertical ellipsis ()\n  - Popover content now uses direct action buttons (Preview/Edit/Delete or Restore)\n  - Added controlled popover open state to close menu when action is selected\n\nValidation:\n- undefined

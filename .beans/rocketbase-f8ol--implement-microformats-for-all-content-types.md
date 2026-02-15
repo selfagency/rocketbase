@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: high
 created_at: 2026-02-13T22:51:48Z
-updated_at: 2026-02-14T06:05:21Z
+updated_at: 2026-02-15T08:20:13Z
+parent: rocketbase-inji
 ---
 
 Add microformats support for all content types following IndieWeb standards. See: https://indieweb.org/microformats

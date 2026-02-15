@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T22:01:29Z
-updated_at: 2026-02-14T22:01:47Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-iaak
 ---
 
 Make title and slug columns slightly smaller and give summary a larger default width on admin pages index.

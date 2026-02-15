@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T18:28:10Z
-updated_at: 2026-02-14T19:31:53Z
+updated_at: 2026-02-15T08:23:41Z
+parent: rocketbase-3h6u
 ---
 
 Adjust app code and post utility script for schema changes where posts/pages now use media relation instead of inline uploads; account for new comments and portfolio collections.

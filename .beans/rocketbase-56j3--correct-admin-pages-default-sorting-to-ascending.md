@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T20:41:39Z
-updated_at: 2026-02-14T20:42:03Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-iaak
 ---
 
 Follow-up correction: admin pages table default should be page order ascending, not descending. Update server default sort and table default sort indicator state.

@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T22:11:21Z
-updated_at: 2026-02-14T22:12:05Z
+updated_at: 2026-02-15T08:23:17Z
+parent: rocketbase-alnr
 ---
 
 Re-add summary column in admin pages index after it was dropped by a later revert.

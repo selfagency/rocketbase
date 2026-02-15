@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T23:07:56Z
-updated_at: 2026-02-14T23:12:15Z
+updated_at: 2026-02-15T08:34:31Z
+parent: rocketbase-alnr
 ---
 
 Add AlertDialog components for delete and restore actions in pages and posts admin tables using shadcn-svelte

@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T06:19:50Z
-updated_at: 2026-02-15T07:17:48Z
+updated_at: 2026-02-15T08:23:49Z
+parent: rocketbase-90wn
 ---
 
 Prevent collisions when multiple new post/page windows are open by using a temporary fake slug until title/slug exists and combining it with superform form.id in EditorSessionGuard recordId.

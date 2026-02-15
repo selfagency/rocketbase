@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T23:51:03Z
-updated_at: 2026-02-14T23:53:27Z
+updated_at: 2026-02-15T08:22:14Z
+parent: rocketbase-alnr
 ---
 
 ## Problem\nColumn widths in admin data tables appear to be defined in multiple places, causing conflicting sizing behavior.\n\n## Checklist\n- [x] Identify all width definitions for admin pages/posts tables\n- [x] Consolidate width control to a single source of truth\n- [x] Verify pages and posts tables render with intended sizing\n- [x] Run app checks for affected files

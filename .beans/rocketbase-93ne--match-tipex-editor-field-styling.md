@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-15T05:07:57Z
-updated_at: 2026-02-15T05:13:44Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-90wn
 ---
 
 Make the Tipex editor container and focus states visually consistent with other admin form inputs (Input/Textarea) while preserving accessibility and toolbar behavior.

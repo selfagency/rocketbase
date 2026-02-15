@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: normal
 created_at: 2026-02-15T02:31:22Z
-updated_at: 2026-02-15T02:35:31Z
+updated_at: 2026-02-15T08:23:55Z
+parent: rocketbase-90wn
 ---
 
 Create a reusable Svelte multi-selector component following shadcn-svelte combobox/command/popover patterns and replace authors/tags multi-select in post form.

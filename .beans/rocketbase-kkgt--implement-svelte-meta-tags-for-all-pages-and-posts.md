@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: normal
 created_at: 2026-02-14T04:19:27Z
-updated_at: 2026-02-14T04:33:39Z
+updated_at: 2026-02-15T08:34:31Z
+parent: rocketbase-inji
 ---
 
 Add SEO meta tags using svelte-meta-tags library across all pages and posts in the application

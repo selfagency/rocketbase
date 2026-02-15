@@ -5,7 +5,8 @@ status: todo
 type: task
 priority: normal
 created_at: 2026-02-14T02:25:50Z
-updated_at: 2026-02-14T02:25:50Z
+updated_at: 2026-02-15T08:17:52Z
+parent: rocketbase-90wn
 ---
 
 The admin pages view is not mobile-friendly and should follow mobile-first architecture principles.

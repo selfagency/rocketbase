@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-15T02:07:30Z
-updated_at: 2026-02-15T02:17:38Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-90wn
 ---
 
 Update revision history interaction so history is displayed as a scrollable list; clicking a revision opens the revision details in a modal showing author/date/time above the diff and restore/cancel buttons below.

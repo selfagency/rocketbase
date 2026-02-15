@@ -1,8 +1,12 @@
 ---
-title: "Integrate Webfinger using PocketBase metadata"
-type: task
+# rocketbase-ndx6
+title: Integrate Webfinger using PocketBase metadata
 status: todo
+type: task
 priority: normal
+created_at: 2026-02-13T22:56:00Z
+updated_at: 2026-02-15T08:07:42Z
+parent: rocketbase-inji
 ---
 
 Summary

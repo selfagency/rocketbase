@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T23:57:11Z
-updated_at: 2026-02-14T23:59:08Z
+updated_at: 2026-02-15T08:21:35Z
+parent: rocketbase-alnr
 ---
 
 ## Problem\nColumn width changes in data-table.svelte do not visually apply; likely conflicting/overriding width constraints in table wrappers or column cell render snippets.\n\n## Checklist\n- [x] Verify actual width precedence path for pages/posts tables\n- [x] Remove/align conflicting width constraints\n- [x] Validate with diagnostics

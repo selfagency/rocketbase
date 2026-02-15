@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-15T03:32:52Z
-updated_at: 2026-02-15T03:38:26Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-90wn
 ---
 
 Use TanStack columnVisibility state for admin posts/pages tables: hide slug+summary below lg, keep status compact on mobile, show status dot with tooltip below md, and place Create actions in page headers.

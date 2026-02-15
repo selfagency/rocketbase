@@ -5,7 +5,8 @@ status: todo
 type: bug
 priority: low
 created_at: 2026-02-14T02:15:30Z
-updated_at: 2026-02-14T02:15:30Z
+updated_at: 2026-02-15T08:15:38Z
+parent: rocketbase-6qhb
 ---
 
 The navigation test for admin dropdown menu works correctly on the live website but fails in the Playwright E2E test environment.

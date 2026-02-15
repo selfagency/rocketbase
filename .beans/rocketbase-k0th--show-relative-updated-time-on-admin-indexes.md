@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T00:19:20Z
-updated_at: 2026-02-15T00:27:10Z
+updated_at: 2026-02-15T08:23:24Z
+parent: rocketbase-alnr
 ---
 
 Change Updated column display on /admin/pages and /admin/posts indexes to human-readable relative time (e.g. a few minutes ago, 1 hour ago, 3 days ago).

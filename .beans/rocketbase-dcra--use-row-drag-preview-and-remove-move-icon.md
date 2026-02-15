@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T22:10:07Z
-updated_at: 2026-02-14T22:12:00Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-iaak
 ---
 
 Revert four-arrow icon in pages drag handle and make drag preview represent the row while keeping drag restricted to the handle.

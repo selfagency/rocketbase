@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: normal
 created_at: 2026-02-15T03:44:33Z
-updated_at: 2026-02-15T03:48:06Z
+updated_at: 2026-02-15T08:24:13Z
+parent: rocketbase-90wn
 ---
 
 Add a New + dropdown button to the nav, positioned left of the account dropdown, with Page and Post links.

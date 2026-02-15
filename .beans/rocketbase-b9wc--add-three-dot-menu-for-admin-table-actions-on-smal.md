@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T22:46:38Z
-updated_at: 2026-02-14T23:22:01Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-alnr
 ---
 
 When the viewport is too small to show action buttons in admin tables (pages, posts), put them behind a three-dot menu button instead of showing them inline.

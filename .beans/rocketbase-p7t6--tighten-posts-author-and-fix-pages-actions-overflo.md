@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T00:12:04Z
-updated_at: 2026-02-15T00:13:55Z
+updated_at: 2026-02-15T08:23:31Z
+parent: rocketbase-alnr
 ---
 
 Follow-up table layout tuning for posts/pages admin index views.

@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T21:23:50Z
-updated_at: 2026-02-14T21:25:22Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-jl6x
 ---
 
 Reduce slug cell width in admin posts table to make truncation more aggressive.

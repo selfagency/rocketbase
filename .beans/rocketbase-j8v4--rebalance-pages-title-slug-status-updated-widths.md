@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T00:15:10Z
-updated_at: 2026-02-15T01:38:02Z
+updated_at: 2026-02-15T08:23:10Z
+parent: rocketbase-alnr
 ---
 
 Tune admin/pages index widths: make title and slug a bit narrower, and status and updated slightly wider.\n\n## Checklist\n- [x] Inspect current pages table width classes\n- [x] Adjust width classes for title/slug/status/updated\n- [x] Validate diagnostics

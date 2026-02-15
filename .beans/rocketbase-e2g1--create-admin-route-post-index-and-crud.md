@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T20:59:03Z
-updated_at: 2026-02-14T21:07:44Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-jl6x
 ---
 
 Implement /admin/posts index, create, edit, and delete routes mirroring admin/pages, include full posts fields and author lookup/expand behavior.

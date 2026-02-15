@@ -5,7 +5,8 @@ status: todo
 type: feature
 priority: normal
 created_at: 2026-02-15T04:04:07Z
-updated_at: 2026-02-15T07:42:52Z
+updated_at: 2026-02-15T08:09:54Z
+parent: rocketbase-7aiq
 ---
 
 Implement admin panel CRUD/workflows for managing events and their scheduling relationships.

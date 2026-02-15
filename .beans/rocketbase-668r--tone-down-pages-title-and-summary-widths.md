@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T22:16:19Z
-updated_at: 2026-02-14T22:16:28Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-iaak
 ---
 
 Reduce oversized title/summary columns and keep status/date/updated/actions compact on pages index.

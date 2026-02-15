@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-13T20:16:18Z
-updated_at: 2026-02-13T20:17:55Z
+updated_at: 2026-02-15T08:22:02Z
+parent: rocketbase-alnr
 ---
 
 The author combobox in admin/pages is not working due to: 1) Combobox using Svelte 4 event dispatcher in Svelte 5 project, 2) Server not filtering by author param

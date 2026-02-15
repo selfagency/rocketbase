@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-15T03:01:34Z
-updated_at: 2026-02-15T03:06:10Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-yu99
 ---
 
 Read metadata keys admin_posts_per_page and posts_per_page, place values in a server-side Svelte store, and use store values to drive page-size in requests.

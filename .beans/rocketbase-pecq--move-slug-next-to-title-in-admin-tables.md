@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T21:33:23Z
-updated_at: 2026-02-14T21:33:45Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-alnr
 ---
 
 Reorder columns so Slug is immediately after Title on both /admin/posts and /admin/pages tables.

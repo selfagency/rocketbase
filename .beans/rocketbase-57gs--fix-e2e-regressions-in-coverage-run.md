@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T19:45:49Z
-updated_at: 2026-02-14T20:26:47Z
+updated_at: 2026-02-15T08:22:18Z
+parent: rocketbase-6qhb
 ---
 
 Resolve failing e2e tests in nav/admin/auth flows surfaced by test:coverage Chromium run.

@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: high
 created_at: 2026-02-13T22:51:47Z
-updated_at: 2026-02-14T06:09:42Z
+updated_at: 2026-02-15T08:21:30Z
+parent: rocketbase-inji
 ---
 
 Add to CLAUDE.md and copilot instructions: follow best implementation requirements of https://indieweb.org/Category:building-blocks and https://spec.indieweb.org/

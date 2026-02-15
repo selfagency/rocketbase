@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T00:39:15Z
-updated_at: 2026-02-15T01:45:33Z
+updated_at: 2026-02-15T08:23:14Z
+parent: rocketbase-alnr
 ---
 
 On posts: narrow slug/authors a bit more and normalize table text to default color. On pages: match font size/color treatment and narrow slug more.

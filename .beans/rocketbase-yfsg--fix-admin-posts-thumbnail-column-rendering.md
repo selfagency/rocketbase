@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T21:18:00Z
-updated_at: 2026-02-14T21:19:50Z
+updated_at: 2026-02-15T08:21:59Z
+parent: rocketbase-alnr
 ---
 
 Admin posts table shows literal <img ...> markup text instead of rendering thumbnails in first column.

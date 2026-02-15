@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T21:08:52Z
-updated_at: 2026-02-14T21:13:49Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-6qhb
 ---
 
 Add e2e coverage for admin posts index/new/edit routes and ensure posts submenu link visibility, then create follow-up beans for trash workflow, soft-delete, cleanup cron, and newsletters collection.

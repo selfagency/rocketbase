@@ -5,7 +5,8 @@ status: todo
 type: feature
 priority: normal
 created_at: 2026-02-15T04:04:07Z
-updated_at: 2026-02-15T07:42:51Z
+updated_at: 2026-02-15T08:09:57Z
+parent: rocketbase-7aiq
 ---
 
 Implement public-facing events frontend experience (listing/detail/calendar views as scoped), including routing and data loading.

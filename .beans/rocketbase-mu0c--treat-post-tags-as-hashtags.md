@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: high
 created_at: 2026-02-13T22:51:49Z
-updated_at: 2026-02-13T23:22:48Z
+updated_at: 2026-02-15T08:20:17Z
+parent: rocketbase-inji
 ---
 
 Implement hashtag functionality for post tags, making them clickable and searchable.

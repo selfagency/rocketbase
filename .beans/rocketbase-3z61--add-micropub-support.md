@@ -5,7 +5,8 @@ status: todo
 type: feature
 priority: normal
 created_at: 2026-02-13T22:52:03Z
-updated_at: 2026-02-13T22:52:03Z
+updated_at: 2026-02-15T08:06:02Z
+parent: rocketbase-inji
 ---
 
 Implement Micropub API for posting from third-party clients. See: https://micropub.rocks/

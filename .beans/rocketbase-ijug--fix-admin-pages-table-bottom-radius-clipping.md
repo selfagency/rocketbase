@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T20:48:00Z
-updated_at: 2026-02-14T20:48:24Z
+updated_at: 2026-02-15T08:21:53Z
+parent: rocketbase-alnr
 ---
 
 Admin pages table loses visible bottom rounded corners after body background color changes. Ensure inner table backgrounds are clipped to container border radius.

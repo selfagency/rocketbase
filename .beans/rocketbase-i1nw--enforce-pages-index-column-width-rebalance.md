@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T22:14:36Z
-updated_at: 2026-02-14T22:39:35Z
+updated_at: 2026-02-15T08:21:41Z
+parent: rocketbase-alnr
 ---
 
 Make title/slug/summary visibly wider and status/date/updated/actions narrower using fixed table layout; ensure Published header is Status.

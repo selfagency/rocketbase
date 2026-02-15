@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T06:33:14Z
-updated_at: 2026-02-15T07:18:08Z
+updated_at: 2026-02-15T08:22:11Z
+parent: rocketbase-90wn
 ---
 
 Resolve initial validation errors showing before user input on new post/page forms and replace autosave status text with a right-aligned syncing badge on Create Page.

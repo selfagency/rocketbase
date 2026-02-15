@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T20:44:37Z
-updated_at: 2026-02-14T20:45:26Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-iaak
 ---
 
 Remove unintended left spacing before top-level page titles in admin pages table and replace text-based subpage marker with gray Lucide corner-down-right icon.

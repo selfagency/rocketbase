@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T07:20:39Z
-updated_at: 2026-02-15T07:27:40Z
+updated_at: 2026-02-15T08:22:23Z
+parent: rocketbase-6qhb
 ---
 
 Make server page-size metadata loading resilient to mocked PocketBase clients that do not implement metadata.getFullList, so route server tests pass again.

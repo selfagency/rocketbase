@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T04:58:09Z
-updated_at: 2026-02-14T05:03:46Z
+updated_at: 2026-02-15T08:22:44Z
+parent: rocketbase-56l8
 ---
 
 Fix incorrect file URL formats across post components. PostCard uses wrong _superusers path, other components have extra /pb/ in path. Add CDN URL support via metadata.

@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T22:05:42Z
-updated_at: 2026-02-14T22:05:59Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-56l8
 ---
 
 Stop writing token refresh auth events into audit_logs while keeping other auth auditing intact.

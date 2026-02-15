@@ -5,7 +5,8 @@ status: todo
 type: task
 priority: normal
 created_at: 2026-02-15T04:04:07Z
-updated_at: 2026-02-15T07:42:47Z
+updated_at: 2026-02-15T08:11:33Z
+parent: rocketbase-ghzs
 ---
 
 Design and add PocketBase editorial calendar collection schema for planning/scheduling editorial items.

@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: high
 created_at: 2026-02-12T20:13:22Z
-updated_at: 2026-02-12T20:14:33Z
+updated_at: 2026-02-15T08:19:55Z
+parent: rocketbase-6qhb
 ---
 
 Imported from issues.jsonl (rocketbase-c1u). Closed in file. Owner: daniel@self.agency. Created by Daniel Sieradski 2026-02-10T19:20:57.731157-05:00.

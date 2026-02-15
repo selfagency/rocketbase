@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: high
 created_at: 2026-02-13T22:51:54Z
-updated_at: 2026-02-14T06:09:11Z
+updated_at: 2026-02-15T08:20:08Z
+parent: rocketbase-inji
 ---
 
 Implement structured data (Schema.org) for better SEO. See: http://www.structured-data.org/

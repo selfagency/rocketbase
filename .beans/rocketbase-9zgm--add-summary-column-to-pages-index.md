@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T21:59:46Z
-updated_at: 2026-02-14T22:00:06Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-iaak
 ---
 
 Insert a Summary column in admin pages index table with concise rendering.

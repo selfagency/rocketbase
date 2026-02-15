@@ -5,7 +5,8 @@ status: todo
 type: feature
 priority: normal
 created_at: 2026-02-13T22:52:00Z
-updated_at: 2026-02-13T22:52:00Z
+updated_at: 2026-02-15T08:05:03Z
+parent: rocketbase-5dct
 ---
 
 Add UI toggle in post editor to automatically cross-post to connected social media accounts.

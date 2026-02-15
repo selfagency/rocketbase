@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T03:38:46Z
-updated_at: 2026-02-15T03:39:23Z
+updated_at: 2026-02-15T08:21:56Z
+parent: rocketbase-alnr
 ---
 
 Resolve SvelteKit error on POST /admin/posts/[id]: named actions mixed with default action in route actions.

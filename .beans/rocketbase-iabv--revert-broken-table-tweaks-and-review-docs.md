@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-15T03:26:45Z
-updated_at: 2026-02-15T03:31:37Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-gw8p
 ---
 
 Revert recent admin posts/pages table/status/header changes that caused regression, then review shadcn-svelte data table docs with focus on column visibility.

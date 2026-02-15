@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T21:56:17Z
-updated_at: 2026-02-14T22:03:12Z
+updated_at: 2026-02-15T08:34:33Z
+parent: rocketbase-iaak
 ---
 
 Remove the date/created column from admin pages index columns so pages index no longer shows a date column.

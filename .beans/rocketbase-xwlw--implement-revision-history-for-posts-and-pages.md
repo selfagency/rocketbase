@@ -5,7 +5,8 @@ status: completed
 type: feature
 priority: normal
 created_at: 2026-02-15T01:51:48Z
-updated_at: 2026-02-15T02:02:26Z
+updated_at: 2026-02-15T08:24:20Z
+parent: rocketbase-alnr
 ---
 
 ## Goal\nImplement revision history views for admin posts and pages backed by audit_logs and visual diffs using svelte-diff-match-patch.\n\n## Checklist\n- [x] Review existing audit_logs schema/hooks and admin route patterns\n- [x] Add server-side revision history loading for posts and pages\n- [x] Add UI components/routes to browse revisions and inspect changes\n- [x] Integrate svelte-diff-match-patch for content field diffs\n- [x] Validate with targeted diagnostics and document summary

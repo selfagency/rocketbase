@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: high
 created_at: 2026-02-12T20:13:22Z
-updated_at: 2026-02-13T15:36:12Z
+updated_at: 2026-02-15T08:20:36Z
+parent: rocketbase-90wn
 ---
 
 Imported from issues.jsonl (rocketbase-xfj). Closed in file (updated forms to use Superforms capture/restore). Owner: daniel@self.agency. Created by Daniel Sieradski 2026-02-10T00:19:13.597676-05:00.

@@ -5,7 +5,8 @@ status: todo
 type: task
 priority: low
 created_at: 2026-02-14T02:26:02Z
-updated_at: 2026-02-14T02:26:02Z
+updated_at: 2026-02-15T08:18:01Z
+parent: rocketbase-90wn
 ---
 
 Various aesthetic and UX improvements needed across admin interfaces.

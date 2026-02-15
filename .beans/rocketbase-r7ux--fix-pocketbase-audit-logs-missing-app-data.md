@@ -3,8 +3,10 @@
 title: Fix PocketBase audit logs missing app data
 status: completed
 type: bug
+priority: normal
 created_at: 2026-02-14T21:47:31Z
-updated_at: 2026-02-14T22:05:00Z
+updated_at: 2026-02-15T08:22:38Z
+parent: rocketbase-56l8
 ---
 
 Investigate audit hooks and audit_logs schema; ensure before/after changes and request metadata are captured consistently for app CRUD/auth paths.

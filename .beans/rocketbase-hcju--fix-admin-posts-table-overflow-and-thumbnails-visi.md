@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-14T21:21:18Z
-updated_at: 2026-02-14T21:22:06Z
+updated_at: 2026-02-15T08:21:57Z
+parent: rocketbase-alnr
 ---
 
 Ensure thumbnails are visible in /admin/posts and reduce horizontal overflow by truncating long title/authors/tags/slug cells.

@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T22:14:10Z
-updated_at: 2026-02-14T22:39:36Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-iaak
 ---
 
 Center the order column sort icon over the order numbers in the pages index table.

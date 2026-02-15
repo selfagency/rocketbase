@@ -5,7 +5,8 @@ status: in-progress
 type: feature
 priority: normal
 created_at: 2026-02-15T04:25:26Z
-updated_at: 2026-02-15T06:12:20Z
+updated_at: 2026-02-15T08:16:58Z
+parent: rocketbase-3h6u
 ---
 
 Add WordPress-style media upload/selection/insertion workflow to Tipex using PocketBase media + attachments, with post/page scoped media, all-media browsing, and optional Pexels import with attribution.

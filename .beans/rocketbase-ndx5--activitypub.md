@@ -1,8 +1,12 @@
 ---
-title: "Integrate ActivityPub for posts"
-type: task
+# rocketbase-ndx5
+title: Integrate ActivityPub for posts
 status: todo
+type: task
 priority: normal
+created_at: 2026-02-13T22:56:00Z
+updated_at: 2026-02-15T08:07:26Z
+parent: rocketbase-inji
 ---
 
 Summary

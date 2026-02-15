@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: high
 created_at: 2026-02-13T22:51:45Z
-updated_at: 2026-02-14T07:24:38Z
+updated_at: 2026-02-15T08:21:26Z
+parent: rocketbase-gw8p
 ---
 
 Go through routes and turn complex portions of code into their own components or external TypeScript files for better maintainability and testability.

@@ -5,7 +5,8 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-14T19:34:48Z
-updated_at: 2026-02-14T19:42:06Z
+updated_at: 2026-02-15T08:34:32Z
+parent: rocketbase-6qhb
 ---
 
 Add nyc configuration and scripts to collect coverage when running e2e tests with Playwright.

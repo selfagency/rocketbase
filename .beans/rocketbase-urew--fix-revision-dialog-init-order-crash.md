@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T02:39:29Z
-updated_at: 2026-02-15T02:40:10Z
+updated_at: 2026-02-15T08:22:58Z
+parent: rocketbase-alnr
 ---
 
 Resolve ReferenceError in revision-history-dialog.svelte where visibleRevisions is accessed before initialization on /admin/posts/:id.

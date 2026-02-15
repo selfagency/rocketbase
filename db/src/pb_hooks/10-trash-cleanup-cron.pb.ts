@@ -17,20 +17,25 @@ cronAdd('trash-cleanup', '0 2 * * *', function () {
     var pagesCollection = $app.findCollectionByNameOrId('pages');
     if (pagesCollection) {
       var stalePagesFilter = 'in_trash = true && updated <= "' + thirtyDaysAgoISO + '"';
-      var stalePages = arrayOf(new DynamicModel({ id: '', updated: '' }));
+      var stalePages = arrayOf(new Record(pagesCollection));
 
       try {
-        $app.findRecordsByFilter('pages', stalePagesFilter, '-updated', 500, 0, function (record) {
+        $app.findRecordsByFilter('pages', stalePagesFilter, '-updated', 500, 0, function (record: any) {
           stalePages.push(record);
         });
 
         var pagesDeleted = 0;
         for (var i = 0; i < stalePages.length; i++) {
+          var page = stalePages[i];
+          if (!page) {
+            continue;
+          }
+
           try {
-            $app.delete(stalePages[i]);
+            $app.delete(page);
             pagesDeleted++;
           } catch (err) {
-            console.error('[Trash Cleanup] Failed to delete page:', stalePages[i].id, err);
+            console.error('[Trash Cleanup] Failed to delete page:', page.id, err);
           }
         }
 
@@ -44,20 +49,25 @@ cronAdd('trash-cleanup', '0 2 * * *', function () {
     var postsCollection = $app.findCollectionByNameOrId('posts');
     if (postsCollection) {
       var stalePostsFilter = 'in_trash = true && updated <= "' + thirtyDaysAgoISO + '"';
-      var stalePosts = arrayOf(new DynamicModel({ id: '', updated: '' }));
+      var stalePosts = arrayOf(new Record(postsCollection));
 
       try {
-        $app.findRecordsByFilter('posts', stalePostsFilter, '-updated', 500, 0, function (record) {
+        $app.findRecordsByFilter('posts', stalePostsFilter, '-updated', 500, 0, function (record: any) {
           stalePosts.push(record);
         });
 
         var postsDeleted = 0;
         for (var j = 0; j < stalePosts.length; j++) {
+          var post = stalePosts[j];
+          if (!post) {
+            continue;
+          }
+
           try {
-            $app.delete(stalePosts[j]);
+            $app.delete(post);
             postsDeleted++;
           } catch (err) {
-            console.error('[Trash Cleanup] Failed to delete post:', stalePosts[j].id, err);
+            console.error('[Trash Cleanup] Failed to delete post:', post.id, err);
           }
         }
 

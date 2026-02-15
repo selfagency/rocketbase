@@ -41,7 +41,15 @@ const defaultMetadata = [
   },
 ];
 
-async function populateMetadata() {
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message;
+  }
+
+  return String(err);
+}
+
+async function populateMetadata(): Promise<void> {
   console.log('Populating metadata collection...\n');
 
   for (const meta of defaultMetadata) {
@@ -55,7 +63,7 @@ async function populateMetadata() {
         await pb.collection('metadata').create(meta);
         console.log(`✓ Created metadata "${meta.key}" with value: "${meta.value}"`);
       } catch (createError) {
-        console.error(`✗ Failed to create metadata "${meta.key}":`, createError.message);
+        console.error(`✗ Failed to create metadata "${meta.key}":`, getErrorMessage(createError));
       }
     }
   }
@@ -63,7 +71,7 @@ async function populateMetadata() {
   console.log('\n✓ Metadata population complete!');
 }
 
-populateMetadata().catch(error => {
-  console.error('Error populating metadata:', error);
+populateMetadata().catch((error: unknown) => {
+  console.error('Error populating metadata:', getErrorMessage(error));
   process.exit(1);
 });

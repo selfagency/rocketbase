@@ -791,13 +791,12 @@ migrate(
     }
 
     if (collection) {
-    collection = new Collection(collectionCreateData);
-    const createResult = app.save(collection);
-
-    if (false) {
       unmarshal(collectionUpdateData, collection);
       return app.save(collection);
     }
+
+    collection = new Collection(collectionCreateData as any);
+    const createResult = app.save(collection);
 
     return createResult;
   },
@@ -806,15 +805,6 @@ migrate(
       const collection = app.findCollectionByNameOrId('pbc_1125843985');
       return app.delete(collection);
     } catch (_) {
-      try {
-        const collection = app.findCollectionByNameOrId('posts');
-        return app.delete(collection);
-      } catch (_) {
-        return null;
-      }
-    }
-  }
-);  } catch (_) {
       try {
         const collection = app.findCollectionByNameOrId('posts');
         return app.delete(collection);

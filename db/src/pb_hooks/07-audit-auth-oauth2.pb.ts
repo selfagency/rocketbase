@@ -30,7 +30,7 @@ onRecordAuthWithOAuth2Request(function (e) {
     auditRecord.set('timestamp', new Date().toISOString());
     $app.save(auditRecord);
   } catch (err) {
-    console.error('[Audit] auth_oauth2 failed: ' + err.toString());
+    console.error('[Audit] auth_oauth2 failed: ' + String(err));
   }
 
   e.next();

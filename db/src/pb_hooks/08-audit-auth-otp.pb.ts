@@ -30,7 +30,7 @@ onRecordAuthWithOTPRequest(function (e) {
     auditRecord.set('timestamp', new Date().toISOString());
     $app.save(auditRecord);
   } catch (err) {
-    console.error('[Audit] auth_otp failed: ' + err.toString());
+    console.error('[Audit] auth_otp failed: ' + String(err));
   }
 
   e.next();

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "rm -f ./pb_hooks/*.d.ts ./pb_hooks/*.d.ts.map ./pb_migrations/*.d.ts ./pb_migrations/*.d.ts.map && tsc --project tsconfig.json",
     "build:types": "pocketbase-typegen --db ./pb_data/data.db --out ../app/src/lib/types/pocketbase.d.ts",
     "check": "tsc --noEmit",
     "generate:portfolio": "node ./util/generate-portfolio.js",

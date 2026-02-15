@@ -16,7 +16,7 @@ migrate(
         system: false,
         type: 'select',
         values: ['posts', 'tags', 'users', 'portfolio'],
-      })
+      } as any)
     );
 
     return app.save(collection);
@@ -37,7 +37,7 @@ migrate(
         system: false,
         type: 'select',
         values: ['posts', 'tags', 'users'],
-      })
+      } as any)
     );
 
     return app.save(collection);

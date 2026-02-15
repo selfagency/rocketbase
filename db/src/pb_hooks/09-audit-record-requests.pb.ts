@@ -2,7 +2,7 @@
 
 onRecordCreateRequest(function (e) {
   try {
-    var writeRequestAudit = function (eventType, beforeRecord, afterRecord) {
+    var writeRequestAudit = function (eventType: string, beforeRecord: any, afterRecord: any) {
       var collectionName = '';
       if (e.record && e.record.collection()) {
         collectionName = e.record.collection().name;
@@ -19,7 +19,7 @@ onRecordCreateRequest(function (e) {
         return;
       }
 
-      var serializeRecord = function (record) {
+      var serializeRecord = function (record: any) {
         if (!record) {
           return null;
         }
@@ -49,7 +49,7 @@ onRecordCreateRequest(function (e) {
 
     writeRequestAudit('create_request', null, e.record);
   } catch (err) {
-    console.error('[Audit] create_request failed: ' + err.toString());
+    console.error('[Audit] create_request failed: ' + String(err));
   }
 
   e.next();
@@ -57,7 +57,7 @@ onRecordCreateRequest(function (e) {
 
 onRecordUpdateRequest(function (e) {
   try {
-    var writeRequestAudit = function (eventType, beforeRecord, afterRecord) {
+    var writeRequestAudit = function (eventType: string, beforeRecord: any, afterRecord: any) {
       var collectionName = '';
       if (e.record && e.record.collection()) {
         collectionName = e.record.collection().name;
@@ -74,7 +74,7 @@ onRecordUpdateRequest(function (e) {
         return;
       }
 
-      var serializeRecord = function (record) {
+      var serializeRecord = function (record: any) {
         if (!record) {
           return null;
         }
@@ -106,7 +106,7 @@ onRecordUpdateRequest(function (e) {
 
     writeRequestAudit('update_request', beforeRecord, e.record);
   } catch (err) {
-    console.error('[Audit] update_request failed: ' + err.toString());
+    console.error('[Audit] update_request failed: ' + String(err));
   }
 
   e.next();
@@ -114,7 +114,7 @@ onRecordUpdateRequest(function (e) {
 
 onRecordDeleteRequest(function (e) {
   try {
-    var writeRequestAudit = function (eventType, beforeRecord, afterRecord) {
+    var writeRequestAudit = function (eventType: string, beforeRecord: any, afterRecord: any) {
       var collectionName = '';
       if (e.record && e.record.collection()) {
         collectionName = e.record.collection().name;
@@ -131,7 +131,7 @@ onRecordDeleteRequest(function (e) {
         return;
       }
 
-      var serializeRecord = function (record) {
+      var serializeRecord = function (record: any) {
         if (!record) {
           return null;
         }
@@ -161,7 +161,7 @@ onRecordDeleteRequest(function (e) {
 
     writeRequestAudit('delete_request', e.record, null);
   } catch (err) {
-    console.error('[Audit] delete_request failed: ' + err.toString());
+    console.error('[Audit] delete_request failed: ' + String(err));
   }
 
   e.next();

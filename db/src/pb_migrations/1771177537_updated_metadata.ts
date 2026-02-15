@@ -19,7 +19,7 @@ migrate(
         required: false,
         system: false,
         type: 'text',
-      })
+      } as any)
     );
 
     return app.save(collection);

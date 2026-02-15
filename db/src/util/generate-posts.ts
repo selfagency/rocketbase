@@ -48,17 +48,61 @@ const API_USER = process.env.API_USER || 'admin@example.com';
 const API_PASS = process.env.API_PASS || 'test1234567890';
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || '';
 
-function log(...args) {
+type FetchResponse = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<any>;
+  text: () => Promise<string>;
+  arrayBuffer: () => Promise<ArrayBuffer>;
+};
+
+type ImageFile = {
+  buffer: ArrayBuffer;
+  name: string;
+};
+
+type PostPayload = {
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  date: string;
+  author: string[];
+  tags: string[];
+  published: boolean;
+  visible: boolean;
+  require_login: boolean;
+  subscriber_only: boolean;
+  attachments?: string[];
+  imageFile?: ImageFile;
+  mediaFiles?: ImageFile[];
+};
+
+function asFetchResponse(response: unknown): FetchResponse {
+  return response as FetchResponse;
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message;
+  }
+
+  return String(err);
+}
+
+function log(...args: unknown[]) {
   console.log('[generate-posts]', ...args);
 }
 
-async function adminAuth(email, password) {
+async function adminAuth(email: string, password: string): Promise<string | null> {
   try {
-    const res = await fetch(`${PB_URL}/api/admins/auth-with-password`, {
+    const res = asFetchResponse(
+      await fetch(`${PB_URL}/api/admins/auth-with-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ identity: email, password }),
-    });
+      }),
+    );
     if (!res.ok) {
       log('admin auth failed', res.status);
       return null;
@@ -66,22 +110,22 @@ async function adminAuth(email, password) {
     const data = await res.json();
     return data?.token || null;
   } catch (err) {
-    log('adminAuth error', err.message || err);
+    log('adminAuth error', getErrorMessage(err));
     return null;
   }
 }
 
-async function fetchUsers(headers) {
+async function fetchUsers(headers: Record<string, string>): Promise<Array<{ id: string }>> {
   const url = `${PB_URL}/api/collections/users/records?perPage=1000`;
-  const res = await fetch(url, { headers });
+  const res = asFetchResponse(await fetch(url, { headers }));
   if (!res.ok) throw new Error(`Failed to fetch users: ${res.status}`);
   const data = await res.json();
   return data?.items || [];
 }
 
-async function fetchTags(headers) {
+async function fetchTags(headers: Record<string, string>): Promise<Array<{ id: string }>> {
   const url = `${PB_URL}/api/collections/tags/records?perPage=1000`;
-  const res = await fetch(url, { headers });
+  const res = asFetchResponse(await fetch(url, { headers }));
   if (!res.ok) {
     log('No tags collection or failed to fetch tags');
     return [];
@@ -90,13 +134,13 @@ async function fetchTags(headers) {
   return data?.items || [];
 }
 
-async function fetchPexelsPhotos(apiKey, page = 1, perPage = 1) {
+async function fetchPexelsPhotos(apiKey: string, page = 1, perPage = 1): Promise<any[]> {
   const url = `https://api.pexels.com/v1/curated?per_page=${perPage}&page=${page}`;
-  const res = await fetch(url, {
+  const res = asFetchResponse(await fetch(url, {
     headers: {
       Authorization: apiKey,
     },
-  });
+  }));
   if (!res.ok) {
     log('Pexels API error:', res.status);
     return [];
@@ -105,15 +149,15 @@ async function fetchPexelsPhotos(apiKey, page = 1, perPage = 1) {
   return data.photos || [];
 }
 
-async function downloadImage(imageUrl) {
-  const res = await fetch(imageUrl);
+async function downloadImage(imageUrl: string): Promise<ArrayBuffer> {
+  const res = asFetchResponse(await fetch(imageUrl));
   if (!res.ok) {
     throw new Error(`Failed to download image: ${res.status}`);
   }
   return res.arrayBuffer();
 }
 
-async function createMediaRecord(fileData, headers) {
+async function createMediaRecord(fileData: ImageFile, headers: Record<string, string>): Promise<{ id: string }> {
   const url = `${PB_URL}/api/collections/media/records`;
   const formData = new FormData();
 
@@ -123,11 +167,11 @@ async function createMediaRecord(fileData, headers) {
 
   const { 'Content-Type': _, ...headersWithoutContentType } = headers;
 
-  const res = await fetch(url, {
+  const res = asFetchResponse(await fetch(url, {
     method: 'POST',
     headers: headersWithoutContentType,
     body: formData,
-  });
+  }));
 
   if (!res.ok) {
     const error = await res.text();
@@ -137,7 +181,7 @@ async function createMediaRecord(fileData, headers) {
   return res.json();
 }
 
-async function createPost(postData, headers) {
+async function createPost(postData: PostPayload, headers: Record<string, string>): Promise<{ id: string; title: string }> {
   const url = `${PB_URL}/api/collections/posts/records`;
 
   // Convert uploaded media files to media records, then attach relation IDs to the post
@@ -165,10 +209,10 @@ async function createPost(postData, headers) {
       if (Array.isArray(value)) {
         // For array fields like author and tags, append each value
         for (const item of value) {
-          formData.append(key, item);
+          formData.append(key, String(item));
         }
       } else {
-        formData.append(key, value);
+        formData.append(key, String(value));
       }
     }
 
@@ -181,11 +225,11 @@ async function createPost(postData, headers) {
     // Remove Content-Type header to let fetch set it with boundary
     const { 'Content-Type': _, ...headersWithoutContentType } = headers;
 
-    const res = await fetch(url, {
+    const res = asFetchResponse(await fetch(url, {
       method: 'POST',
       headers: headersWithoutContentType,
       body: formData,
-    });
+    }));
 
     if (!res.ok) {
       const error = await res.text();
@@ -195,11 +239,11 @@ async function createPost(postData, headers) {
   }
 
   // Fallback to JSON request if no images
-  const res = await fetch(url, {
+  const res = asFetchResponse(await fetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(postData),
-  });
+  }));
   if (!res.ok) {
     const error = await res.text();
     throw new Error(`Failed to create post (JSON): ${res.status} ${error}`);
@@ -207,13 +251,13 @@ async function createPost(postData, headers) {
   return res.json();
 }
 
-async function createTag(tagData, headers) {
+async function createTag(tagData: { tag: string; slug: string }, headers: Record<string, string>): Promise<{ id: string; tag: string }> {
   const url = `${PB_URL}/api/collections/tags/records`;
-  const res = await fetch(url, {
+  const res = asFetchResponse(await fetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(tagData),
-  });
+  }));
   if (!res.ok) {
     const error = await res.text();
     throw new Error(`Failed to create tag: ${res.status} ${error}`);
@@ -221,7 +265,7 @@ async function createTag(tagData, headers) {
   return res.json();
 }
 
-async function generatePost(users, tags, pexelsPage) {
+async function generatePost(users: Array<{ id: string }>, tags: Array<{ id: string }>, pexelsPage: number): Promise<PostPayload> {
   // Mixed titles for more variety
   const title = randNumber({ min: 0, max: 1 }) === 0 ? randCatchPhrase() : `${randJobTitle()} ${randProductName()}`;
 
@@ -240,17 +284,17 @@ async function generatePost(users, tags, pexelsPage) {
   // Pick 1-3 random authors
   const authorCount = randNumber({ min: 1, max: Math.min(3, users.length) });
   const shuffledUsers = [...users].sort(() => Math.random() - 0.5);
-  const author = shuffledUsers.slice(0, authorCount).map(u => u.id);
+  const author = shuffledUsers.slice(0, authorCount).map((u: { id: string }) => u.id);
 
   // Pick 1-5 random tags (if tags exist)
-  let postTags = [];
+  let postTags: string[] = [];
   if (tags.length > 0) {
     const tagCount = randNumber({ min: 1, max: Math.min(5, tags.length) });
     const shuffledTags = [...tags].sort(() => Math.random() - 0.5);
-    postTags = shuffledTags.slice(0, tagCount).map(t => t.id);
+    postTags = shuffledTags.slice(0, tagCount).map((t: { id: string }) => t.id);
   }
 
-  const postData = {
+  const postData: PostPayload = {
     title,
     slug,
     summary,
@@ -296,7 +340,7 @@ async function generatePost(users, tags, pexelsPage) {
         }
       }
     } catch (err) {
-      log(`  Failed to fetch Pexels images:`, err.message);
+      log(`  Failed to fetch Pexels images:`, getErrorMessage(err));
       // Continue without image
     }
   }
@@ -307,7 +351,7 @@ async function generatePost(users, tags, pexelsPage) {
 void (async function main() {
   log('Starting blog post generation (POCKETBASE_URL=', PB_URL, ')');
 
-  let headers = {
+  let headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
 
@@ -352,7 +396,7 @@ void (async function main() {
         log(`Created tag ${i + 1}/${tagCountToGenerate}: "${newTag.tag}" (${newTag.id})`);
         tags.push(newTag);
       } catch (err) {
-        log(`Failed to create tag ${i + 1}:`, err.message);
+        log(`Failed to create tag ${i + 1}:`, getErrorMessage(err));
       }
     }
 
@@ -371,14 +415,14 @@ void (async function main() {
         const post = await createPost(postData, headers);
         log(`Created post ${i + 1}/${postCount}: "${post.title}" (${post.id})`);
       } catch (err) {
-        log(`Failed to create post ${i + 1}:`, err.message);
+        log(`Failed to create post ${i + 1}:`, getErrorMessage(err));
         // Continue with next post
       }
     }
 
     log('Blog post generation complete');
   } catch (err) {
-    log('Generation failed:', err.message || err);
+    log('Generation failed:', getErrorMessage(err));
     process.exitCode = 2;
   }
 })();

@@ -16,7 +16,7 @@ migrate(
         system: false,
         type: 'select',
         values: ['general', 'social_media', 'indieweb', 'customization', 'other'],
-      })
+      } as any)
     );
 
     return app.save(collection);

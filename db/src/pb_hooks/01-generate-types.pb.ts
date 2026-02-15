@@ -3,8 +3,15 @@
 // Generate types after any collection changes
 
 onCollectionAfterCreateSuccess(function (e) {
-  var cmd = $os.cmd('which', 'pnpm');
-  if (!cmd || cmd.status !== 0) {
+  var hasPnpm = false;
+  try {
+    var cmd = $os.cmd('which', 'pnpm');
+    hasPnpm = toString(cmd.output()).trim() !== '';
+  } catch (_) {
+    hasPnpm = false;
+  }
+
+  if (!hasPnpm) {
     console.log('pnpm not found, skipping type generation');
     e.next();
     return;
@@ -19,8 +26,15 @@ onCollectionAfterCreateSuccess(function (e) {
 });
 
 onCollectionAfterUpdateSuccess(function (e) {
-  var cmd = $os.cmd('which', 'pnpm');
-  if (!cmd || cmd.status !== 0) {
+  var hasPnpm = false;
+  try {
+    var cmd = $os.cmd('which', 'pnpm');
+    hasPnpm = toString(cmd.output()).trim() !== '';
+  } catch (_) {
+    hasPnpm = false;
+  }
+
+  if (!hasPnpm) {
     console.log('pnpm not found, skipping type generation');
     e.next();
     return;
@@ -35,8 +49,15 @@ onCollectionAfterUpdateSuccess(function (e) {
 });
 
 onCollectionAfterDeleteSuccess(function (e) {
-  var cmd = $os.cmd('which', 'pnpm');
-  if (!cmd || cmd.status !== 0) {
+  var hasPnpm = false;
+  try {
+    var cmd = $os.cmd('which', 'pnpm');
+    hasPnpm = toString(cmd.output()).trim() !== '';
+  } catch (_) {
+    hasPnpm = false;
+  }
+
+  if (!hasPnpm) {
     console.log('pnpm not found, skipping type generation');
     e.next();
     return;

@@ -23,46 +23,94 @@ const API_USER = process.env.API_USER || 'admin@example.com';
 const API_PASS = process.env.API_PASS || 'test1234567890';
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || '';
 
-function log(...args) {
+type FetchResponse = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<any>;
+  text: () => Promise<string>;
+  arrayBuffer: () => Promise<ArrayBuffer>;
+};
+
+type MediaFile = {
+  buffer: ArrayBuffer | Buffer;
+  name: string;
+  mimeType?: string;
+  source?: string;
+  sourceUrl?: string;
+};
+
+type PortfolioItem = {
+  title: string;
+  slug: string;
+  summary: string;
+  description: string;
+  url: string;
+  published: boolean;
+  visible: boolean;
+  imageFile?: MediaFile;
+  mediaFiles?: MediaFile[];
+};
+
+function asFetchResponse(response: unknown): FetchResponse {
+  return response as FetchResponse;
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message;
+  }
+
+  return String(err);
+}
+
+function toBlobPart(data: ArrayBuffer | Buffer): any {
+  if (data instanceof ArrayBuffer) {
+    return data;
+  }
+
+  return new Uint8Array(data);
+}
+
+function log(...args: unknown[]) {
   console.log('[generate-portfolio]', ...args);
 }
 
-async function adminAuth(email, password) {
-  const res = await fetch(`${PB_URL}/api/admins/auth-with-password`, {
+async function adminAuth(email: string, password: string): Promise<string | null> {
+  const res = asFetchResponse(await fetch(`${PB_URL}/api/admins/auth-with-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ identity: email, password }),
-  });
+  }));
 
   if (!res.ok) return null;
   const data = await res.json();
   return data?.token || null;
 }
 
-async function fetchPexelsPhotos(apiKey, page = 1, perPage = 1) {
+async function fetchPexelsPhotos(apiKey: string, page = 1, perPage = 1): Promise<any[]> {
   const url = `https://api.pexels.com/v1/curated?per_page=${perPage}&page=${page}`;
-  const res = await fetch(url, {
+  const res = asFetchResponse(await fetch(url, {
     headers: {
       Authorization: apiKey,
     },
-  });
+  }));
 
   if (!res.ok) return [];
   const data = await res.json();
   return data.photos || [];
 }
 
-async function downloadImage(imageUrl) {
-  const res = await fetch(imageUrl);
+async function downloadImage(imageUrl: string): Promise<ArrayBuffer> {
+  const res = asFetchResponse(await fetch(imageUrl));
   if (!res.ok) throw new Error(`Failed to download image: ${res.status}`);
   return res.arrayBuffer();
 }
 
-async function createMediaRecord(fileData, headers) {
+async function createMediaRecord(fileData: MediaFile, headers: Record<string, string>): Promise<{ id: string }> {
   const url = `${PB_URL}/api/collections/media/records`;
   const formData = new FormData();
 
-  const blob = new Blob([fileData.buffer], { type: fileData.mimeType || 'image/jpeg' });
+  const blob = new Blob([toBlobPart(fileData.buffer)], { type: fileData.mimeType || 'image/jpeg' });
   formData.append('file', blob, fileData.name);
   formData.append('source', fileData.source || 'Generator');
   if (fileData.sourceUrl) {
@@ -71,11 +119,11 @@ async function createMediaRecord(fileData, headers) {
 
   const { 'Content-Type': _, ...headersWithoutContentType } = headers;
 
-  const res = await fetch(url, {
+  const res = asFetchResponse(await fetch(url, {
     method: 'POST',
     headers: headersWithoutContentType,
     body: formData,
-  });
+  }));
 
   if (!res.ok) {
     const error = await res.text();
@@ -85,7 +133,10 @@ async function createMediaRecord(fileData, headers) {
   return res.json();
 }
 
-async function createPortfolioRecord(itemData, headers) {
+async function createPortfolioRecord(
+  itemData: PortfolioItem & { mediaIds?: string[] },
+  headers: Record<string, string>,
+): Promise<{ id: string; title: string }> {
   const url = `${PB_URL}/api/collections/portfolio/records`;
   const formData = new FormData();
 
@@ -98,7 +149,7 @@ async function createPortfolioRecord(itemData, headers) {
   formData.append('visible', String(itemData.visible));
 
   if (itemData.imageFile) {
-    const imageBlob = new Blob([itemData.imageFile.buffer], { type: 'image/jpeg' });
+    const imageBlob = new Blob([toBlobPart(itemData.imageFile.buffer)], { type: 'image/jpeg' });
     formData.append('image', imageBlob, itemData.imageFile.name);
   }
 
@@ -109,11 +160,11 @@ async function createPortfolioRecord(itemData, headers) {
   }
 
   const { 'Content-Type': _, ...headersWithoutContentType } = headers;
-  const res = await fetch(url, {
+  const res = asFetchResponse(await fetch(url, {
     method: 'POST',
     headers: headersWithoutContentType,
     body: formData,
-  });
+  }));
 
   if (!res.ok) {
     const error = await res.text();
@@ -123,7 +174,7 @@ async function createPortfolioRecord(itemData, headers) {
   return res.json();
 }
 
-async function generatePortfolioItem(index) {
+async function generatePortfolioItem(index: number): Promise<PortfolioItem> {
   const product = randProduct();
   const company = randCompanyName();
   const category = randProductCategory();
@@ -140,7 +191,7 @@ async function generatePortfolioItem(index) {
   const description = `<p>${paragraphs.join('</p><p>')}</p>`;
   const url = randUrl();
 
-  const item = {
+  const item: PortfolioItem = {
     title,
     slug,
     summary: `${summary} (${category})`,
@@ -150,7 +201,7 @@ async function generatePortfolioItem(index) {
     visible: true,
   };
 
-  function createSyntheticSvgAsset(kind, sequence) {
+  function createSyntheticSvgAsset(kind: string, sequence: number): MediaFile {
     const width = 1600;
     const height = 900;
     const hue = (index * 37 + sequence * 71) % 360;
@@ -223,7 +274,7 @@ async function generatePortfolioItem(index) {
 void (async function main() {
   log('Starting portfolio generation');
 
-  const headers = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
 
@@ -245,7 +296,7 @@ void (async function main() {
     try {
       const item = await generatePortfolioItem(i);
 
-      const mediaIds = [];
+      const mediaIds: string[] = [];
       if (Array.isArray(item.mediaFiles) && item.mediaFiles.length > 0) {
         for (const mediaFile of item.mediaFiles) {
           const mediaRecord = await createMediaRecord(mediaFile, headers);
@@ -256,7 +307,7 @@ void (async function main() {
       const created = await createPortfolioRecord({ ...item, mediaIds }, headers);
       log(`Created ${i + 1}/${total}: ${created.title} (${created.id})`);
     } catch (err) {
-      log(`Failed item ${i + 1}:`, err.message || err);
+      log(`Failed item ${i + 1}:`, getErrorMessage(err));
     }
   }
 

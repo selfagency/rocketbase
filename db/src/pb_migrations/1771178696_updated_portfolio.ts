@@ -14,7 +14,7 @@ migrate(
         required: false,
         system: false,
         type: 'bool',
-      })
+      } as any)
     );
 
     return app.save(collection);

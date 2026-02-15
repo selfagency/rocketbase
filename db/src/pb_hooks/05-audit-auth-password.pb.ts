@@ -30,7 +30,7 @@ onRecordAuthWithPasswordRequest(function (e) {
     auditRecord.set('timestamp', new Date().toISOString());
     $app.save(auditRecord);
   } catch (err) {
-    console.error('[Audit] auth_password failed: ' + err.toString());
+    console.error('[Audit] auth_password failed: ' + String(err));
   }
 
   e.next();

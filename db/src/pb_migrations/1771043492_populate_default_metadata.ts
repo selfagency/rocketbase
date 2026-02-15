@@ -67,7 +67,7 @@ migrate(
         const records = app.findRecordsByFilter(collection.id, `key = "${key}"`, '', 1, 0);
 
         for (const record of records) {
-          app.delete(record);
+          app.delete(record as any);
         }
       } catch (e) {
         console.error('Error deleting metadata:', key, e);

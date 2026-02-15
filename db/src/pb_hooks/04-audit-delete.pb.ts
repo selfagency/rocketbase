@@ -22,7 +22,7 @@ onRecordAfterDeleteSuccess(function (e) {
     auditRecord.set('before_changes', e.record.clone().withCustomData(true).publicExport());
     $app.save(auditRecord);
   } catch (err) {
-    console.error('[Audit] delete failed: ' + err.toString());
+    console.error('[Audit] delete failed: ' + String(err));
   }
 
   e.next();

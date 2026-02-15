@@ -321,7 +321,7 @@ migrate(
       return app.save(collection);
     }
 
-    collection = new Collection(collectionCreateData);
+    collection = new Collection(collectionCreateData as any);
     const createResult = app.save(collection);
 
     return createResult;

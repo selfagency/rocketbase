@@ -87,21 +87,29 @@ var DEFAULT_METADATA = [
   },
 ];
 
-function isBlank(value) {
+type MetadataDefault = {
+  key: string;
+  nice_name: string;
+  value: string;
+  type: string;
+};
+
+function isBlank(value: any) {
   return value === null || value === undefined || toString(value).trim() === '';
 }
 
-function findDefaultMetadataByKey(key) {
+function findDefaultMetadataByKey(key: string): MetadataDefault | null {
   for (var i = 0; i < DEFAULT_METADATA.length; i++) {
-    if (DEFAULT_METADATA[i].key === key) {
-      return DEFAULT_METADATA[i];
+    var defaults = DEFAULT_METADATA[i] as MetadataDefault | undefined;
+    if (defaults && defaults.key === key) {
+      return defaults;
     }
   }
 
   return null;
 }
 
-function patchMetadataRecordWithDefaults(record, defaults) {
+function patchMetadataRecordWithDefaults(record: any, defaults: MetadataDefault | null): boolean {
   if (!record || !defaults) {
     return false;
   }
@@ -126,42 +134,13 @@ function patchMetadataRecordWithDefaults(record, defaults) {
   return changed;
 }
 
-function ensureMetadataDefaultsExist() {
-  var collection = $app.findCollectionByNameOrId('metadata');
-
-  for (var i = 0; i < DEFAULT_METADATA.length; i++) {
-    var defaults = DEFAULT_METADATA[i];
-    var records = $app.findRecordsByFilter(collection.id, "key = '" + defaults.key + "'", '', 1, 0);
-
-    if (records.length === 0) {
-      var created = new Record(collection);
-      created.set('key', defaults.key);
-      created.set('nice_name', defaults.nice_name);
-      created.set('value', defaults.value);
-      created.set('type', defaults.type);
-      $app.save(created);
-      continue;
-    }
-
-    var existing = records[0];
-    if (patchMetadataRecordWithDefaults(existing, defaults)) {
-      $app.save(existing);
-    }
-  }
-}
-
-onBootstrap(function (e) {
-  try {
-    ensureMetadataDefaultsExist();
-  } catch (err) {
-    console.error('[Hooks] metadata default bootstrap failed: ' + err.toString());
-  }
-
-  e.next();
-});
-
 onRecordValidate(function (e) {
   try {
+    if (!e.record) {
+      e.next();
+      return;
+    }
+
     var key = toString(e.record.get('key') || '');
     var defaults = findDefaultMetadataByKey(key);
 
@@ -169,7 +148,7 @@ onRecordValidate(function (e) {
       patchMetadataRecordWithDefaults(e.record, defaults);
     }
   } catch (err) {
-    console.error('[Hooks] metadata record default patch failed: ' + err.toString());
+    console.error('[Hooks] metadata record default patch failed: ' + String(err));
   }
 
   e.next();

@@ -22,7 +22,7 @@ onRecordAfterCreateSuccess(function (e) {
     auditRecord.set('after_changes', e.record.clone().withCustomData(true).publicExport());
     $app.save(auditRecord);
   } catch (err) {
-    console.error('[Audit] create failed: ' + err.toString());
+    console.error('[Audit] create failed: ' + String(err));
   }
 
   e.next();

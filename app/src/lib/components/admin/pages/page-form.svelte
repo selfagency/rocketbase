@@ -12,6 +12,7 @@
   import type { PagesResponse } from '$lib/types/pocketbase';
   import type { RevisionHistoryEntry } from '$lib/types/revision-history';
   import { generateSlug as createSlug } from '$lib/utils/slug-utils';
+  import { createEventDispatcher } from 'svelte';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
 
@@ -29,6 +30,18 @@
     availableParents?: PagesResponse[];
   } = $props();
 
+  const dispatch = createEventDispatcher<{
+    draftIdentityChanged: { formId: string; slug: string };
+  }>();
+
+  const initialFormState = (() => {
+    if (!isEdit && !data.form.posted) {
+      return { ...data.form, errors: {} };
+    }
+
+    return data.form;
+  })();
+
   const pageDiffFields = [
     { key: 'title', label: 'Title' },
     { key: 'slug', label: 'Slug' },
@@ -38,8 +51,13 @@
   ];
 
   // svelte-ignore state_referenced_locally
-  const form = superForm(data.form, {
-    id: isEdit && pageId ? `admin-page-edit-${pageId}` : 'admin-page-create',
+  const form = superForm(initialFormState, {
+    id:
+      isEdit && pageId
+        ? `admin-page-edit-${pageId}`
+        : typeof data.form.id === 'string' && data.form.id.trim()
+          ? data.form.id
+          : 'admin-page-create',
     validators: zod4Client(pageSchema),
     resetForm: false,
     onResult: ({ result }) => {
@@ -51,33 +69,61 @@
     },
   });
 
-  const { form: formData, enhance, capture, restore } = form;
+  const { form: formData, enhance } = form;
 
-  export function captureFormSnapshot() {
-    return {
-      superform: capture(),
-      content: $formData.content ?? '',
-    };
+  type SnapshotPayload = {
+    formData: Infer<PageSchema>;
+  };
+
+  function sanitizeSnapshotValue<T>(input: T): T {
+    const seen = new WeakSet<object>();
+
+    return JSON.parse(
+      JSON.stringify(input, (_key, value) => {
+        if (value instanceof Date) {
+          return value.toISOString();
+        }
+
+        if (typeof File !== 'undefined' && value instanceof File) {
+          return undefined;
+        }
+
+        if (typeof Blob !== 'undefined' && value instanceof Blob) {
+          return undefined;
+        }
+
+        if (typeof value === 'object' && value !== null) {
+          if (seen.has(value)) return undefined;
+          seen.add(value);
+        }
+
+        return value;
+      })
+    ) as T;
   }
 
-  export function restoreFormSnapshot(
-    snapshot: ReturnType<typeof capture> | { superform?: unknown; content?: string }
-  ) {
-    if (snapshot && typeof snapshot === 'object' && 'superform' in snapshot) {
-      const payload = snapshot as { superform?: ReturnType<typeof capture>; content?: string };
+  export function captureFormSnapshot() {
+    const safeFormData = sanitizeSnapshotValue($formData) as Infer<PageSchema>;
 
-      if (payload.superform) {
-        restore(payload.superform);
-      }
+    return {
+      formData: {
+        ...safeFormData,
+        content: safeFormData.content ?? '',
+      },
+    } satisfies SnapshotPayload;
+  }
 
-      if (typeof payload.content === 'string') {
-        $formData.content = payload.content;
-      }
+  export function restoreFormSnapshot(snapshot: unknown) {
+    if (!snapshot || typeof snapshot !== 'object') return;
 
-      return;
-    }
+    const payload = snapshot as Partial<SnapshotPayload>;
+    if (!payload.formData || typeof payload.formData !== 'object') return;
 
-    restore(snapshot as ReturnType<typeof capture>);
+    const restored = sanitizeSnapshotValue(payload.formData) as Infer<PageSchema>;
+    Object.assign($formData, restored, {
+      content: restored.content ?? '',
+      attachments: Array.isArray(restored.attachments) ? restored.attachments : [],
+    });
   }
 
   // Generate slug from title using stopword removal and snake case
@@ -86,6 +132,37 @@
       $formData.slug = createSlug($formData.title);
     }
   }
+
+  function getDraftSlug(): string {
+    const explicitSlug = ($formData.slug ?? '').trim();
+    if (explicitSlug) {
+      return createSlug(explicitSlug) || 'untitled-page';
+    }
+
+    const titleSlug = createSlug(($formData.title ?? '').trim());
+    return titleSlug || 'untitled-page';
+  }
+
+  function getDraftFormId(): string {
+    if (isEdit && pageId) {
+      return `admin-page-edit-${pageId}`;
+    }
+
+    if (typeof data.form.id === 'string' && data.form.id.trim()) {
+      return data.form.id;
+    }
+
+    return 'admin-page-create';
+  }
+
+  $effect(() => {
+    if (isEdit) return;
+
+    dispatch('draftIdentityChanged', {
+      formId: getDraftFormId(),
+      slug: getDraftSlug(),
+    });
+  });
 </script>
 
 <form method="POST" use:enhance enctype="multipart/form-data" class="space-y-6">

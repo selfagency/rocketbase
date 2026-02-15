@@ -15,7 +15,7 @@ export const pageSchema = z.object({
   order: z.number().int().min(0).optional(),
   image: z.instanceof(File).optional(),
   media: z.array(z.instanceof(File)).optional(),
-  attachments: z.array(z.string()).default([]).optional(),
+  attachments: z.array(z.string()).default([]),
   parent: z.string().optional(),
   require_login: z.boolean().default(false),
   subscriber_only: z.boolean().default(false),

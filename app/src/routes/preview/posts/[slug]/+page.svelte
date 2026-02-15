@@ -2,8 +2,8 @@
   import { page } from '$app/state';
   import PostHeader from '$lib/components/posts/PostHeader.svelte';
   import * as m from '$lib/paraglide/messages';
-  import { getSocialImageUrl } from '$lib/utils/image-sizes';
   import { getFileUrl } from '$lib/utils';
+  import { getSocialImageUrl } from '$lib/utils/image-sizes';
   import { MetaTags } from 'svelte-meta-tags';
 
   let { data } = $props();

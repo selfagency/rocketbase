@@ -34,15 +34,15 @@ export const load: PageServerLoad = async ({ locals }) => {
   ]);
 
   const defaultAuthorIds = locals.user?.id ? [locals.user.id] : [];
+  const form = await superValidate(zod4(postSchema), {
+    errors: false,
+  });
+
+  form.data.date = getCurrentDateTimeLocalValue();
+  form.data.author = defaultAuthorIds;
 
   return {
-    form: await superValidate(
-      {
-        date: getCurrentDateTimeLocalValue(),
-        author: defaultAuthorIds,
-      },
-      zod4(postSchema)
-    ),
+    form,
     authors: users.map(user => ({ id: user.id, name: user.name || user.email || 'Unknown' })),
     tags: tags.map(tag => ({ id: tag.id, name: tag.tag || tag.slug || 'untagged' })),
     pexelsEnabled: Boolean(env.PEXELS_API_KEY),

@@ -12,6 +12,7 @@
   import { toast } from '$lib/stores/toast';
   import type { RevisionHistoryEntry } from '$lib/types/revision-history';
   import { generateSlug as createSlug } from '$lib/utils/slug-utils';
+  import { createEventDispatcher } from 'svelte';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
 
@@ -47,9 +48,26 @@
     postId?: string;
   } = $props();
 
+  const dispatch = createEventDispatcher<{
+    draftIdentityChanged: { formId: string; slug: string };
+  }>();
+
+  const initialFormState = (() => {
+    if (!isEdit && !data.form.posted) {
+      return { ...data.form, errors: {} };
+    }
+
+    return data.form;
+  })();
+
   // svelte-ignore state_referenced_locally
-  const form = superForm(data.form, {
-    id: isEdit && postId ? `admin-post-edit-${postId}` : 'admin-post-create',
+  const form = superForm(initialFormState, {
+    id:
+      isEdit && postId
+        ? `admin-post-edit-${postId}`
+        : typeof data.form.id === 'string' && data.form.id.trim()
+          ? data.form.id
+          : 'admin-post-create',
     validators: zod4Client(postSchema),
     resetForm: false,
     onResult: ({ result }) => {
@@ -61,33 +79,61 @@
     },
   });
 
-  const { form: formData, enhance, capture, restore } = form;
+  const { form: formData, enhance } = form;
 
-  export function captureFormSnapshot() {
-    return {
-      superform: capture(),
-      content: $formData.content ?? '',
-    };
+  type SnapshotPayload = {
+    formData: Infer<PostSchema>;
+  };
+
+  function sanitizeSnapshotValue<T>(input: T): T {
+    const seen = new WeakSet<object>();
+
+    return JSON.parse(
+      JSON.stringify(input, (_key, value) => {
+        if (value instanceof Date) {
+          return value.toISOString();
+        }
+
+        if (typeof File !== 'undefined' && value instanceof File) {
+          return undefined;
+        }
+
+        if (typeof Blob !== 'undefined' && value instanceof Blob) {
+          return undefined;
+        }
+
+        if (typeof value === 'object' && value !== null) {
+          if (seen.has(value)) return undefined;
+          seen.add(value);
+        }
+
+        return value;
+      })
+    ) as T;
   }
 
-  export function restoreFormSnapshot(
-    snapshot: ReturnType<typeof capture> | { superform?: unknown; content?: string }
-  ) {
-    if (snapshot && typeof snapshot === 'object' && 'superform' in snapshot) {
-      const payload = snapshot as { superform?: ReturnType<typeof capture>; content?: string };
+  export function captureFormSnapshot() {
+    const safeFormData = sanitizeSnapshotValue($formData) as Infer<PostSchema>;
 
-      if (payload.superform) {
-        restore(payload.superform);
-      }
+    return {
+      formData: {
+        ...safeFormData,
+        content: safeFormData.content ?? '',
+      },
+    } satisfies SnapshotPayload;
+  }
 
-      if (typeof payload.content === 'string') {
-        $formData.content = payload.content;
-      }
+  export function restoreFormSnapshot(snapshot: unknown) {
+    if (!snapshot || typeof snapshot !== 'object') return;
 
-      return;
-    }
+    const payload = snapshot as Partial<SnapshotPayload>;
+    if (!payload.formData || typeof payload.formData !== 'object') return;
 
-    restore(snapshot as ReturnType<typeof capture>);
+    const restored = sanitizeSnapshotValue(payload.formData) as Infer<PostSchema>;
+    Object.assign($formData, restored, {
+      content: restored.content ?? '',
+      attachments: Array.isArray(restored.attachments) ? restored.attachments : [],
+    });
   }
 
   const authorOptions = $derived<MultiSelectOption[]>(
@@ -109,6 +155,37 @@
       $formData.slug = createSlug($formData.title);
     }
   }
+
+  function getDraftSlug(): string {
+    const explicitSlug = ($formData.slug ?? '').trim();
+    if (explicitSlug) {
+      return createSlug(explicitSlug) || 'untitled-post';
+    }
+
+    const titleSlug = createSlug(($formData.title ?? '').trim());
+    return titleSlug || 'untitled-post';
+  }
+
+  function getDraftFormId(): string {
+    if (isEdit && postId) {
+      return `admin-post-edit-${postId}`;
+    }
+
+    if (typeof data.form.id === 'string' && data.form.id.trim()) {
+      return data.form.id;
+    }
+
+    return 'admin-post-create';
+  }
+
+  $effect(() => {
+    if (isEdit) return;
+
+    dispatch('draftIdentityChanged', {
+      formId: getDraftFormId(),
+      slug: getDraftSlug(),
+    });
+  });
 </script>
 
 <form

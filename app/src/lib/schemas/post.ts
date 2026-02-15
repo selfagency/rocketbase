@@ -20,7 +20,7 @@ export const postSchema = z.object({
   tags: z.array(z.string()).default([]).optional(),
   image: z.instanceof(File).optional(),
   media: z.array(z.instanceof(File)).optional(),
-  attachments: z.array(z.string()).default([]).optional(),
+  attachments: z.array(z.string()).default([]),
 });
 
 export type PostSchema = typeof postSchema;

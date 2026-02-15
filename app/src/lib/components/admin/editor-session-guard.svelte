@@ -16,7 +16,10 @@
     recordUpdatedAt: string | null;
   };
 
-  const dispatch = createEventDispatcher<{ restoreDraft: { snapshot: unknown } }>();
+  const dispatch = createEventDispatcher<{
+    restoreDraft: { snapshot: unknown };
+    syncStateChanged: { syncing: boolean };
+  }>();
 
   let {
     collectionId,
@@ -42,7 +45,7 @@
   let recordChangedSinceStart = $state(false);
   let recordChangedAt = $state<string | null>(null);
   let warningMessage = $state<string | null>(null);
-  let isConnected = $state(false);
+  let isSyncing = $state(false);
 
   let worker: Worker | null = null;
   let autosaveTimer: ReturnType<typeof setInterval> | null = null;
@@ -50,6 +53,9 @@
   let sessionStartedAt = '';
   let lastAutosaveHash = '';
   let initialSnapshotHash = '';
+  let syncStartedAt = 0;
+  let syncClearTimer: ReturnType<typeof setTimeout> | null = null;
+  const MIN_SYNC_VISIBLE_MS = 900;
 
   function serializeSnapshot(snapshot: unknown): string {
     const seen = new WeakSet<object>();
@@ -184,6 +190,8 @@
 
   async function runAutosave() {
     try {
+      if (isSyncing) return;
+
       const snapshot = getSnapshot?.();
       if (!snapshot) return;
 
@@ -192,10 +200,13 @@
       if (initialSnapshotHash && nextHash === initialSnapshotHash) return;
       if (nextHash === lastAutosaveHash) return;
 
+      setSyncingState(true);
       await postSnapshot('autosave', JSON.parse(serializedSnapshot));
       lastAutosaveHash = nextHash;
     } catch (err) {
       warningMessage = err instanceof Error ? err.message : 'Autosave failed.';
+    } finally {
+      setSyncingState(false);
     }
   }
 
@@ -210,6 +221,46 @@
   function restoreDraft() {
     if (!recoverableSnapshot) return;
     dispatch('restoreDraft', { snapshot: recoverableSnapshot });
+  }
+
+  function setSyncingState(next: boolean) {
+    if (next) {
+      if (syncClearTimer) {
+        clearTimeout(syncClearTimer);
+        syncClearTimer = null;
+      }
+
+      syncStartedAt = Date.now();
+
+      if (!isSyncing) {
+        isSyncing = true;
+        dispatch('syncStateChanged', { syncing: true });
+      }
+
+      return;
+    }
+
+    if (!isSyncing) return;
+
+    const elapsed = Date.now() - syncStartedAt;
+    const remaining = Math.max(0, MIN_SYNC_VISIBLE_MS - elapsed);
+
+    if (remaining === 0) {
+      isSyncing = false;
+      dispatch('syncStateChanged', { syncing: false });
+      return;
+    }
+
+    if (syncClearTimer) {
+      clearTimeout(syncClearTimer);
+    }
+
+    syncClearTimer = setTimeout(() => {
+      syncClearTimer = null;
+      if (!isSyncing) return;
+      isSyncing = false;
+      dispatch('syncStateChanged', { syncing: false });
+    }, remaining);
   }
 
   function dismissRecoveryNotice() {
@@ -232,7 +283,6 @@
         };
 
         if (message.type === 'connected') {
-          isConnected = true;
           return;
         }
 
@@ -287,6 +337,10 @@
     return () => {
       if (autosaveTimer) clearInterval(autosaveTimer);
       if (heartbeatTimer) clearInterval(heartbeatTimer);
+      if (syncClearTimer) {
+        clearTimeout(syncClearTimer);
+        syncClearTimer = null;
+      }
       worker?.postMessage({ type: 'stop' });
       worker?.terminate();
       worker = null;
@@ -351,7 +405,5 @@
 
   {#if warningMessage}
     <p class="text-sm text-muted-foreground">{warningMessage}</p>
-  {:else if isConnected}
-    <p class="text-xs text-muted-foreground">Autosave and realtime edit detection are active.</p>
   {/if}
 </div>

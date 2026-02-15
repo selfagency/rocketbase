@@ -20,7 +20,9 @@ export const load: PageServerLoad = async ({ locals }) => {
   });
 
   return {
-    form: await superValidate(zod4(pageSchema)),
+    form: await superValidate(zod4(pageSchema), {
+      errors: false,
+    }),
     availableParents: pages,
     pexelsEnabled: Boolean(env.PEXELS_API_KEY),
   };

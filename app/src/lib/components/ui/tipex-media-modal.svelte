@@ -48,7 +48,7 @@
 
   let {
     open = $bindable(false),
-    attachments = $bindable<string[]>([]),
+    attachments = $bindable<string[]>(),
     entityType,
     entityId,
     pexelsEnabled = false,
@@ -84,6 +84,10 @@
   let editAltText = $state('');
   let editCaption = $state('');
 
+  function currentAttachments(): string[] {
+    return Array.isArray(attachments) ? attachments : [];
+  }
+
   function formatDate(value: string): string {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return value;
@@ -91,18 +95,19 @@
   }
 
   function buildAttachmentIds(): string {
-    return attachments.filter(Boolean).join(',');
+    return currentAttachments().filter(Boolean).join(',');
   }
 
   function mergeAttachment(id: string) {
     if (!id) return;
-    if (!attachments.includes(id)) {
-      attachments = [...attachments, id];
+    const current = currentAttachments();
+    if (!current.includes(id)) {
+      attachments = [...current, id];
     }
   }
 
   function removeAttachment(id: string) {
-    attachments = attachments.filter(value => value !== id);
+    attachments = currentAttachments().filter(value => value !== id);
   }
 
   async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -595,7 +600,7 @@
                       <div class="space-y-1">
                         <div class="flex items-center justify-between gap-2">
                           <Badge variant="outline">{item.source || 'upload'}</Badge>
-                          {#if attachments.includes(item.id)}
+                          {#if currentAttachments().includes(item.id)}
                             <Badge>Linked</Badge>
                           {/if}
                         </div>

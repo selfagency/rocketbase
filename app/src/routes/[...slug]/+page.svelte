@@ -1,8 +1,8 @@
 <script lang="ts">
   import { page as pageState } from '$app/state';
   import PageContent from '$lib/components/pages/PageContent.svelte';
-  import { getSocialImageUrl } from '$lib/utils/image-sizes';
   import { getFileUrl } from '$lib/utils';
+  import { getSocialImageUrl } from '$lib/utils/image-sizes';
   import { MetaTags } from 'svelte-meta-tags';
 
   let { data } = $props();

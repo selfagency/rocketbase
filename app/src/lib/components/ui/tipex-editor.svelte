@@ -26,7 +26,7 @@
 
   let {
     value = $bindable(),
-    attachments = $bindable<string[]>([]),
+    attachments = $bindable<string[]>(),
     entityType,
     entityId,
     pexelsEnabled = false,
@@ -54,8 +54,9 @@
 
   function ensureAttachment(id: string) {
     if (!id) return;
-    if (!attachments.includes(id)) {
-      attachments = [...attachments, id];
+    const current = Array.isArray(attachments) ? attachments : [];
+    if (!current.includes(id)) {
+      attachments = [...current, id];
     }
   }
 
@@ -207,31 +208,6 @@
     }
   }
 
-  // Sync editor content back to the bound value on every editor update.
-  $effect(() => {
-    if (!editor || typeof editor.on !== 'function') return;
-
-    const syncFromEditor = () => {
-      const editorHtml = normalizeHtml(editor.getHTML?.());
-      const modelHtml = normalizeHtml(value);
-
-      if (editorHtml !== modelHtml) {
-        value = editorHtml;
-      }
-    };
-
-    editor.on('update', syncFromEditor);
-    editor.on('blur', syncFromEditor);
-    syncFromEditor();
-
-    return () => {
-      if (typeof editor.off === 'function') {
-        editor.off('update', syncFromEditor);
-        editor.off('blur', syncFromEditor);
-      }
-    };
-  });
-
   // Reconcile external value changes (e.g. snapshot restore) back into editor content.
   $effect(() => {
     if (!editor || typeof editor.getHTML !== 'function') return;
@@ -303,7 +279,7 @@
   data-placeholder={placeholder}
   {...props}
 >
-  <Tipex bind:tipex={editor} floating focal />
+  <Tipex bind:tipex={editor} body={value} floating focal onupdate={() => (value = normalizeHtml(editor?.getHTML()))} />
   <button type="button" class="tipex-html-fab" aria-label="Edit raw HTML" onclick={openHtmlEditor}>
     <CodeXmlIcon class="size-4" aria-hidden="true" />
     <span class="hidden sm:inline">HTML</span>
@@ -332,7 +308,7 @@
 />
 
 <Dialog.Root bind:open={htmlEditorOpen}>
-  <Dialog.Content class="max-w-3xl">
+  <Dialog.Content class="max-h-[80vh] max-w-3xl overflow-hidden">
     <Dialog.Header>
       <Dialog.Title>Edit raw HTML</Dialog.Title>
       <Dialog.Description>Review and edit the source HTML for this editor content.</Dialog.Description>
@@ -384,8 +360,9 @@
   }
 
   .tipex-wrapper :global(.tipex-editor-section) {
-    min-height: 340px;
-    max-height: 72vh;
+    height: 340px;
+    min-height: 260px;
+    max-height: 80vh;
     resize: vertical;
     overflow-y: auto;
     padding: 0.75rem;
@@ -535,8 +512,10 @@
   .tipex-html-source {
     counter-reset: codejar-line;
     min-height: 300px;
+    max-height: 80vh;
     width: 100%;
     resize: vertical;
+    overflow: auto;
     border-radius: 0.5rem;
     border: 1px solid hsl(var(--input));
     background: hsl(var(--background));

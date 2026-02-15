@@ -19,6 +19,10 @@ describe('generateSlug', () => {
   });
 
   it('handles mixed case and punctuation', () => {
-    expect(generateSlug('  My, NEW --- Post: 2026  ')).toBe('new-----post-2026');
+    expect(generateSlug('  My, NEW --- Post: 2026  ')).toBe('new-post-2026');
+  });
+
+  it('collapses repeated hyphens in input', () => {
+    expect(generateSlug('alpha----beta ----- gamma')).toBe('alpha-beta-gamma');
   });
 });

@@ -20,6 +20,9 @@
     "target": "esnext",
     // "types": [],
     // For nodejs:
+    "types": [
+      "node"
+    ],
     "lib": [
       "esnext"
     ],

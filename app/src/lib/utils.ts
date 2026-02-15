@@ -23,6 +23,6 @@ export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?:
  * @returns Complete file URL
  */
 export function getFileUrl(collection: string, recordId: string, filename: string, cdnUrl?: string): string {
-  const path = `/api/files/${collection}/${recordId}/${filename}`;
+  const path = `/api/files/${encodeURIComponent(collection)}/${encodeURIComponent(recordId)}/${encodeURIComponent(filename)}`;
   return cdnUrl ? `${cdnUrl}${path}` : path;
 }

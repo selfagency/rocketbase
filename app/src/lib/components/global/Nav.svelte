@@ -95,6 +95,11 @@
                       <div class="font-medium">Posts</div>
                     </NavigationMenu.Link>
                   </li>
+                  <li>
+                    <NavigationMenu.Link href="/admin/portfolio">
+                      <div class="font-medium">Portfolio</div>
+                    </NavigationMenu.Link>
+                  </li>
                 {/if}
               </ul>
             </NavigationMenu.Content>
@@ -131,6 +136,13 @@
                 }}
               >
                 Post
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onSelect={() => {
+                  goto('/admin/portfolio/new');
+                }}
+              >
+                Portfolio Item
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Root>

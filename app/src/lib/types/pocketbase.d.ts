@@ -164,7 +164,18 @@ export enum MetadataTypeOptions {
   'boolean' = 'boolean',
   'code' = 'code',
 }
+
+export enum MetadataGroupOptions {
+  'general' = 'general',
+  'editing' = 'editing',
+  'social_media' = 'social_media',
+  'indieweb' = 'indieweb',
+  'customization' = 'customization',
+  'other' = 'other',
+}
 export type MetadataRecord = {
+  description?: string;
+  group?: MetadataGroupOptions;
   id: string;
   key: string;
   nice_name?: string;
@@ -177,6 +188,7 @@ export enum PagesCollectionOptions {
   'posts' = 'posts',
   'tags' = 'tags',
   'users' = 'users',
+  'portfolio' = 'portfolio',
 }
 export type PagesRecord = {
   attachments?: RecordIdString[];
@@ -203,6 +215,7 @@ export type PortfolioRecord<Tmetadata = unknown> = {
   description?: HTMLString;
   id: string;
   image?: FileNameString;
+  in_trash?: boolean;
   media?: RecordIdString[];
   metadata?: null | Tmetadata;
   published?: boolean;

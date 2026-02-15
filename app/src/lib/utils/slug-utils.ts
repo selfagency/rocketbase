@@ -30,7 +30,11 @@ export function generateSlug(title: string): string {
   const finalWords = wordsWithoutStopwords.length > 0 ? wordsWithoutStopwords : words;
 
   // Join with dash case (hyphenated)
-  const slug = dash(finalWords.join(' '));
+  const slug = dash(finalWords.join(' '))
+    // collapse repeated separators
+    .replace(/-+/g, '-')
+    // guard against leading/trailing separators
+    .replace(/^-|-$/g, '');
 
   return slug;
 }

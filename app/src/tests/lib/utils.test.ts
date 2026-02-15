@@ -18,6 +18,11 @@ describe('utils', () => {
     const url = getFileUrl('users', 'u1', 'a.jpg', 'https://cdn.test');
     expect(url).toBe('https://cdn.test/api/files/users/u1/a.jpg');
   });
+
+  it('getFileUrl encodes filenames for media library uploads', () => {
+    const url = getFileUrl('media', 'abc123', 'hero image (1).png');
+    expect(url).toBe('/api/files/media/abc123/hero%20image%20(1).png');
+  });
 });
 
 describe('utils', () => {
@@ -60,6 +65,11 @@ describe('utils', () => {
     it('handles CDN URL with trailing slash', () => {
       const url = getFileUrl('media', 'id789', 'video.mp4', 'https://cdn.example.com/');
       expect(url).toBe('https://cdn.example.com//api/files/media/id789/video.mp4');
+    });
+
+    it('encodes spaces in filenames', () => {
+      const url = getFileUrl('media', 'id789', 'sample file.jpg');
+      expect(url).toBe('/api/files/media/id789/sample%20file.jpg');
     });
   });
 });

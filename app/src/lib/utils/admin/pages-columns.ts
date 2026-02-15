@@ -4,6 +4,7 @@ import PublishVisibilityCell from '$lib/components/admin/pages/publish-visibilit
 import { renderComponent, renderSnippet } from '$lib/components/ui/data-table';
 import * as m from '$lib/paraglide/messages';
 import type { PagesResponseWithAuthor } from '$lib/types/pocketbase-expanded';
+import { formatRelativeTime } from '$lib/utils/relative-time';
 import ImageIcon from '@lucide/svelte/icons/image';
 import type { ColumnDef } from '@tanstack/table-core';
 import { createRawSnippet } from 'svelte';
@@ -17,7 +18,7 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
       const orderSnippet = createRawSnippet<[{ orderLabel: string }]>(getData => {
         const { orderLabel } = getData();
         return {
-          render: () => `<div class="text-sm text-center font-mono">${orderLabel}</div>`,
+          render: () => `<div class="text-xs text-center font-mono text-foreground">${orderLabel}</div>`,
         };
       });
       return renderSnippet(orderSnippet, {
@@ -32,11 +33,11 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
       const { image, id } = row.original as any;
       if (!image) {
         return renderComponent(ImageIcon, {
-          class: 'w-8 h-8 text-gray-300 p-2 bg-gray-100 rounded',
+          class: 'h-12 w-12 rounded bg-gray-100 p-2 text-gray-300',
         });
       }
       const imageUrl = `http://127.0.0.1:8090/api/files/pages/${id}/${image}?thumb=100x100`;
-      return `<img src="${imageUrl}" alt="Thumbnail" class="w-12 h-12 object-cover rounded" />`;
+      return `<img src="${imageUrl}" alt="Thumbnail" class="h-12 w-12 rounded object-cover" />`;
     },
   },
   {
@@ -60,7 +61,7 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
         const safeSlug = slug?.trim() || '—';
         return {
           render: () =>
-            `<div class="max-w-20 truncate text-sm text-muted-foreground sm:max-w-24 md:max-w-32" title="${safeSlug.replace(/"/g, '&quot;')}">${safeSlug}</div>`,
+            `<div class="truncate text-xs text-foreground" title="${safeSlug.replace(/"/g, '&quot;')}">${safeSlug}</div>`,
         };
       });
       return renderSnippet(slugSnippet, {
@@ -78,7 +79,7 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
         const safeSummary = summary?.trim() || '—';
         return {
           render: () =>
-            `<div class="max-w-full truncate text-sm text-muted-foreground" title="${safeSummary.replace(/"/g, '&quot;')}">${safeSummary}</div>`,
+            `<div class="max-w-full truncate text-xs text-foreground" title="${safeSummary.replace(/"/g, '&quot;')}">${safeSummary}</div>`,
         };
       });
 
@@ -102,9 +103,9 @@ export const columns: ColumnDef<PagesResponseWithAuthor>[] = [
     cell: ({ row }) => {
       const dateSnippet = createRawSnippet<[{ updated: string }]>(getData => {
         const { updated } = getData();
-        const formatted = new Date(updated).toLocaleDateString();
+        const formatted = formatRelativeTime(updated);
         return {
-          render: () => `<div class="text-sm text-muted-foreground">${formatted}</div>`,
+          render: () => `<div class="text-xs text-foreground">${formatted}</div>`,
         };
       });
       return renderSnippet(dateSnippet, {

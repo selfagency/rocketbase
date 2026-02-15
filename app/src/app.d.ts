@@ -2,6 +2,7 @@
 // for information about these interfaces
 import type { LogLayer } from 'loglayer';
 import type { TypedPocketBase, UsersResponse } from './lib/types/pocketbase';
+import '@poppanator/sveltekit-svg/dist/svg.d.ts';
 
 declare global {
   namespace App {

@@ -1,4 +1,5 @@
 import { pageSchema } from '$lib/schemas/page';
+import { env } from '$env/dynamic/private';
 import type { PagesResponse } from '$lib/types/pocketbase';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
@@ -21,6 +22,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   return {
     form: await superValidate(zod4(pageSchema)),
     availableParents: pages,
+    pexelsEnabled: Boolean(env.PEXELS_API_KEY),
   };
 };
 
@@ -70,7 +72,7 @@ export const actions: Actions = {
         attachmentIds.push(mediaRecord.id);
       }
 
-      for (const attachmentId of attachmentIds) {
+      for (const attachmentId of [...new Set(attachmentIds)]) {
         if (attachmentId) {
           pbFormData.append('attachments', attachmentId);
         }

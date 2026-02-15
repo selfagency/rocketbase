@@ -22,6 +22,7 @@ export enum Collections {
   QueueStats = 'queue_stats',
   QueueTasks = 'queue_tasks',
   Redirects = 'redirects',
+  Snapshots = 'snapshots',
   Tags = 'tags',
   Users = 'users',
 }
@@ -161,7 +162,7 @@ export enum MetadataTypeOptions {
   'float' = 'float',
   'json' = 'json',
   'boolean' = 'boolean',
-  'textblob' = 'textblob',
+  'code' = 'code',
 }
 export type MetadataRecord = {
   id: string;
@@ -221,6 +222,7 @@ export type PostsRecord = {
   date: IsoDateString;
   embed?: string;
   enclosure?: string;
+  featured?: boolean;
   id: string;
   image?: FileNameString;
   in_trash?: boolean;
@@ -263,6 +265,15 @@ export type RedirectsRecord = {
   slug?: string;
   updated: IsoAutoDateString;
   url?: string;
+};
+
+export type SnapshotsRecord<Tsnapshot = unknown> = {
+  collection_id?: string;
+  editor?: RecordIdString;
+  id: string;
+  record_id?: string;
+  snapshot?: null | Tsnapshot;
+  updated: IsoAutoDateString;
 };
 
 export type TagsRecord = {
@@ -325,6 +336,8 @@ export type QueueStatsResponse<Tfailed_tasks = unknown, Tpending_tasks = unknown
 export type QueueTasksResponse<Ttask = unknown, Texpand = unknown> = Required<QueueTasksRecord<Ttask>> &
   BaseSystemFields<Texpand>;
 export type RedirectsResponse<Texpand = unknown> = Required<RedirectsRecord> & BaseSystemFields<Texpand>;
+export type SnapshotsResponse<Tsnapshot = unknown, Texpand = unknown> = Required<SnapshotsRecord<Tsnapshot>> &
+  BaseSystemFields<Texpand>;
 export type TagsResponse<Texpand = unknown> = Required<TagsRecord> & BaseSystemFields<Texpand>;
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>;
 
@@ -347,6 +360,7 @@ export type CollectionRecords = {
   queue_stats: QueueStatsRecord;
   queue_tasks: QueueTasksRecord;
   redirects: RedirectsRecord;
+  snapshots: SnapshotsRecord;
   tags: TagsRecord;
   users: UsersRecord;
 };
@@ -368,6 +382,7 @@ export type CollectionResponses = {
   queue_stats: QueueStatsResponse;
   queue_tasks: QueueTasksResponse;
   redirects: RedirectsResponse;
+  snapshots: SnapshotsResponse;
   tags: TagsResponse;
   users: UsersResponse;
 };

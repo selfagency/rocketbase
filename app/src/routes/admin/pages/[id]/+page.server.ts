@@ -1,4 +1,5 @@
 import { pageSchema } from '$lib/schemas/page';
+import { env } from '$env/dynamic/private';
 import { getRestoreSnapshot, getRevisionHistory } from '$lib/server/revision-history';
 import type { PagesResponse, UsersResponse } from '$lib/types/pocketbase';
 import type { AuditSnapshot } from '$lib/types/revision-history';
@@ -163,6 +164,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       parentSlug,
       availableParents,
       revisions,
+      pexelsEnabled: Boolean(env.PEXELS_API_KEY),
     };
   } catch {
     error(404, 'Page not found');
@@ -217,7 +219,7 @@ export const actions: Actions = {
         attachmentIds.push(mediaRecord.id);
       }
 
-      for (const attachmentId of attachmentIds) {
+      for (const attachmentId of [...new Set(attachmentIds)]) {
         if (attachmentId) {
           pbFormData.append('attachments', attachmentId);
         }

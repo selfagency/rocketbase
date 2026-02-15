@@ -2,6 +2,7 @@
   import { page } from '$app/state';
   import PostHeader from '$lib/components/posts/PostHeader.svelte';
   import * as m from '$lib/paraglide/messages';
+  import { getSocialImageUrl } from '$lib/utils/image-sizes';
   import { getFileUrl } from '$lib/utils';
   import { MetaTags } from 'svelte-meta-tags';
   import type { PageData } from './$types';
@@ -12,6 +13,7 @@
   const featuredImageUrl = $derived(
     data.post.image ? `${page.url.origin}${getFileUrl('posts', data.post.id, data.post.image, cdnUrl)}` : undefined
   );
+  const facebookOgImageUrl = $derived(featuredImageUrl ? getSocialImageUrl(featuredImageUrl, 'facebook') : undefined);
 
   const metaTags = $derived({
     title: data.post.title,
@@ -22,10 +24,10 @@
       url: `${page.url.origin}/posts/${data.post.slug}`,
       title: data.post.title,
       description: data.post.summary,
-      images: featuredImageUrl
+      images: facebookOgImageUrl
         ? [
             {
-              url: featuredImageUrl,
+              url: facebookOgImageUrl,
               width: 1200,
               height: 630,
               alt: data.post.title,
@@ -44,7 +46,7 @@
       '@type': 'BlogPosting',
       headline: data.post.title,
       description: data.post.summary,
-      image: featuredImageUrl,
+      image: facebookOgImageUrl,
       datePublished: data.post.date,
       dateModified: data.post.updated,
       author: (data.post.expand as any)?.author?.map((a: any) => ({

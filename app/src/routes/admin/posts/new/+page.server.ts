@@ -1,4 +1,5 @@
 import { postSchema } from '$lib/schemas/post';
+import { env } from '$env/dynamic/private';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
@@ -8,6 +9,12 @@ function normalizeDateInput(dateString: string): string | null {
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return null;
   return date.toISOString();
+}
+
+function getCurrentDateTimeLocalValue(): string {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
 }
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -26,10 +33,19 @@ export const load: PageServerLoad = async ({ locals }) => {
     }),
   ]);
 
+  const defaultAuthorIds = locals.user?.id ? [locals.user.id] : [];
+
   return {
-    form: await superValidate(zod4(postSchema)),
+    form: await superValidate(
+      {
+        date: getCurrentDateTimeLocalValue(),
+        author: defaultAuthorIds,
+      },
+      zod4(postSchema)
+    ),
     authors: users.map(user => ({ id: user.id, name: user.name || user.email || 'Unknown' })),
     tags: tags.map(tag => ({ id: tag.id, name: tag.tag || tag.slug || 'untagged' })),
+    pexelsEnabled: Boolean(env.PEXELS_API_KEY),
   };
 };
 
@@ -94,7 +110,7 @@ export const actions: Actions = {
         attachmentIds.push(mediaRecord.id);
       }
 
-      for (const attachmentId of attachmentIds) {
+      for (const attachmentId of [...new Set(attachmentIds)]) {
         if (attachmentId) {
           pbFormData.append('attachments', attachmentId);
         }

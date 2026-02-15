@@ -1,4 +1,5 @@
 import { postSchema } from '$lib/schemas/post';
+import { env } from '$env/dynamic/private';
 import { getRestoreSnapshot, getRevisionHistory } from '$lib/server/revision-history';
 import type { UsersResponse } from '$lib/types/pocketbase';
 import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
@@ -161,6 +162,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       authors: users.map(user => ({ id: user.id, name: user.name || user.email || 'Unknown' })),
       tags: tags.map(tag => ({ id: tag.id, name: tag.tag || tag.slug || 'untagged' })),
       revisions,
+      pexelsEnabled: Boolean(env.PEXELS_API_KEY),
     };
   } catch {
     error(404, 'Post not found');
@@ -228,7 +230,7 @@ export const actions: Actions = {
         attachmentIds.push(mediaRecord.id);
       }
 
-      for (const attachmentId of attachmentIds) {
+      for (const attachmentId of [...new Set(attachmentIds)]) {
         if (attachmentId) {
           pbFormData.append('attachments', attachmentId);
         }

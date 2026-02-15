@@ -71,7 +71,11 @@
       "Bash(/tmp/coverage-progress.md:*)",
       "Bash(pnpm run test:node:*)",
       "Bash(pnpm test:browser:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(pnpm dlx:*)",
+      "Bash(pnpm run add-ui:*)",
+      "Bash(pnpx shadcn-svelte@latest add:*)",
+      "Bash(git checkout:*)"
     ]
   },
   "hooks": {

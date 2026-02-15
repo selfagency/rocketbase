@@ -1,13 +1,16 @@
 <script lang="ts">
+  import RevisionHistoryDialog from '$lib/components/admin/revisions/revision-history-dialog.svelte';
   import { Button } from '$lib/components/ui/button';
   import * as Form from '$lib/components/ui/form';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
+  import { MultiSelect, type MultiSelectOption } from '$lib/components/ui/multi-select';
   import { Switch } from '$lib/components/ui/switch';
   import { Textarea } from '$lib/components/ui/textarea';
   import TipexEditor from '$lib/components/ui/tipex-editor.svelte';
   import { postSchema, type PostSchema } from '$lib/schemas/post';
   import { toast } from '$lib/stores/toast';
+  import type { RevisionHistoryEntry } from '$lib/types/revision-history';
   import { generateSlug as createSlug } from '$lib/utils/slug-utils';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
@@ -16,12 +19,22 @@
     form: SuperValidated<Infer<PostSchema>>;
     authors: { id: string; name: string }[];
     tags: { id: string; name: string }[];
+    revisions?: RevisionHistoryEntry[];
     post?: {
       id: string;
       slug: string;
       title?: string;
     };
   };
+
+  const postDiffFields = [
+    { key: 'title', label: 'Title' },
+    { key: 'slug', label: 'Slug' },
+    { key: 'summary', label: 'Summary' },
+    { key: 'content', label: 'Content' },
+    { key: 'embed', label: 'Embed code' },
+    { key: 'enclosure', label: 'Enclosure URL' },
+  ];
 
   let {
     data,
@@ -47,6 +60,20 @@
   });
 
   const { form: formData, enhance } = form;
+
+  const authorOptions = $derived<MultiSelectOption[]>(
+    data.authors.map(author => ({
+      value: author.id,
+      label: author.name,
+    }))
+  );
+
+  const tagOptions = $derived<MultiSelectOption[]>(
+    data.tags.map(tag => ({
+      value: tag.id,
+      label: tag.name,
+    }))
+  );
 
   function generateSlug() {
     if ($formData.title && !$formData.slug) {
@@ -133,20 +160,17 @@
       <Form.Control>
         {#snippet children({ props })}
           <Form.Label>Authors</Form.Label>
-          <select
+          <MultiSelect
             {...props}
             bind:value={$formData.author}
-            multiple
-            class="flex min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+            options={authorOptions}
+            placeholder="Select authors"
+            searchPlaceholder="Search authors..."
             aria-describedby="author-help"
-          >
-            {#each data.authors as author (author.id)}
-              <option value={author.id}>{author.name}</option>
-            {/each}
-          </select>
+          />
         {/snippet}
       </Form.Control>
-      <Form.Description id="author-help">Select one or more authors (Cmd/Ctrl+click for multiple).</Form.Description>
+      <Form.Description id="author-help">Select one or more authors.</Form.Description>
       <Form.FieldErrors />
     </Form.Field>
 
@@ -154,17 +178,14 @@
       <Form.Control>
         {#snippet children({ props })}
           <Form.Label>Tags</Form.Label>
-          <select
+          <MultiSelect
             {...props}
             bind:value={$formData.tags}
-            multiple
-            class="flex min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+            options={tagOptions}
+            placeholder="Select tags"
+            searchPlaceholder="Search tags..."
             aria-describedby="tags-help"
-          >
-            {#each data.tags as tag (tag.id)}
-              <option value={tag.id}>{tag.name}</option>
-            {/each}
-          </select>
+          />
         {/snippet}
       </Form.Control>
       <Form.Description id="tags-help">Select any tags you want to assign.</Form.Description>
@@ -192,7 +213,7 @@
     </Form.Field>
   </div>
 
-  <div class="space-y-4 rounded-lg border p-4">
+  <div class="space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
     <h2 class="font-semibold">Post Settings</h2>
 
     <Form.Field {form} name="published">
@@ -259,4 +280,12 @@
     {/if}
     <Button type="button" variant="outline" href="/admin/posts">Cancel</Button>
   </div>
+
+  {#if isEdit}
+    <RevisionHistoryDialog
+      revisions={data.revisions ?? []}
+      restoreAction="?/restoreRevision"
+      diffFields={postDiffFields}
+    />
+  {/if}
 </form>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import RevisionHistoryDialog from '$lib/components/admin/revisions/revision-history-dialog.svelte';
   import { Button } from '$lib/components/ui/button';
   import * as Form from '$lib/components/ui/form';
   import { Input } from '$lib/components/ui/input';
@@ -9,6 +10,7 @@
   import { pageSchema, type PageSchema } from '$lib/schemas/page';
   import { toast } from '$lib/stores/toast';
   import type { PagesResponse } from '$lib/types/pocketbase';
+  import type { RevisionHistoryEntry } from '$lib/types/revision-history';
   import { generateSlug as createSlug } from '$lib/utils/slug-utils';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod4Client } from 'sveltekit-superforms/adapters';
@@ -20,12 +22,20 @@
     pageId,
     availableParents = [],
   }: {
-    data: { form: SuperValidated<Infer<PageSchema>> };
+    data: { form: SuperValidated<Infer<PageSchema>>; revisions?: RevisionHistoryEntry[] };
     isEdit?: boolean;
     parentSlug?: string | null;
     pageId?: string;
     availableParents?: PagesResponse[];
   } = $props();
+
+  const pageDiffFields = [
+    { key: 'title', label: 'Title' },
+    { key: 'slug', label: 'Slug' },
+    { key: 'summary', label: 'Summary' },
+    { key: 'content', label: 'Content' },
+    { key: 'custom_css', label: 'Custom CSS' },
+  ];
 
   // svelte-ignore state_referenced_locally
   const form = superForm(data.form, {
@@ -191,7 +201,7 @@
   </div>
 
   <!-- Switches Section -->
-  <div class="space-y-4 rounded-lg border p-4">
+  <div class="space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
     <h3 class="font-semibold">Page Settings</h3>
 
     <Form.Field {form} name="published">
@@ -281,4 +291,12 @@
     {/if}
     <Button type="button" variant="outline" href="/admin/pages">Cancel</Button>
   </div>
+
+  {#if isEdit}
+    <RevisionHistoryDialog
+      revisions={data.revisions ?? []}
+      restoreAction="?/restoreRevision"
+      diffFields={pageDiffFields}
+    />
+  {/if}
 </form>

@@ -122,17 +122,9 @@
     @apply bg-muted pt-24 text-foreground;
   }
 
-  /* Input, textarea, and select background styling */
   input:not([type='checkbox']):not([type='radio']):not([type='file']),
   textarea,
   select {
-    background-color: oklch(0.985 0 0); /* #FBFBFB equivalent */
-  }
-
-  /* Dark mode override */
-  .dark input:not([type='checkbox']):not([type='radio']):not([type='file']),
-  .dark textarea,
-  .dark select {
-    background-color: oklch(0.235 0.034 273.80697572834913); /* Match dark card color */
+    @apply bg-[oklch(0.985_0_0)]! dark:bg-[oklch(0.235_0.034_273.80697572834913)]!;
   }
 }

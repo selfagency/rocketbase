@@ -23,6 +23,9 @@ importers:
       '@friendofsvelte/tipex':
         specifier: ^0.1.1
         version: 0.1.1(highlight.js@11.8.0)(svelte@5.51.0)
+      '@humanspeak/svelte-diff-match-patch':
+        specifier: ^0.0.3
+        version: 0.0.3(svelte@5.51.0)
       '@inlang/paraglide-js':
         specifier: ^2.11.0
         version: 2.11.0
@@ -652,6 +655,11 @@ packages:
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
+
+  '@humanspeak/svelte-diff-match-patch@0.0.3':
+    resolution: {integrity: sha512-36agVKiNDXoWRsu0URpymHgYnYYhDqrsM9WFB0ipRhAWfEqHteUqGZNY9WS0FjjiqRgOLjOgbhiwPZmwFzL6Jw==}
+    peerDependencies:
+      svelte: ^5.0.0
 
   '@humanwhocodes/crosspost@1.0.2':
     resolution: {integrity: sha512-p+hmTOQvELjWLmCuXzpTPe7prXDmbZIQrR2JhDM7/+wIuDxYrOmce4ZGLOsFE6C36lrA35lAvI8gptOxlitgQg==}
@@ -3403,6 +3411,9 @@ packages:
   devalue@5.6.2:
     resolution: {integrity: sha512-nPRkjWzzDQlsejL1WVifk5rvcFi/y1onBRxjaFMjZeR9mFpqu2gmAZ9xUB9/IEanEP/vBtGeGganC/GO1fmufg==}
 
+  diff-match-patch-ts@0.6.0:
+    resolution: {integrity: sha512-U0uPIJ+wJqgaBoVw2MFSFpGIk7q3mJJ+/sehbxDZFv4Gx6a1GOmrsSLmxVDDrGtRL4Q9de084aa5lVpCHn+eUw==}
+
   dlv@1.1.3:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
 
@@ -5840,6 +5851,11 @@ snapshots:
   '@hono/node-server@1.19.9(hono@4.11.8)':
     dependencies:
       hono: 4.11.8
+
+  '@humanspeak/svelte-diff-match-patch@0.0.3(svelte@5.51.0)':
+    dependencies:
+      diff-match-patch-ts: 0.6.0
+      svelte: 5.51.0
 
   '@humanwhocodes/crosspost@1.0.2':
     dependencies:
@@ -8448,6 +8464,8 @@ snapshots:
   detect-libc@2.1.2: {}
 
   devalue@5.6.2: {}
+
+  diff-match-patch-ts@0.6.0: {}
 
   dlv@1.1.3:
     optional: true

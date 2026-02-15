@@ -1,5 +1,8 @@
 import { postSchema } from '$lib/schemas/post';
+import { getRestoreSnapshot, getRevisionHistory } from '$lib/server/revision-history';
+import type { UsersResponse } from '$lib/types/pocketbase';
 import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
+import type { AuditSnapshot } from '$lib/types/revision-history';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
@@ -33,14 +36,86 @@ function relationIds(values: unknown[]): string[] {
     .filter((id): id is string => Boolean(id));
 }
 
-export const load: PageServerLoad = async ({ locals, params }) => {
-  if (!locals.user) error(401, 'Unauthorized');
-  if (locals.user.role !== 'admin' && locals.user.role !== 'editor') {
+function ensureEditorAccess(user: UsersResponse | null) {
+  if (!user) error(401, 'Unauthorized');
+  if (user.role !== 'admin' && user.role !== 'editor') {
     error(403, 'Forbidden - Requires editor or admin role');
   }
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function asBoolean(value: unknown): boolean | undefined {
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+function asStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+
+  return value
+    .map(item => {
+      if (typeof item === 'string') return item;
+      if (item && typeof item === 'object' && 'id' in item) {
+        const id = (item as { id?: string }).id;
+        return id || '';
+      }
+
+      return '';
+    })
+    .filter(Boolean);
+}
+
+function buildPostRestorePayload(snapshot: AuditSnapshot): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+
+  const title = asString(snapshot.title);
+  if (title !== undefined) payload.title = title;
+
+  const slug = asString(snapshot.slug);
+  if (slug !== undefined) payload.slug = slug;
+
+  payload.summary = asString(snapshot.summary) ?? '';
+
+  payload.content = asString(snapshot.content) ?? '';
+
+  payload.embed = asString(snapshot.embed) ?? '';
+
+  payload.enclosure = asString(snapshot.enclosure) ?? '';
+
+  const published = asBoolean(snapshot.published);
+  if (published !== undefined) payload.published = published;
+
+  const visible = asBoolean(snapshot.visible);
+  if (visible !== undefined) payload.visible = visible;
+
+  const requireLogin = asBoolean(snapshot.require_login);
+  if (requireLogin !== undefined) payload.require_login = requireLogin;
+
+  const subscriberOnly = asBoolean(snapshot.subscriber_only);
+  if (subscriberOnly !== undefined) payload.subscriber_only = subscriberOnly;
+
+  const inTrash = asBoolean(snapshot.in_trash);
+  if (inTrash !== undefined) payload.in_trash = inTrash;
+
+  const normalizedDate = asString(snapshot.date) ? normalizeDateInput(String(snapshot.date)) : null;
+  if (normalizedDate) payload.date = normalizedDate;
+
+  payload.author = asStringArray(snapshot.author) ?? [];
+
+  payload.tags = asStringArray(snapshot.tags) ?? [];
+
+  payload.attachments = asStringArray(snapshot.attachments) ?? [];
+
+  return payload;
+}
+
+export const load: PageServerLoad = async ({ locals, params }) => {
+  ensureEditorAccess(locals.user);
 
   try {
-    const [post, users, tags] = await Promise.all([
+    const [post, users, tags, revisions] = await Promise.all([
       locals.pb.collection('posts').getOne<PostsResponseWithExpanded>(params.id, {
         expand: 'author,tags,attachments',
       }),
@@ -51,6 +126,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       locals.pb.collection('tags').getFullList({
         fields: 'id,tag,slug',
       }),
+      getRevisionHistory(locals.pb, 'posts', params.id),
     ]);
 
     const expandedAuthor = Array.isArray((post as any).expand?.author) ? (post as any).expand.author : [];
@@ -84,6 +160,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       form,
       authors: users.map(user => ({ id: user.id, name: user.name || user.email || 'Unknown' })),
       tags: tags.map(tag => ({ id: tag.id, name: tag.tag || tag.slug || 'untagged' })),
+      revisions,
     };
   } catch {
     error(404, 'Post not found');
@@ -92,6 +169,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
 export const actions: Actions = {
   default: async ({ locals, params, request }) => {
+    ensureEditorAccess(locals.user);
+
     const formData = await request.formData();
     const form = await superValidate(formData, zod4(postSchema));
 
@@ -162,6 +241,60 @@ export const actions: Actions = {
         form,
         error: pbError.message || 'Failed to update post',
       });
+    }
+
+    redirect(303, `/admin/posts/${params.id}`);
+  },
+
+  restoreRevision: async ({ locals, params, request }) => {
+    ensureEditorAccess(locals.user);
+
+    const formData = await request.formData();
+    const revisionId = formData.get('revisionId');
+
+    if (typeof revisionId !== 'string' || !revisionId.trim()) {
+      return fail(400, { error: 'A valid revision is required.' });
+    }
+
+    try {
+      const revision = await locals.pb.collection('audit_logs').getOne(revisionId, {
+        fields: 'id,event_type,collection_name,record_id,before_changes,after_changes,timestamp,created',
+      });
+
+      if (revision.collection_name !== 'posts' || revision.record_id !== params.id) {
+        return fail(404, { error: 'Revision not found for this post.' });
+      }
+
+      if (revision.event_type !== 'create' && revision.event_type !== 'update') {
+        return fail(400, { error: 'Only create/update revisions can be restored.' });
+      }
+
+      const snapshot = getRestoreSnapshot({
+        id: revision.id,
+        eventType: revision.event_type,
+        timestamp: revision.timestamp,
+        created: revision.created,
+        authorId: null,
+        authorName: 'System',
+        authorEmail: null,
+        before: (revision.before_changes as AuditSnapshot | null) || null,
+        after: (revision.after_changes as AuditSnapshot | null) || null,
+      });
+
+      if (!snapshot) {
+        return fail(400, { error: 'No snapshot data found for the selected revision.' });
+      }
+
+      const payload = buildPostRestorePayload(snapshot);
+
+      if (!payload.title || !payload.slug || !payload.date || !payload.author) {
+        return fail(400, { error: 'Revision is missing required post fields and cannot be restored.' });
+      }
+
+      await locals.pb.collection('posts').update(params.id, payload);
+    } catch (err) {
+      const pbError = err as Error;
+      return fail(500, { error: pbError.message || 'Failed to restore revision.' });
     }
 
     redirect(303, `/admin/posts/${params.id}`);

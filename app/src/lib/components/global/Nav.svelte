@@ -11,6 +11,7 @@
   import { isMobile } from '$lib/stores/screen';
   import type { NavItem } from '$lib/types';
   import { getDisplayName, getPocketBaseAvatarUrl, getUserInitials } from '$lib/utils/user-profile';
+  import CirclePlusIcon from '@lucide/svelte/icons/circle-plus';
 
   let { navItems = [] }: { navItems?: NavItem[] } = $props();
 
@@ -104,6 +105,37 @@
 
     <div class="flex items-center gap-3">
       {#if page?.data?.user}
+        {#if page?.data?.user?.role === 'admin' || page?.data?.user?.role === 'editor' || page?.data?.user?.role === 'contributor'}
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger
+              aria-label="Create new content"
+              class="inline-flex items-center gap-2 rounded-md border border-transparent bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            >
+              <CirclePlusIcon class="h-4 w-4" aria-hidden="true" />
+              <span>New</span>
+            </DropdownMenu.Trigger>
+
+            <DropdownMenu.Content align="end" class="w-40 border-border/60 shadow-md">
+              {#if page?.data?.user?.role === 'admin' || page?.data?.user?.role === 'editor'}
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    goto('/admin/pages/new');
+                  }}
+                >
+                  Page
+                </DropdownMenu.Item>
+              {/if}
+              <DropdownMenu.Item
+                onSelect={() => {
+                  goto('/admin/posts/new');
+                }}
+              >
+                Post
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        {/if}
+
         <form method="POST" action="/logout" bind:this={logoutFormRef} class="hidden"></form>
         <DropdownMenu.Root>
           <DropdownMenu.Trigger
@@ -121,7 +153,7 @@
             </Avatar.Root>
           </DropdownMenu.Trigger>
 
-          <DropdownMenu.Content align="end" class="w-48">
+          <DropdownMenu.Content align="end" class="w-48 border-border/60 shadow-md">
             <DropdownMenu.Label>{m['nav.account_label']()}</DropdownMenu.Label>
             <DropdownMenu.Separator />
             <DropdownMenu.Item

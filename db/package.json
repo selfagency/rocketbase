@@ -1,0 +1,30 @@
+{
+  "name": "rocketbase-pocketbase",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "check": "tsc --noEmit",
+    "generate:portfolio": "node ./util/generate-portfolio.js",
+    "generate:posts": "node ./util/generate-posts.js"
+  },
+  "keywords": [],
+  "author": "Daniel Sieradski <daniel@self.agency> (https://self.agency)",
+  "license": "MIT",
+  "packageManager": "pnpm@10.29.3",
+  "devDependencies": {
+    "@ngneat/falso": "^8.0.2",
+    "@prettier/plugin-oxc": "^0.1.3",
+    "dotenv": "^17.3.1",
+    "oxfmt": "^0.32.0",
+    "oxlint": "^1.47.0",
+    "oxlint-tsgolint": "^0.13.0",
+    "pocketbase": "^0.26.8",
+    "pocketbase-typegen": "^1.3.3",
+    "radashi": "^12.7.1",
+    "sqlite3": "^5.1.7",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

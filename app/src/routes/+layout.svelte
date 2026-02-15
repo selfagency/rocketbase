@@ -91,12 +91,10 @@
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
-
 <MetaTags {...baseMetaTags} />
-
 <Toaster />
 <Nav navItems={data.navItems || []} />
 
-<div class="container mx-auto flex min-h-[80vh] w-full flex-col items-center justify-start">
+<div class="container mx-auto flex min-h-[80vh] w-full flex-col items-center justify-start p-4 md:p-8">
   {@render children()}
 </div>

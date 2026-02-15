@@ -12,7 +12,8 @@
   import ArrowDown10Icon from '@lucide/svelte/icons/arrow-down-1-0';
   import ArrowDownUpIcon from '@lucide/svelte/icons/arrow-down-up';
   import GripVerticalIcon from '@lucide/svelte/icons/grip-vertical';
-  import { type ColumnDef, getCoreRowModel } from '@tanstack/table-core';
+  import { type ColumnDef, type VisibilityState, getCoreRowModel } from '@tanstack/table-core';
+  import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
 
   type DataTableProps<TData, TValue> = {
@@ -30,7 +31,29 @@
   let searchValue = $state(page.url.searchParams.get('search') || '');
   // svelte-ignore state_referenced_locally
   let statusValue = $state(status);
+  let columnVisibility = $state<VisibilityState>({});
   let searchTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  function syncColumnVisibility(width: number) {
+    const showExtendedColumns = width >= 1024;
+
+    columnVisibility = {
+      ...columnVisibility,
+      slug: showExtendedColumns,
+      summary: showExtendedColumns,
+    };
+  }
+
+  onMount(() => {
+    syncColumnVisibility(window.innerWidth);
+
+    const onResize = () => {
+      syncColumnVisibility(window.innerWidth);
+    };
+
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  });
 
   const table = createSvelteTable({
     get data() {
@@ -38,6 +61,18 @@
     },
     get columns() {
       return columns;
+    },
+    state: {
+      get columnVisibility() {
+        return columnVisibility;
+      },
+    },
+    onColumnVisibilityChange: updater => {
+      if (typeof updater === 'function') {
+        columnVisibility = updater(columnVisibility);
+      } else {
+        columnVisibility = updater;
+      }
     },
     getCoreRowModel: getCoreRowModel(),
   });
@@ -158,10 +193,10 @@
   const columnWidthClasses: Record<string, string> = {
     order: 'w-14 min-w-14 max-w-14 text-center',
     image: 'w-16 min-w-16 max-w-16',
-    title: 'min-w-48 max-w-72',
-    slug: 'min-w-8 max-w-12',
-    summary: 'min-w-36 max-w-64',
-    published: 'w-28 min-w-28 max-w-36',
+    title: 'min-w-56 max-w-[34rem]',
+    slug: 'min-w-28 max-w-44',
+    summary: 'min-w-44 max-w-72',
+    published: 'w-14 min-w-14 max-w-14 text-center md:w-28 md:min-w-28 md:max-w-36',
     created: 'w-24 min-w-24 max-w-24 whitespace-nowrap',
     updated: 'w-24 min-w-24 max-w-32 whitespace-nowrap',
     actions: 'w-12 min-w-12 max-w-12 pr-2 pl-1 text-right whitespace-nowrap',
@@ -234,8 +269,6 @@
           {m['admin.pages.trash']()}
         </Button>
       </ButtonGroup.Root>
-
-      <Button href="/admin/pages/new" class="ms-auto">{m['admin.pages.create_page']()}</Button>
     </div>
 
     <div class="overflow-hidden rounded-md border">

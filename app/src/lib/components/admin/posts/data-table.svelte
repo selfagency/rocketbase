@@ -8,7 +8,8 @@
   import * as Table from '$lib/components/ui/table';
   import * as Tooltip from '$lib/components/ui/tooltip';
   import ArrowDownUpIcon from '@lucide/svelte/icons/arrow-down-up';
-  import { type ColumnDef, getCoreRowModel } from '@tanstack/table-core';
+  import { type ColumnDef, type VisibilityState, getCoreRowModel } from '@tanstack/table-core';
+  import { onMount } from 'svelte';
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
@@ -37,7 +38,29 @@
   let statusValue = $state(status);
   // svelte-ignore state_referenced_locally
   let authorValue = $state(selectedAuthor);
+  let columnVisibility = $state<VisibilityState>({});
   let searchTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  function syncColumnVisibility(width: number) {
+    const showExtendedColumns = width >= 1280;
+
+    columnVisibility = {
+      ...columnVisibility,
+      slug: showExtendedColumns,
+      summary: showExtendedColumns,
+    };
+  }
+
+  onMount(() => {
+    syncColumnVisibility(window.innerWidth);
+
+    const onResize = () => {
+      syncColumnVisibility(window.innerWidth);
+    };
+
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  });
 
   const table = createSvelteTable({
     get data() {
@@ -45,6 +68,18 @@
     },
     get columns() {
       return columns;
+    },
+    state: {
+      get columnVisibility() {
+        return columnVisibility;
+      },
+    },
+    onColumnVisibilityChange: updater => {
+      if (typeof updater === 'function') {
+        columnVisibility = updater(columnVisibility);
+      } else {
+        columnVisibility = updater;
+      }
     },
     getCoreRowModel: getCoreRowModel(),
   });
@@ -94,11 +129,11 @@
 
   const columnWidthClasses: Record<string, string> = {
     image: 'w-16 min-w-16 max-w-16 pr-2',
-    title: 'min-w-72 max-w-[36rem]',
-    slug: 'min-w-7 max-w-10',
-    summary: 'min-w-24 max-w-32',
-    author: 'min-w-9 max-w-12',
-    published: 'w-28 min-w-28 max-w-28',
+    title: 'min-w-72 max-w-[40rem] lg:min-w-56 lg:max-w-[34rem]',
+    slug: 'min-w-28 max-w-44',
+    summary: 'min-w-44 max-w-72',
+    author: 'min-w-14 max-w-24 lg:min-w-20 lg:max-w-40',
+    published: 'w-14 min-w-14 max-w-14 text-center md:w-28 md:min-w-28 md:max-w-28',
     date: 'w-24 min-w-24 max-w-28 whitespace-nowrap',
     updated: 'w-28 min-w-28 max-w-36 whitespace-nowrap',
     actions: 'w-12 min-w-12 max-w-12 pr-2 pl-1 text-right whitespace-nowrap',
@@ -209,8 +244,6 @@
           Trash
         </Button>
       </ButtonGroup.Root>
-
-      <Button href="/admin/posts/new" class="ms-auto">Create Post</Button>
     </div>
 
     <div class="overflow-hidden rounded-md border">

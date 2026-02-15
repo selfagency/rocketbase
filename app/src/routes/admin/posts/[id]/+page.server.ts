@@ -168,7 +168,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ locals, params, request }) => {
+  update: async ({ locals, params, request }) => {
     ensureEditorAccess(locals.user);
 
     const formData = await request.formData();

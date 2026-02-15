@@ -1,4 +1,5 @@
 <script lang="ts">
+  import StatusIndicator from '$lib/components/admin/status-indicator.svelte';
   import EyeOffIcon from '@lucide/svelte/icons/eye-off';
 
   let {
@@ -12,19 +13,9 @@
 
 <div class="inline-flex items-center gap-1.5">
   {#if published}
-    <span
-      class="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-[11px] font-medium text-green-800"
-      aria-label="Published"
-    >
-      Published
-    </span>
+    <StatusIndicator label="Published" tone="published" />
   {:else}
-    <span
-      class="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-800"
-      aria-label="Draft"
-    >
-      Draft
-    </span>
+    <StatusIndicator label="Draft" tone="draft" />
   {/if}
 
   {#if !visible}

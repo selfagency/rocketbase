@@ -154,7 +154,8 @@ describe('Nav.svelte (authenticated/admin)', () => {
       },
     });
 
-    const userMenuTrigger = document.querySelector('[aria-label]') as HTMLElement | null;
+    const userMenuTrigger = document.querySelector('.rounded-full[aria-label]') as HTMLElement | null;
+    expect(userMenuTrigger).toBeTruthy();
     userMenuTrigger?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     await Promise.resolve();

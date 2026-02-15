@@ -40,7 +40,7 @@ describe('Individual Tag Page Server Load', () => {
           { id: 'post2', title: 'Post 2' },
         ],
         page: 1,
-        perPage: 10,
+        perPage: 12,
         totalItems: 2,
         totalPages: 1,
       };
@@ -67,7 +67,7 @@ describe('Individual Tag Page Server Load', () => {
       expect(result.posts).toEqual(mockPosts.items);
       expect(result.pagination).toEqual({
         page: 1,
-        perPage: 10,
+        perPage: 12,
         totalItems: 2,
         totalPages: 1,
       });
@@ -75,7 +75,7 @@ describe('Individual Tag Page Server Load', () => {
       expect(tagsCollection.getFirstListItem).toHaveBeenCalledWith('slug = "technology"');
       expect(postsCollection.getList).toHaveBeenCalledWith(
         1,
-        10,
+        12,
         expect.objectContaining({
           filter: 'tags.id ?= "tag1" && published = true && visible = true',
           sort: '-created',

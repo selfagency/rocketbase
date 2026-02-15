@@ -5,7 +5,7 @@ status: completed
 type: task
 priority: normal
 created_at: 2026-02-12T20:13:22Z
-updated_at: 2026-02-14T22:27:11Z
+updated_at: 2026-02-15T07:41:38Z
 ---
 
 Imported from issues.jsonl (rocketbase-rd9). Owner: daniel@self.agency. Created by Daniel Sieradski 2026-02-11T00:42:32.60227-05:00.
@@ -28,3 +28,17 @@ The admin posts CRUD functionality was fully implemented including:
 - Implementation: app/src/routes/admin/posts/
 
 This bean is being marked completed to close the duplicate tracking item.
+
+## Reasons for Scrapping
+
+Duplicate bean with the same title and scope as rocketbase-e2g1 ('Create admin route - post index and CRUD').
+
+Kept rocketbase-e2g1 as the canonical record because it is the newer completed bean with fuller execution history and validation details.
+
+## Unscrap Note
+
+Restored from scrapped status per maintainer request. This bean remains valid historical work and is intentionally kept as completed.
+
+## Unscrap Note
+
+Restored from scrapped status per maintainer request. This bean remains valid historical work and is intentionally kept as completed.

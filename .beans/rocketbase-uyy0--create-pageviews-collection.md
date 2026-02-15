@@ -1,11 +1,11 @@
 ---
 # rocketbase-uyy0
 title: Create pageviews collection
-status: scrapped
+status: todo
 type: task
 priority: normal
 created_at: 2026-02-15T04:04:07Z
-updated_at: 2026-02-15T04:06:02Z
+updated_at: 2026-02-15T07:42:40Z
 ---
 
 Create pageviews collection to record visitor and logged-in user pageviews (excluding admin/editor/contributor), include common analytics fields, mimic single-site Umami-style tracking, and enforce 30-day raw retention before aggregation into stats.

@@ -19,11 +19,12 @@ type MetadataRecord = {
 };
 
 type MetadataCollection = {
-  getFullList<T>(options?: Record<string, unknown>): Promise<T[]>;
+  getFullList?<T>(options?: Record<string, unknown>): Promise<T[]>;
+  getList?<T>(page: number, perPage: number, options?: Record<string, unknown>): Promise<{ items?: T[] }>;
 };
 
 type PocketBaseLike = {
-  collection(name: string): MetadataCollection;
+  collection(name: string): MetadataCollection | undefined;
 };
 
 const pageSizeStore = writable<PageSizeStoreValue>({
@@ -38,10 +39,22 @@ function parsePageSize(value: unknown, fallback: number): number {
 }
 
 export async function refreshPageSizesFromMetadata(pb: PocketBaseLike): Promise<PageSizeStoreValue> {
-  const metadata = await pb.collection('metadata').getFullList<MetadataRecord>({
-    filter: `key = "${ADMIN_POSTS_PER_PAGE_KEY}" || key = "${POSTS_PER_PAGE_KEY}"`,
-    fields: 'key,value',
-  });
+  const metadataCollection = pb.collection('metadata');
+
+  let metadata: MetadataRecord[] = [];
+
+  if (metadataCollection?.getFullList) {
+    metadata = await metadataCollection.getFullList<MetadataRecord>({
+      filter: `key = "${ADMIN_POSTS_PER_PAGE_KEY}" || key = "${POSTS_PER_PAGE_KEY}"`,
+      fields: 'key,value',
+    });
+  } else if (metadataCollection?.getList) {
+    const result = await metadataCollection.getList<MetadataRecord>(1, 50, {
+      filter: `key = "${ADMIN_POSTS_PER_PAGE_KEY}" || key = "${POSTS_PER_PAGE_KEY}"`,
+      fields: 'key,value',
+    });
+    metadata = Array.isArray(result?.items) ? result.items : [];
+  }
 
   const metadataMap = new Map(metadata.map(item => [item.key, item.value]));
 
@@ -62,5 +75,15 @@ export async function getServerPageSizes(pb: PocketBaseLike): Promise<PageSizeSt
     return current;
   }
 
-  return refreshPageSizesFromMetadata(pb);
+  try {
+    return await refreshPageSizesFromMetadata(pb);
+  } catch {
+    const fallback: PageSizeStoreValue = {
+      adminPostsPerPage: current.adminPostsPerPage || DEFAULT_ADMIN_POSTS_PER_PAGE,
+      postsPerPage: current.postsPerPage || DEFAULT_POSTS_PER_PAGE,
+      loadedAt: Date.now(),
+    };
+    pageSizeStore.set(fallback);
+    return fallback;
+  }
 }

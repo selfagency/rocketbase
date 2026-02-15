@@ -1,11 +1,11 @@
 ---
 # rocketbase-2ysx
 title: Create editorial calendar admin panel
-status: scrapped
+status: todo
 type: feature
 priority: normal
 created_at: 2026-02-15T04:04:07Z
-updated_at: 2026-02-15T04:06:01Z
+updated_at: 2026-02-15T07:42:54Z
 ---
 
 Implement admin panel UI/CRUD for editorial calendar entries and planning workflows.

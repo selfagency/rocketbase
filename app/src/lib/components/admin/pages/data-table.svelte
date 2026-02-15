@@ -155,6 +155,22 @@
     return { asc: current === sortKey, desc: current === `-${sortKey}` };
   }
 
+  const columnWidthClasses: Record<string, string> = {
+    order: 'w-14 min-w-14 max-w-14 text-center',
+    image: 'w-16 min-w-16 max-w-16',
+    title: 'min-w-48 max-w-72',
+    slug: 'min-w-8 max-w-12',
+    summary: 'min-w-36 max-w-64',
+    published: 'w-28 min-w-28 max-w-36',
+    created: 'w-24 min-w-24 max-w-24 whitespace-nowrap',
+    updated: 'w-24 min-w-24 max-w-32 whitespace-nowrap',
+    actions: 'w-12 min-w-12 max-w-12 pr-2 pl-1 text-right whitespace-nowrap',
+  };
+
+  function getColumnWidthClass(columnId: string) {
+    return columnWidthClasses[columnId] ?? '';
+  }
+
   // Watch for status changes
   $effect(() => {
     if (statusValue !== status) {
@@ -180,7 +196,7 @@
         class="max-w-sm"
       />
 
-      <ButtonGroup.Root class="rounded-lg border bg-white">
+      <ButtonGroup.Root class="rounded-lg border bg-white [&_button]:font-normal">
         <Button
           variant={statusValue === 'all' ? 'default' : 'ghost'}
           size="sm"
@@ -228,36 +244,16 @@
           {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
             <Table.Row>
               <!-- Drag handle header cell to align with body drag handle -->
-              <Table.Head class="w-8"></Table.Head>
+              <Table.Head class="w-8 max-w-8 min-w-8"></Table.Head>
               {#each headerGroup.headers as header (header.id)}
-                <Table.Head
-                  class={header.column.id === 'order'
-                    ? 'w-14 text-center'
-                    : header.column.id === 'image'
-                      ? 'w-16'
-                      : header.column.id === 'title'
-                        ? 'min-w-56'
-                        : header.column.id === 'slug'
-                          ? 'min-w-40'
-                          : header.column.id === 'summary'
-                            ? 'min-w-48'
-                            : header.column.id === 'published'
-                              ? 'w-28'
-                              : header.column.id === 'created'
-                                ? 'w-24 whitespace-nowrap'
-                                : header.column.id === 'updated'
-                                  ? 'w-24 whitespace-nowrap'
-                                  : header.column.id === 'actions'
-                                    ? 'w-24 px-1 text-right whitespace-nowrap'
-                                    : ''}
-                >
+                <Table.Head class={`${getColumnWidthClass(header.column.id)} text-xs`}>
                   {#if !header.isPlaceholder}
                     {#if (header.column.columnDef as any)?.meta?.sortKey}
                       {@const tooltip = (header.column.columnDef as any)?.meta?.tooltip}
                       <button
                         class={(header.column.columnDef as any).meta.sortKey === 'order'
-                          ? 'flex w-full items-center justify-center transition-colors hover:text-foreground'
-                          : 'flex items-center gap-2 transition-colors hover:text-foreground'}
+                          ? 'flex w-full items-center justify-center text-xs transition-colors hover:text-foreground'
+                          : 'flex items-center gap-2 text-xs transition-colors hover:text-foreground'}
                         onclick={() => navigateToSort((header.column.columnDef as any).meta.sortKey)}
                       >
                         <FlexRender content={header.column.columnDef.header} context={header.getContext()} />
@@ -268,15 +264,15 @@
                                 <span {...props} class="inline-flex items-center gap-2">
                                   {#if (header.column.columnDef as any).meta.sortKey === 'order'}
                                     {@const sortState = isSortState((header.column.columnDef as any).meta.sortKey)}
-                                    <div class="relative h-4 w-4">
+                                    <div class="relative h-3.5 w-3.5">
                                       {#if sortState.desc}
                                         <span class="absolute inset-0" transition:fade={{ duration: 150 }}>
-                                          <ArrowDown10Icon class="h-4 w-4 text-foreground" aria-hidden="true" />
+                                          <ArrowDown10Icon class="h-3.5 w-3.5 text-foreground" aria-hidden="true" />
                                         </span>
                                       {:else}
                                         <span class="absolute inset-0" transition:fade={{ duration: 150 }}>
                                           <ArrowDown01Icon
-                                            class="h-4 w-4 {sortState.asc
+                                            class="h-3.5 w-3.5 {sortState.asc
                                               ? 'text-foreground'
                                               : 'text-muted-foreground'}"
                                             aria-hidden="true"
@@ -286,8 +282,8 @@
                                     </div>
                                   {:else}
                                     <ArrowDownUpIcon
-                                      class="h-4 w-4 {isSortState((header.column.columnDef as any).meta.sortKey).asc ||
-                                      isSortState((header.column.columnDef as any).meta.sortKey).desc
+                                      class="h-3.5 w-3.5 {isSortState((header.column.columnDef as any).meta.sortKey)
+                                        .asc || isSortState((header.column.columnDef as any).meta.sortKey).desc
                                         ? 'text-foreground'
                                         : 'text-muted-foreground'}"
                                       aria-hidden="true"
@@ -302,15 +298,15 @@
                           </Tooltip.Root>
                         {:else if (header.column.columnDef as any).meta.sortKey === 'order'}
                           {@const sortState = isSortState((header.column.columnDef as any).meta.sortKey)}
-                          <div class="relative h-4 w-4">
+                          <div class="relative h-3.5 w-3.5">
                             {#if sortState.desc}
                               <span class="absolute inset-0" transition:fade={{ duration: 150 }}>
-                                <ArrowDown10Icon class="h-4 w-4 text-foreground" aria-hidden="true" />
+                                <ArrowDown10Icon class="h-3.5 w-3.5 text-foreground" aria-hidden="true" />
                               </span>
                             {:else}
                               <span class="absolute inset-0" transition:fade={{ duration: 150 }}>
                                 <ArrowDown01Icon
-                                  class="h-4 w-4 {sortState.asc ? 'text-foreground' : 'text-muted-foreground'}"
+                                  class="h-3.5 w-3.5 {sortState.asc ? 'text-foreground' : 'text-muted-foreground'}"
                                   aria-hidden="true"
                                 />
                               </span>
@@ -318,7 +314,7 @@
                           </div>
                         {:else}
                           <ArrowDownUpIcon
-                            class="h-4 w-4 {isSortState((header.column.columnDef as any).meta.sortKey).asc ||
+                            class="h-3.5 w-3.5 {isSortState((header.column.columnDef as any).meta.sortKey).asc ||
                             isSortState((header.column.columnDef as any).meta.sortKey).desc
                               ? 'text-foreground'
                               : 'text-muted-foreground'}"
@@ -345,7 +341,7 @@
               ondrop={e => onDrop(e as DragEvent, rowId)}
             >
               <!-- Drag handle cell -->
-              <Table.Cell class="w-8 text-center">
+              <Table.Cell class="w-8 max-w-8 min-w-8 text-center">
                 <button
                   type="button"
                   draggable="true"
@@ -360,27 +356,7 @@
                 </button>
               </Table.Cell>
               {#each row.getVisibleCells() as cell (cell.id)}
-                <Table.Cell
-                  class={cell.column.id === 'title'
-                    ? 'min-w-56'
-                    : cell.column.id === 'image'
-                      ? 'w-16'
-                      : cell.column.id === 'order'
-                        ? 'w-14'
-                        : cell.column.id === 'slug'
-                          ? 'min-w-40'
-                          : cell.column.id === 'summary'
-                            ? 'min-w-48'
-                            : cell.column.id === 'published'
-                              ? 'w-28'
-                              : cell.column.id === 'created'
-                                ? 'w-24 whitespace-nowrap'
-                                : cell.column.id === 'updated'
-                                  ? 'w-24 whitespace-nowrap'
-                                  : cell.column.id === 'actions'
-                                    ? 'w-24 px-1 text-right whitespace-nowrap'
-                                    : ''}
-                >
+                <Table.Cell class={getColumnWidthClass(cell.column.id)}>
                   <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
                 </Table.Cell>
               {/each}

@@ -12,11 +12,17 @@
 
 <div class="inline-flex items-center gap-1.5">
   {#if published}
-    <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+    <span
+      class="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-[11px] font-medium text-green-800"
+      aria-label="Published"
+    >
       Published
     </span>
   {:else}
-    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
+    <span
+      class="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-800"
+      aria-label="Draft"
+    >
       Draft
     </span>
   {/if}

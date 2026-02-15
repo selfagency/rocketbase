@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page as pageState } from '$app/state';
-  import PageContent from '$lib/components/PageContent.svelte';
+  import PageContent from '$lib/components/pages/PageContent.svelte';
   import { MetaTags } from 'svelte-meta-tags';
 
   let { data } = $props();

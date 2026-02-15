@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import PageContent from '$lib/components/PageContent.svelte';
+  import PageContent from '$lib/components/pages/PageContent.svelte';
   import { Button } from '$lib/components/ui/button';
   import { Card, CardContent, CardDescription, CardHeader } from '$lib/components/ui/card';
   import * as m from '$lib/paraglide/messages';

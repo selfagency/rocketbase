@@ -161,10 +161,12 @@ export enum MetadataTypeOptions {
   'float' = 'float',
   'json' = 'json',
   'boolean' = 'boolean',
+  'textblob' = 'textblob',
 }
 export type MetadataRecord = {
   id: string;
   key: string;
+  nice_name?: string;
   type: MetadataTypeOptions;
   updated: IsoAutoDateString;
   value?: string;

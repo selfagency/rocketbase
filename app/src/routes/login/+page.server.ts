@@ -1,6 +1,7 @@
 import { authenticateWithPassword, verifyMfaCode } from '$lib/auth/mfa-helpers';
 import { loginSchema, type LoginSchema } from '$lib/auth/schemas';
 import * as m from '$lib/paraglide/messages';
+import logger from '$lib/server/logger';
 import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
@@ -21,7 +22,7 @@ export const actions: Actions = {
   login: async ({ request, locals, url }) => {
     // Emit simple console logs so container logs capture test-relevant events
     try {
-      console.log('[login] action invoked', { route: url.pathname, requestId: locals.requestId });
+      logger.withMetadata({ route: url.pathname, requestId: locals.requestId }).debug('[login] action invoked');
     } catch {
       // Ignore console errors
     }

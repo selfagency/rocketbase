@@ -5,7 +5,8 @@ status: completed
 type: bug
 priority: normal
 created_at: 2026-02-15T15:46:45Z
-updated_at: 2026-02-15T15:47:30Z
+updated_at: 2026-02-15T16:12:35Z
+parent: rocketbase-56l8
 ---
 
 Resolve migration failures like 1771121058_updated_audit_logs.js (sql: no rows in result set) by making early audit_logs update migrations resilient when collection does not yet exist.

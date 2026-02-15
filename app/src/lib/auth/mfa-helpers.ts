@@ -109,12 +109,14 @@ export async function authenticateWithPassword<T extends Record<string, any>>(
 
   try {
     try {
-      console.log('[login] attempting authWithPassword', {
-        email,
-        route,
-        requestId,
-      });
-    } catch (e) {
+      logger
+        .withMetadata({
+          email,
+          route,
+          requestId,
+        })
+        .debug('[login] attempting authWithPassword');
+    } catch {
       // Ignore console errors
     }
 
@@ -138,8 +140,8 @@ export async function authenticateWithPassword<T extends Record<string, any>>(
 
     // Successful login without MFA
     try {
-      console.log('[login] password auth successful', { userId: authData.record?.id, email });
-    } catch (e) {
+      logger.withMetadata({ userId: authData.record?.id, email }).debug('[login] password auth successful');
+    } catch {
       // Ignore console errors
     }
 
@@ -171,8 +173,8 @@ export async function authenticateWithPassword<T extends Record<string, any>>(
 
     // Regular login error
     try {
-      console.log('[login] password auth failed', { email, err: err?.message || String(err) });
-    } catch (e) {
+      logger.withMetadata({ email, err: err?.message || String(err) }).debug('[login] password auth failed');
+    } catch {
       // Ignore console errors
     }
 

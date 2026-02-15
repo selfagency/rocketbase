@@ -1,6 +1,6 @@
+import { writable } from 'svelte/store';
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { writable } from 'svelte/store';
 
 import MfaCard from '../../../../lib/components/account/MfaCard.svelte';
 

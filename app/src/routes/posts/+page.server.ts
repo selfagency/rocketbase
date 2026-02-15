@@ -1,12 +1,14 @@
+import { getServerPageSizes } from '$lib/server/page-size-store';
 import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
   const { pb } = locals;
+  const { postsPerPage } = await getServerPageSizes(pb);
 
   // Get pagination parameters from URL
   const page = parseInt(url.searchParams.get('page') || '1');
-  const perPage = parseInt(url.searchParams.get('perPage') || '12');
+  const perPage = parseInt(url.searchParams.get('perPage') || String(postsPerPage));
 
   try {
     // Fetch paginated posts

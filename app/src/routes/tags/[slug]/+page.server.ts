@@ -1,13 +1,15 @@
+import { getServerPageSizes } from '$lib/server/page-size-store';
 import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, url, locals }) => {
   const { pb } = locals;
+  const { postsPerPage } = await getServerPageSizes(pb);
 
   // Get pagination parameters from URL
   const page = parseInt(url.searchParams.get('page') || '1');
-  const perPage = parseInt(url.searchParams.get('perPage') || '10');
+  const perPage = parseInt(url.searchParams.get('perPage') || String(postsPerPage));
 
   try {
     // Find the tag by slug

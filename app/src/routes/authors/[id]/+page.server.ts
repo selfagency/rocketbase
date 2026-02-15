@@ -1,12 +1,14 @@
 import { error } from '@sveltejs/kit';
+import { getServerPageSizes } from '$lib/server/page-size-store';
 import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
   const { pb } = locals;
   const { id } = params;
+  const { postsPerPage } = await getServerPageSizes(pb);
   const page = Number(url.searchParams.get('page')) || 1;
-  const perPage = 12;
+  const perPage = Number(url.searchParams.get('perPage')) || postsPerPage;
 
   try {
     // Fetch author details

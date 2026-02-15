@@ -1,3 +1,4 @@
+import { getServerPageSizes } from '$lib/server/page-size-store';
 import type { PostsResponseWithExpanded } from '$lib/types/pocketbase-expanded';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -12,8 +13,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     error(403, 'Forbidden - Requires editor or admin role');
   }
 
+  const { adminPostsPerPage } = await getServerPageSizes(locals.pb);
+
   const page = parseInt(url.searchParams.get('page') || '1');
-  const perPage = parseInt(url.searchParams.get('perPage') || '10');
+  const perPage = parseInt(url.searchParams.get('perPage') || String(adminPostsPerPage));
   const search = url.searchParams.get('search') || '';
   const status = url.searchParams.get('status') || 'all';
   const sort = url.searchParams.get('sort') || '-date';

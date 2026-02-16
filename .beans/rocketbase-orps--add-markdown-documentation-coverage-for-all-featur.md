@@ -1,0 +1,11 @@
+---
+# rocketbase-orps
+title: Add markdown documentation coverage for all features
+status: todo
+type: task
+created_at: 2026-02-16T00:05:45Z
+updated_at: 2026-02-16T00:05:45Z
+parent: rocketbase-a1vh
+---
+
+Ensure external markdown documentation exists and is maintained for every implemented feature.

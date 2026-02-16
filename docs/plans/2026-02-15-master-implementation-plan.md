@@ -326,6 +326,40 @@ To reduce regressions and keep implementation quality high while shipping featur
 - New/updated functions, components, and routes include inline documentation.
 - External markdown documentation for the feature is created or updated before completion.
 
+### Pre-Implementation UI/UX + Security + Accessibility Interrogation Gate (Mandatory)
+
+**Ongoing Priority:** CRITICAL
+
+Before any feature work proceeds (including schema, backend, frontend, or tests), the current feature plan must be explicitly interrogated for implementation approach quality with UI design, user experience, security, and accessibility best practices factored in.
+
+**Required Interrogation Focus Areas:**
+
+- **Information Architecture and User Flows**
+  - Validate primary and secondary user journeys, edge states, and recovery paths.
+  - Ensure interaction model is clear for both first-time and returning users.
+- **UI Design Best Practices**
+  - Confirm visual hierarchy, layout consistency, spacing, and responsive behavior.
+  - Confirm component choices match semantics and intended user actions.
+- **UX and Accessibility Best Practices**
+  - Validate keyboard operability, focus behavior, labels, and error messaging.
+  - Ensure states (loading, empty, success, error) are explicit and comprehensible.
+- **Security and Privacy Best Practices**
+  - Validate OWASP-aligned controls for access control, input validation, injection prevention, secret handling, and secure defaults.
+  - Validate data minimization and sensitive-data handling (at rest and in transit) for any new user-facing or API flow.
+- **Accessibility Compliance (WCAG 2.2 AA)**
+  - Confirm semantic structure, heading hierarchy, screen-reader support, and visible focus indicators.
+  - Confirm color contrast, keyboard-only operability, and non-color-only status/error communication.
+- **Implementation Fit**
+  - Verify selected technical approach supports the intended UX (performance, progressive enhancement, maintainability).
+
+**Mandatory Output of the Gate:**
+
+- Update the relevant implementation guidance (master plan section and/or feature plan) with concrete adjustments before coding begins.
+- Include explicit security and accessibility acceptance criteria in the updated guidance.
+- Record resulting decisions as explicit tasks/checkpoints in beans so the UI/UX, security, and accessibility guidance is testable and reviewable.
+
+No implementation should start until this interrogation and guidance update are complete.
+
 ---
 
 ## Feature Plan Structure
@@ -441,9 +475,10 @@ Phase 4 (E-Commerce)
 ### Immediate Actions
 
 1. **Review and approve this master plan**
-2. **Confirm implementation order for Phase 1 features**
-3. **Create beans for each Phase 1 feature plan and assign owners**
-4. **Set milestone dates for Phase 1 and Phase 2 handoff**
+2. **Run the mandatory pre-implementation UI/UX + security + accessibility interrogation gate and update implementation guidance accordingly**
+3. **Confirm implementation order for Phase 1 features**
+4. **Create beans for each Phase 1 feature plan and assign owners**
+5. **Set milestone dates for Phase 1 and Phase 2 handoff**
 
 ### Implementation Start Order (Recommended)
 

@@ -16,7 +16,7 @@
   } = $props();
 </script>
 
-<section class="space-y-3">
+<section class="surface-enter space-y-3">
   <h3 class="text-sm font-semibold">Revision history</h3>
 
   <ScrollArea.Root class="h-60 rounded-md border border-border bg-card shadow-sm">
@@ -42,7 +42,7 @@
             <tr
               role="button"
               tabindex="0"
-              class="cursor-pointer border-t border-border/40 transition-colors hover:bg-accent/50 focus-visible:bg-accent/50 focus-visible:outline-none"
+              class="cursor-pointer border-t border-border/40 transition-colors hover:bg-accent/50 focus-visible:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset"
               onclick={() => {
                 onSelect(revision.id);
               }}

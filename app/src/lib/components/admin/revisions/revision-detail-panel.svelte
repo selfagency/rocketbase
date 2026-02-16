@@ -21,7 +21,7 @@
 </script>
 
 {#if selectedRevision}
-  <section class="min-w-0 p-4 md:p-6">
+  <section class="surface-enter min-w-0 p-4 md:p-6">
     <div class="mb-4 space-y-1 border-b pb-4">
       <p class="text-sm text-muted-foreground">
         <span class="font-medium text-foreground">Author:</span>

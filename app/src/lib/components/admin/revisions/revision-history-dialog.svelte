@@ -61,7 +61,7 @@
     onSelect={openRevision}
   />
 
-  <Dialog.Content class="max-h-[85vh] w-[95vw] max-w-6xl p-0 sm:w-[90vw]">
+  <Dialog.Content class="surface-enter max-h-[85vh] w-[95vw] max-w-6xl p-0 sm:w-[90vw]">
     <RevisionDetailPanel
       {selectedRevision}
       {selectedDiffItems}

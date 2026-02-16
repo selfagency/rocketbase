@@ -14,6 +14,7 @@
   import CirclePlusIcon from '@lucide/svelte/icons/circle-plus';
 
   let { navItems = [] }: { navItems?: NavItem[] } = $props();
+  const hasFaqNavItem = $derived(navItems.some(item => item.slug === 'faqs'));
 
   let logoutFormRef = $state<HTMLFormElement | null>(null);
 </script>
@@ -30,6 +31,12 @@
             {m['nav.brand']()}
           </NavigationMenu.Link>
         </NavigationMenu.Item>
+
+        {#if !hasFaqNavItem}
+          <NavigationMenu.Item>
+            <NavigationMenu.Link href="/faqs" class={navigationMenuTriggerStyle()}>FAQs</NavigationMenu.Link>
+          </NavigationMenu.Item>
+        {/if}
 
         {#each navItems as item (item.id)}
           {#if item.children && item.children.length > 0}

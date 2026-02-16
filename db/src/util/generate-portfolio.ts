@@ -76,11 +76,13 @@ function log(...args: unknown[]) {
 }
 
 async function adminAuth(email: string, password: string): Promise<string | null> {
-  const res = asFetchResponse(await fetch(`${PB_URL}/api/admins/auth-with-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ identity: email, password }),
-  }));
+  const res = asFetchResponse(
+    await fetch(`${PB_URL}/api/admins/auth-with-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identity: email, password }),
+    })
+  );
 
   if (!res.ok) return null;
   const data = await res.json();
@@ -89,11 +91,13 @@ async function adminAuth(email: string, password: string): Promise<string | null
 
 async function fetchPexelsPhotos(apiKey: string, page = 1, perPage = 1): Promise<any[]> {
   const url = `https://api.pexels.com/v1/curated?per_page=${perPage}&page=${page}`;
-  const res = asFetchResponse(await fetch(url, {
-    headers: {
-      Authorization: apiKey,
-    },
-  }));
+  const res = asFetchResponse(
+    await fetch(url, {
+      headers: {
+        Authorization: apiKey,
+      },
+    })
+  );
 
   if (!res.ok) return [];
   const data = await res.json();
@@ -119,11 +123,13 @@ async function createMediaRecord(fileData: MediaFile, headers: Record<string, st
 
   const { 'Content-Type': _, ...headersWithoutContentType } = headers;
 
-  const res = asFetchResponse(await fetch(url, {
-    method: 'POST',
-    headers: headersWithoutContentType,
-    body: formData,
-  }));
+  const res = asFetchResponse(
+    await fetch(url, {
+      method: 'POST',
+      headers: headersWithoutContentType,
+      body: formData,
+    })
+  );
 
   if (!res.ok) {
     const error = await res.text();
@@ -135,7 +141,7 @@ async function createMediaRecord(fileData: MediaFile, headers: Record<string, st
 
 async function createPortfolioRecord(
   itemData: PortfolioItem & { mediaIds?: string[] },
-  headers: Record<string, string>,
+  headers: Record<string, string>
 ): Promise<{ id: string; title: string }> {
   const url = `${PB_URL}/api/collections/portfolio/records`;
   const formData = new FormData();
@@ -160,11 +166,13 @@ async function createPortfolioRecord(
   }
 
   const { 'Content-Type': _, ...headersWithoutContentType } = headers;
-  const res = asFetchResponse(await fetch(url, {
-    method: 'POST',
-    headers: headersWithoutContentType,
-    body: formData,
-  }));
+  const res = asFetchResponse(
+    await fetch(url, {
+      method: 'POST',
+      headers: headersWithoutContentType,
+      body: formData,
+    })
+  );
 
   if (!res.ok) {
     const error = await res.text();
@@ -208,10 +216,7 @@ async function generatePortfolioItem(index: number): Promise<PortfolioItem> {
     const bg = `hsl(${hue} 65% 45%)`;
     const fg = 'rgba(255,255,255,0.92)';
     const subtitle = kind === 'cover' ? 'Cover image' : `Media ${sequence}`;
-    const text = `${title} — ${subtitle}`
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;');
+    const text = `${title} — ${subtitle}`.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
     const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">

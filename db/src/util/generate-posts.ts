@@ -98,10 +98,10 @@ async function adminAuth(email: string, password: string): Promise<string | null
   try {
     const res = asFetchResponse(
       await fetch(`${PB_URL}/api/admins/auth-with-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identity: email, password }),
-      }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identity: email, password }),
+      })
     );
     if (!res.ok) {
       log('admin auth failed', res.status);
@@ -136,11 +136,13 @@ async function fetchTags(headers: Record<string, string>): Promise<Array<{ id: s
 
 async function fetchPexelsPhotos(apiKey: string, page = 1, perPage = 1): Promise<any[]> {
   const url = `https://api.pexels.com/v1/curated?per_page=${perPage}&page=${page}`;
-  const res = asFetchResponse(await fetch(url, {
-    headers: {
-      Authorization: apiKey,
-    },
-  }));
+  const res = asFetchResponse(
+    await fetch(url, {
+      headers: {
+        Authorization: apiKey,
+      },
+    })
+  );
   if (!res.ok) {
     log('Pexels API error:', res.status);
     return [];
@@ -167,11 +169,13 @@ async function createMediaRecord(fileData: ImageFile, headers: Record<string, st
 
   const { 'Content-Type': _, ...headersWithoutContentType } = headers;
 
-  const res = asFetchResponse(await fetch(url, {
-    method: 'POST',
-    headers: headersWithoutContentType,
-    body: formData,
-  }));
+  const res = asFetchResponse(
+    await fetch(url, {
+      method: 'POST',
+      headers: headersWithoutContentType,
+      body: formData,
+    })
+  );
 
   if (!res.ok) {
     const error = await res.text();
@@ -181,7 +185,10 @@ async function createMediaRecord(fileData: ImageFile, headers: Record<string, st
   return res.json();
 }
 
-async function createPost(postData: PostPayload, headers: Record<string, string>): Promise<{ id: string; title: string }> {
+async function createPost(
+  postData: PostPayload,
+  headers: Record<string, string>
+): Promise<{ id: string; title: string }> {
   const url = `${PB_URL}/api/collections/posts/records`;
 
   // Convert uploaded media files to media records, then attach relation IDs to the post
@@ -225,11 +232,13 @@ async function createPost(postData: PostPayload, headers: Record<string, string>
     // Remove Content-Type header to let fetch set it with boundary
     const { 'Content-Type': _, ...headersWithoutContentType } = headers;
 
-    const res = asFetchResponse(await fetch(url, {
-      method: 'POST',
-      headers: headersWithoutContentType,
-      body: formData,
-    }));
+    const res = asFetchResponse(
+      await fetch(url, {
+        method: 'POST',
+        headers: headersWithoutContentType,
+        body: formData,
+      })
+    );
 
     if (!res.ok) {
       const error = await res.text();
@@ -239,11 +248,13 @@ async function createPost(postData: PostPayload, headers: Record<string, string>
   }
 
   // Fallback to JSON request if no images
-  const res = asFetchResponse(await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(postData),
-  }));
+  const res = asFetchResponse(
+    await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(postData),
+    })
+  );
   if (!res.ok) {
     const error = await res.text();
     throw new Error(`Failed to create post (JSON): ${res.status} ${error}`);
@@ -251,13 +262,18 @@ async function createPost(postData: PostPayload, headers: Record<string, string>
   return res.json();
 }
 
-async function createTag(tagData: { tag: string; slug: string }, headers: Record<string, string>): Promise<{ id: string; tag: string }> {
+async function createTag(
+  tagData: { tag: string; slug: string },
+  headers: Record<string, string>
+): Promise<{ id: string; tag: string }> {
   const url = `${PB_URL}/api/collections/tags/records`;
-  const res = asFetchResponse(await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(tagData),
-  }));
+  const res = asFetchResponse(
+    await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(tagData),
+    })
+  );
   if (!res.ok) {
     const error = await res.text();
     throw new Error(`Failed to create tag: ${res.status} ${error}`);
@@ -265,7 +281,11 @@ async function createTag(tagData: { tag: string; slug: string }, headers: Record
   return res.json();
 }
 
-async function generatePost(users: Array<{ id: string }>, tags: Array<{ id: string }>, pexelsPage: number): Promise<PostPayload> {
+async function generatePost(
+  users: Array<{ id: string }>,
+  tags: Array<{ id: string }>,
+  pexelsPage: number
+): Promise<PostPayload> {
   // Mixed titles for more variety
   const title = randNumber({ min: 0, max: 1 }) === 0 ? randCatchPhrase() : `${randJobTitle()} ${randProductName()}`;
 

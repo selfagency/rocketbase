@@ -473,11 +473,6 @@ migrate(
     collection = new Collection(collectionCreateData as any);
     const createResult = app.save(collection);
 
-    if (false) {
-      unmarshal(collectionUpdateData, collection);
-      return app.save(collection);
-    }
-
     return createResult;
   },
   app => {

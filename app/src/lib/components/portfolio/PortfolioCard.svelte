@@ -11,13 +11,13 @@
   let { item, cdnUrl }: Props = $props();
 </script>
 
-<Card.Root class="h-entry overflow-hidden transition-shadow hover:shadow-lg">
+<Card.Root class="interactive-lift surface-enter h-entry overflow-hidden transition-shadow hover:shadow-lg">
   {#if item.image}
     <div class="aspect-video overflow-hidden">
       <img
         src={getFileUrl('portfolio', item.id, item.image, cdnUrl)}
         alt={item.title || 'Portfolio item cover image'}
-        class="u-photo h-full w-full object-cover transition-transform hover:scale-105"
+        class="u-photo h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:scale-105 motion-reduce:transform-none"
         loading="lazy"
       />
     </div>
@@ -25,7 +25,7 @@
 
   <Card.Content class="space-y-3 p-6">
     <h2 class="p-name text-xl font-semibold">
-      <a href={`/portfolio/${item.slug}`} class="u-url transition-colors hover:text-primary">
+      <a href={`/portfolio/${item.slug}`} class="u-url transition-colors hover:text-primary focus-visible:outline-none">
         {item.title || 'Untitled project'}
       </a>
     </h2>

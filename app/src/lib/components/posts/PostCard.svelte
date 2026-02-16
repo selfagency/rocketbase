@@ -31,20 +31,20 @@
   }
 </script>
 
-<Card.Root class="h-entry overflow-hidden transition-shadow hover:shadow-lg">
+<Card.Root class="interactive-lift surface-enter h-entry overflow-hidden transition-shadow hover:shadow-lg">
   {#if post.image}
     <div class="aspect-video overflow-hidden">
       <img
         src={getFileUrl('posts', post.id, post.image, cdnUrl)}
         alt={post.title}
-        class="u-featured h-full w-full object-cover transition-transform hover:scale-105"
+        class="u-featured h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:scale-105 motion-reduce:transform-none"
       />
     </div>
   {/if}
   <Card.Content class="p-6">
     <div class="mb-4">
       <h2 class="p-name mb-2 line-clamp-2 text-xl font-semibold">
-        <a href={`/posts/${post.slug}`} class="u-url transition-colors hover:text-primary">
+        <a href={`/posts/${post.slug}`} class="u-url transition-colors hover:text-primary focus-visible:outline-none">
           {post.title}
         </a>
       </h2>

@@ -241,7 +241,7 @@
   <div class="relative">
     {#if open}
       <Combobox.ContentStatic
-        class="absolute top-1 z-10 w-full animate-in rounded-md border bg-popover text-popover-foreground shadow-md outline-hidden"
+        class="surface-enter absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-hidden"
         onmouseup={() => {
           inputRef?.focus();
         }}

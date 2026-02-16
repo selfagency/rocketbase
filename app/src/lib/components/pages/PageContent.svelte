@@ -53,7 +53,7 @@
   {@html `<style>${pageData.custom_css}</style>`}
 {/if}
 
-<div class="container mx-auto max-w-4xl px-4 py-8">
+<div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
   <article class="h-entry prose prose-lg max-w-none">
     {#if pageData.title}
       <header class="mb-8">
@@ -68,7 +68,7 @@
         {/if}
         {#if pageData.image}
           <img
-            src="{page.url.origin}/api/pb/files/pages/{pageData.id}/{pageData.image}"
+            src={`${page.url.origin}/api/pb/files/pages/${pageData.id}/${pageData.image}`}
             alt={pageData.title || 'Page image'}
             class="u-featured mt-6 h-64 w-full rounded-lg object-cover"
           />

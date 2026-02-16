@@ -80,18 +80,18 @@
 
 **Objective:** Finish core admin tools and content management features that every other feature depends on.
 
-| Feature                                 | Status | Plan Reference                             |
-| --------------------------------------- | ------ | ------------------------------------------ |
-| Settings Admin UI                       | ❌     | `features/01-settings-admin-ui.md`         |
-| Harper.js Editor Integration            | ❌     | `features/02-harper-editor-integration.md` |
-| User Management Dashboard               | ❌     | `features/03-user-management.md`           |
-| Team Admin (collection + UI)            | ❌     | `features/20-team-admin.md`                |
-| Services Admin (collection + UI)        | ❌     | `features/21-services-admin.md`            |
-| Opportunities Admin (collection + UI)   | ❌     | `features/22-opportunities-admin.md`       |
-| UI Theming System                       | ❌     | `features/23-ui-theming-system.md`         |
-| Media Management (complete)             | 🚧     | `features/04-media-management-complete.md` |
-| Posts + IndieWeb (complete)             | 🚧     | `features/05-posts-indieweb-complete.md`   |
-| RSS Feeds (complete)                    | 🚧     | `features/06-rss-feeds-complete.md`        |
+| Feature                               | Status | Plan Reference                             |
+| ------------------------------------- | ------ | ------------------------------------------ |
+| Settings Admin UI                     | ❌     | `features/01-settings-admin-ui.md`         |
+| Harper.js Editor Integration          | ❌     | `features/02-harper-editor-integration.md` |
+| User Management Dashboard             | ❌     | `features/03-user-management.md`           |
+| Team Admin (collection + UI)          | ❌     | `features/20-team-admin.md`                |
+| Services Admin (collection + UI)      | ❌     | `features/21-services-admin.md`            |
+| Opportunities Admin (collection + UI) | ❌     | `features/22-opportunities-admin.md`       |
+| UI Theming System                     | ❌     | `features/23-ui-theming-system.md`         |
+| Media Management (complete)           | 🚧     | `features/04-media-management-complete.md` |
+| Posts + IndieWeb (complete)           | 🚧     | `features/05-posts-indieweb-complete.md`   |
+| RSS Feeds (complete)                  | 🚧     | `features/06-rss-feeds-complete.md`        |
 
 **Dependencies:** None (foundation work)
 

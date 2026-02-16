@@ -23,6 +23,7 @@ Update the master implementation strategy and create beans for: team collection 
   - `rocketbase-1pj3` (Services collection + admin page)
   - `rocketbase-f83k` (Opportunities collection + admin page; employment/internship/volunteer types)
 - Created and linked new UI feature bean under epic `rocketbase-90wn`:
+
   - `rocketbase-nn0u` (UI theming system for site colors).
 
 - Added feature plan docs: docs/plans/features/20-team-admin.md, docs/plans/features/21-services-admin.md, docs/plans/features/22-opportunities-admin.md, docs/plans/features/23-ui-theming-system.md

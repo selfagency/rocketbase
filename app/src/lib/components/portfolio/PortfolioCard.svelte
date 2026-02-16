@@ -19,13 +19,17 @@
         alt={item.title || 'Portfolio item cover image'}
         class="u-photo h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:scale-105 motion-reduce:transform-none"
         loading="lazy"
+        decoding="async"
       />
     </div>
   {/if}
 
   <Card.Content class="space-y-3 p-6">
     <h2 class="p-name text-xl font-semibold">
-      <a href={`/portfolio/${item.slug}`} class="u-url transition-colors hover:text-primary focus-visible:outline-none">
+      <a
+        href={`/portfolio/${item.slug}`}
+        class="u-url rounded-sm transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
         {item.title || 'Untitled project'}
       </a>
     </h2>

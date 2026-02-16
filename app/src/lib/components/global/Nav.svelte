@@ -53,8 +53,6 @@
                         {/if}
                       </NavigationMenu.Link>
                     {/each}
-
-                    {#if page?.data?.user && (page?.data?.user?.role === 'admin' || page?.data?.user?.role === 'editor' || page?.data?.user?.role === 'contributor')}{/if}
                   </li>
                 </ul>
               </NavigationMenu.Content>

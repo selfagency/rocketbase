@@ -38,13 +38,18 @@
         src={getFileUrl('posts', post.id, post.image, cdnUrl)}
         alt={post.title}
         class="u-featured h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:scale-105 motion-reduce:transform-none"
+        loading="lazy"
+        decoding="async"
       />
     </div>
   {/if}
   <Card.Content class="p-6">
     <div class="mb-4">
       <h2 class="p-name mb-2 line-clamp-2 text-xl font-semibold">
-        <a href={`/posts/${post.slug}`} class="u-url transition-colors hover:text-primary focus-visible:outline-none">
+        <a
+          href={`/posts/${post.slug}`}
+          class="u-url rounded-sm transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+        >
           {post.title}
         </a>
       </h2>
@@ -60,7 +65,11 @@
         {#if post.author && post.author.length > 0}
           <div class="flex -space-x-2">
             {#each post.author as author, i}
-              <a href={`/authors/${author.id}`} class="p-author u-category h-card" rel="author">
+              <a
+                href={`/authors/${author.id}`}
+                class="p-author u-category h-card rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+                rel="author"
+              >
                 <Avatar class="h-8 w-8 border border-muted ring-2 ring-background" title={author.name || author.email}>
                   {#if author.avatar}
                     <AvatarImage
@@ -83,7 +92,7 @@
               {#each post.author as author, i}
                 <a
                   href={`/authors/${author.id}`}
-                  class="p-author u-category h-card transition-colors hover:text-primary"
+                  class="p-author u-category h-card rounded-sm transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                   rel="author"
                 >
                   <span class="p-name">{author.name || author.email}</span>
@@ -117,7 +126,10 @@
     {#if post.tags && post.tags.length > 0}
       <div class="mt-4 flex flex-wrap gap-2">
         {#each post.tags as tag}
-          <a href={`/tags/${tag.slug}`}>
+          <a
+            href={`/tags/${tag.slug}`}
+            class="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+          >
             <Badge variant="secondary" class="text-xs transition-colors hover:bg-primary hover:text-primary-foreground">
               #{tag.tag}
             </Badge>

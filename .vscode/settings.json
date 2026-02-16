@@ -24,7 +24,11 @@
     "docker run": true,
     "mv": true,
     "git add": true,
-    "git commit": true
+    "git commit": true,
+    "sqlite3": true,
+    "true": true,
+    "docker exec": true,
+    "git rev-parse": true
   },
   "oxc.fmt.configPath": ""
 }

@@ -13,6 +13,7 @@ export enum Collections {
   Superusers = '_superusers',
   AuditLogs = 'audit_logs',
   Comments = 'comments',
+  Faqs = 'faqs',
   Media = 'media',
   Metadata = 'metadata',
   Pages = 'pages',
@@ -137,9 +138,23 @@ export type CommentsRecord = {
   author?: RecordIdString;
   comment?: HTMLString;
   id: string;
+  internal?: boolean;
   post?: RecordIdString;
   replyTo?: RecordIdString;
   status?: CommentsStatusOptions;
+  updated: IsoAutoDateString;
+};
+
+export type FaqsRecord = {
+  answer: HTMLString;
+  category?: string;
+  created: IsoAutoDateString;
+  id: string;
+  is_published?: boolean;
+  locale?: string;
+  question: string;
+  slug?: string;
+  sort_order?: number;
   updated: IsoAutoDateString;
 };
 
@@ -334,6 +349,7 @@ export type AuditLogsResponse<Tafter_changes = unknown, Tbefore_changes = unknow
 > &
   BaseSystemFields<Texpand>;
 export type CommentsResponse<Texpand = unknown> = Required<CommentsRecord> & BaseSystemFields<Texpand>;
+export type FaqsResponse<Texpand = unknown> = Required<FaqsRecord> & BaseSystemFields<Texpand>;
 export type MediaResponse<Tmetadata = unknown, Texpand = unknown> = Required<MediaRecord<Tmetadata>> &
   BaseSystemFields<Texpand>;
 export type MetadataResponse<Texpand = unknown> = Required<MetadataRecord> & BaseSystemFields<Texpand>;
@@ -364,6 +380,7 @@ export type CollectionRecords = {
   _superusers: SuperusersRecord;
   audit_logs: AuditLogsRecord;
   comments: CommentsRecord;
+  faqs: FaqsRecord;
   media: MediaRecord;
   metadata: MetadataRecord;
   pages: PagesRecord;
@@ -386,6 +403,7 @@ export type CollectionResponses = {
   _superusers: SuperusersResponse;
   audit_logs: AuditLogsResponse;
   comments: CommentsResponse;
+  faqs: FaqsResponse;
   media: MediaResponse;
   metadata: MetadataResponse;
   pages: PagesResponse;
@@ -405,8 +423,7 @@ export type CollectionResponses = {
 type ProcessCreateAndUpdateFields<T> = Omit<
   {
     // Omit AutoDate fields
-    [K in keyof T as Extract<T[K], IsoAutoDateString> extends never ? K : never]: // Convert FileNameString to File
-    T[K] extends infer U
+    [K in keyof T as Extract<T[K], IsoAutoDateString> extends never ? K : never]: T[K] extends infer U // Convert FileNameString to File
       ? U extends FileNameString | FileNameString[]
         ? U extends any[]
           ? File[]

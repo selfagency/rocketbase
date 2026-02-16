@@ -52,6 +52,10 @@
 - Settings page (metadata/redirects admin UI)
 - Harper.js grammar checking in editor
 - User management dashboard
+- Team collection + admin page
+- Services collection + admin page
+- Opportunities collection + admin page (employment, internship, volunteer)
+- UI theming system for site color customization
 - Web stats dashboard
 - Activity audit dashboard
 - Job queue dashboard
@@ -76,16 +80,27 @@
 
 **Objective:** Finish core admin tools and content management features that every other feature depends on.
 
-| Feature                      | Status | Plan Reference                             |
-| ---------------------------- | ------ | ------------------------------------------ |
-| Settings Admin UI            | ❌     | `features/01-settings-admin-ui.md`         |
-| Harper.js Editor Integration | ❌     | `features/02-harper-editor-integration.md` |
-| User Management Dashboard    | ❌     | `features/03-user-management.md`           |
-| Media Management (complete)  | 🚧     | `features/04-media-management-complete.md` |
-| Posts + IndieWeb (complete)  | 🚧     | `features/05-posts-indieweb-complete.md`   |
-| RSS Feeds (complete)         | 🚧     | `features/06-rss-feeds-complete.md`        |
+| Feature                                 | Status | Plan Reference                             |
+| --------------------------------------- | ------ | ------------------------------------------ |
+| Settings Admin UI                       | ❌     | `features/01-settings-admin-ui.md`         |
+| Harper.js Editor Integration            | ❌     | `features/02-harper-editor-integration.md` |
+| User Management Dashboard               | ❌     | `features/03-user-management.md`           |
+| Team Admin (collection + UI)            | ❌     | `features/20-team-admin.md`                |
+| Services Admin (collection + UI)        | ❌     | `features/21-services-admin.md`            |
+| Opportunities Admin (collection + UI)   | ❌     | `features/22-opportunities-admin.md`       |
+| UI Theming System                       | ❌     | `features/23-ui-theming-system.md`         |
+| Media Management (complete)             | 🚧     | `features/04-media-management-complete.md` |
+| Posts + IndieWeb (complete)             | 🚧     | `features/05-posts-indieweb-complete.md`   |
+| RSS Feeds (complete)                    | 🚧     | `features/06-rss-feeds-complete.md`        |
 
 **Dependencies:** None (foundation work)
+
+**New Foundation Scope (Planned Additions):**
+
+- **Team collection + admin page:** manage people profiles (name, role, bio, links, photo, ordering, visibility).
+- **Services collection + admin page:** manage service offerings (title, summary, details, icon/media, pricing hints, ordering, visibility).
+- **Opportunities collection + admin page:** manage opportunity postings with strict type options (`employment`, `internship`, `volunteer`), status, apply link, and publish windows.
+- **UI theming system:** admin-configurable color themes (brand palette + semantic tokens), with safe contrast defaults and runtime switching.
 
 **Exit Criteria:**
 
@@ -446,6 +461,9 @@ Phase 4 (E-Commerce)
 
 - All admin UIs have CRUD operations
 - All settings configurable via UI (not DB)
+- Team, Services, and Opportunities admin CRUD flows are functional
+- Opportunities support type filtering for employment/internship/volunteer
+- Theming system can update site colors from admin-controlled configuration
 - Media library supports batch upload
 - Posts have complete microformats/JSON-LD
 - Editor has real-time grammar checking

@@ -6,7 +6,7 @@ import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 
 const forgotPasswordSchema = z.object({
-  email: z.email(m['validation.email_invalid']()),
+  email: z.string().email(m['validation.email_invalid']()),
 });
 
 type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;

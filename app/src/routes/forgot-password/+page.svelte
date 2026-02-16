@@ -15,7 +15,7 @@
   import { z } from 'zod';
 
   const forgotPasswordSchema = z.object({
-    email: z.email(m['validation.email_invalid']()),
+    email: z.string().email(m['validation.email_invalid']()),
   });
 
   let { data, form: actionData } = $props();

@@ -16,7 +16,7 @@
     {item.title || 'Untitled project'}
     <a
       href={`/portfolio/${item.slug}`}
-      class="u-url u-uid opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary focus-visible:outline-none"
+      class="u-url u-uid rounded-sm opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
       aria-label="Permalink"
     >
       <LinkIcon class="h-5 w-5" aria-hidden="true" />
@@ -33,7 +33,7 @@
         href={item.url}
         rel="external noopener noreferrer"
         target="_blank"
-        class="u-url break-all text-primary underline"
+        class="u-url rounded-sm break-all text-primary underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
       >
         {item.url}
       </a>
@@ -45,6 +45,8 @@
       src={getFileUrl('portfolio', item.id, item.image, cdnUrl)}
       alt={item.title || 'Portfolio cover image'}
       class="u-photo mb-6 h-72 w-full rounded-lg object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:scale-[1.01] motion-reduce:transform-none"
+      loading="eager"
+      decoding="async"
     />
   {/if}
 

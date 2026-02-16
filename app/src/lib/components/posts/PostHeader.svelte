@@ -19,7 +19,7 @@
     {post.title}
     <a
       href={`/posts/${post.slug}`}
-      class="u-url u-uid opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary"
+      class="u-url u-uid rounded-sm opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
       aria-label="Permalink"
     >
       <LinkIcon class="h-6 w-6" />
@@ -37,6 +37,8 @@
       src={getFileUrl('posts', post.id, post.image, cdnUrl)}
       alt={post.title}
       class="u-featured mt-6 mb-6 h-64 w-full rounded-lg object-cover"
+      loading="eager"
+      decoding="async"
     />
   {/if}
 
@@ -47,7 +49,11 @@
         <UsersIcon class="h-4 w-4" aria-hidden="true" />
         <div class="flex -space-x-2">
           {#each post.author as author}
-            <a href={`/authors/${author.id}`} class="p-author u-category h-card" rel="author">
+            <a
+              href={`/authors/${author.id}`}
+              class="p-author u-category h-card rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+              rel="author"
+            >
               <Avatar class="h-6 w-6 border border-muted ring-2 ring-background" title={author.name || author.email}>
                 {#if author.avatar}
                   <AvatarImage
@@ -69,7 +75,7 @@
           {#each post.author as author, i}
             <a
               href={`/authors/${author.id}`}
-              class="p-author u-category h-card transition-colors hover:text-primary"
+              class="p-author u-category h-card rounded-sm transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
               rel="author"
             >
               <span class="p-name">{author.name || author.email}</span>
@@ -82,7 +88,10 @@
     {/if}
 
     {#if post.date}
-      <a href={`/posts/${post.slug}`} class="u-url transition-colors hover:text-primary">
+      <a
+        href={`/posts/${post.slug}`}
+        class="u-url rounded-sm transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
         <time class="dt-published" datetime={post.date}>
           {new Date(post.date).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -96,7 +105,11 @@
     {#if post.tags && post.tags.length > 0}
       <div class="mt-4 flex flex-wrap gap-2">
         {#each post.tags as tag}
-          <a href={`/tags/${tag.slug}`} class="p-category" rel="tag">
+          <a
+            href={`/tags/${tag.slug}`}
+            class="p-category rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+            rel="tag"
+          >
             <Badge variant="secondary" class="text-xs transition-colors hover:bg-primary hover:text-primary-foreground">
               #{tag.tag}
             </Badge>

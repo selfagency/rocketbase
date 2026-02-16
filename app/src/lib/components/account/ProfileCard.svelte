@@ -152,7 +152,7 @@
                 <div class="flex items-center gap-2">
                   <Form.Label>{m['account.email_label']()}</Form.Label>
                   {#if user.verified}
-                    <Badge variant="default" class="bg-green-100 text-green-800">
+                    <Badge variant="default" class="bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200">
                       {m['account.verified_badge']()}
                     </Badge>
                   {/if}

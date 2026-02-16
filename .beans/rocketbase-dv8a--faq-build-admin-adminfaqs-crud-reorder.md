@@ -1,6 +1,6 @@
 ---
 # rocketbase-dv8a
-title: 'FAQ: build admin /admin/faqs CRUD + reorder'
+title: "FAQ: build admin /admin/faqs CRUD + reorder"
 status: completed
 type: task
 priority: critical
@@ -8,13 +8,15 @@ created_at: 2026-02-16T02:04:21Z
 updated_at: 2026-02-16T02:36:29Z
 parent: rocketbase-15d7
 blocked_by:
-    - rocketbase-creq
+  - rocketbase-creq
 ---
 
 ## Goal
+
 Provide admin management for FAQ entries.
 
 ## Tasks
+
 - [x] Add route(s) under `app/src/routes/admin/faqs`
 - [x] Implement create/edit/delete actions with validation
 - [x] Implement publish toggle and sort-order controls (up/down)
@@ -22,6 +24,7 @@ Provide admin management for FAQ entries.
 - [x] Add success/error toasts and form feedback
 
 ## Acceptance Criteria
+
 - Admin can create, update, delete, publish/unpublish, and reorder FAQs
 - Non-admin users cannot perform admin FAQ actions
 - Validation errors are clear and actionable

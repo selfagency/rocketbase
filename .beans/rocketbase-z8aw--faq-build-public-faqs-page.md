@@ -1,6 +1,6 @@
 ---
 # rocketbase-z8aw
-title: 'FAQ: build public /faqs page'
+title: "FAQ: build public /faqs page"
 status: completed
 type: task
 priority: critical
@@ -8,13 +8,15 @@ created_at: 2026-02-16T02:04:16Z
 updated_at: 2026-02-16T02:22:29Z
 parent: rocketbase-15d7
 blocked_by:
-    - rocketbase-creq
+  - rocketbase-creq
 ---
 
 ## Goal
+
 Ship a public FAQs page backed by published records.
 
 ## Tasks
+
 - [x] Add `app/src/routes/faqs/+page.server.ts` to fetch published FAQs
 - [x] Add `app/src/routes/faqs/+page.svelte` UI with semantic headings and accessible expand/collapse
 - [x] Apply stable sorting (`sort_order`, then created fallback)
@@ -22,8 +24,6 @@ Ship a public FAQs page backed by published records.
 - [x] Add SEO metadata/title integration
 
 ## Acceptance Criteria
-
-
 
 ## Summary of Changes
 

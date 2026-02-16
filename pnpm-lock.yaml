@@ -96,8 +96,8 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
       '@types/web':
-        specifier: ^0.0.335
-        version: 0.0.335
+        specifier: ^0.0.336
+        version: 0.0.336
       '@vitest/browser-playwright':
         specifier: ^4.0.18
         version: 4.0.18(playwright@1.58.2)(vite@7.3.1(@types/node@20.19.33)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(vitest@4.0.18)
@@ -2447,8 +2447,8 @@ packages:
   '@types/validator@13.15.10':
     resolution: {integrity: sha512-T8L6i7wCuyoK8A/ZeLYt1+q0ty3Zb9+qbSSvrIVitzT3YjZqkTZ40IbRsPanlB4h1QB3JVL1SYCdR6ngtFYcuA==}
 
-  '@types/web@0.0.335':
-    resolution: {integrity: sha512-MdqOg7t1MaQdaQoGuffSdxOx8icrisFBAuI8/DrdCco4TmRVgcwPJdS9zzbQ6rYocRQNW9yekQtnurTDWksOBg==}
+  '@types/web@0.0.336':
+    resolution: {integrity: sha512-BF63oBTS3D5d1XEKR2fou32PlxSqiaYZxTCchI/eeS/q6f51mKQdcVvFJcLUPsiO8G6KyEPlSYVvhQfa1KVeSw==}
 
   '@typeschema/class-validator@0.3.0':
     resolution: {integrity: sha512-OJSFeZDIQ8EK1HTljKLT5CItM2wsbgczLN8tMEfz3I1Lmhc5TBfkZ0eikFzUC16tI3d1Nag7um6TfCgp2I2Bww==}
@@ -7175,7 +7175,7 @@ snapshots:
   '@types/validator@13.15.10':
     optional: true
 
-  '@types/web@0.0.335': {}
+  '@types/web@0.0.336': {}
 
   '@typeschema/class-validator@0.3.0(class-validator@0.14.3)':
     dependencies:

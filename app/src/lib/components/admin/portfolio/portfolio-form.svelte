@@ -69,7 +69,7 @@
   action={isEdit ? '?/update' : undefined}
   use:enhance
   enctype="multipart/form-data"
-  class="space-y-6"
+  class="surface-enter space-y-6"
 >
   <div class="grid gap-6 md:grid-cols-2">
     <Form.Field {form} name="title" class="md:col-span-2">
@@ -156,7 +156,7 @@
   </div>
 
   {#if data.existingMediaRecords && data.existingMediaRecords.length > 0}
-    <div class="space-y-3 rounded-lg border border-border bg-card p-4 shadow-sm">
+    <div class="surface-enter space-y-3 rounded-lg border border-border bg-card p-4 shadow-sm">
       <h2 class="font-semibold">Existing Gallery Media</h2>
       <ul class="grid grid-cols-1 gap-3 md:grid-cols-2">
         {#each data.existingMediaRecords as media (media.id)}
@@ -190,7 +190,7 @@
     {/each}
   {/if}
 
-  <div class="space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
+  <div class="surface-enter space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
     <h2 class="font-semibold">Visibility</h2>
 
     <Form.Field {form} name="published">

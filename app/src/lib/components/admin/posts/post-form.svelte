@@ -144,7 +144,7 @@
   action={isEdit ? '?/update' : undefined}
   use:enhance
   enctype="multipart/form-data"
-  class="space-y-6"
+  class="surface-enter space-y-6"
 >
   <div class="grid gap-6 md:grid-cols-2">
     <Form.Field {form} name="title" class="md:col-span-2">
@@ -289,7 +289,7 @@
     </Form.Field>
   </div>
 
-  <div class="space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
+  <div class="surface-enter space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
     <h2 class="font-semibold">Post Settings</h2>
 
     <Form.Field {form} name="published">

@@ -116,7 +116,7 @@
   });
 </script>
 
-<form method="POST" use:enhance enctype="multipart/form-data" class="space-y-6">
+<form method="POST" use:enhance enctype="multipart/form-data" class="surface-enter space-y-6">
   <div class="grid gap-6 md:grid-cols-2">
     <!-- Title -->
     <Form.Field {form} name="title" class="md:col-span-2">
@@ -270,7 +270,7 @@
   </div>
 
   <!-- Switches Section -->
-  <div class="space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
+  <div class="surface-enter space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
     <h3 class="font-semibold">Page Settings</h3>
 
     <Form.Field {form} name="published">

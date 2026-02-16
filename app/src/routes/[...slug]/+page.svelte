@@ -47,4 +47,11 @@
 
 {#if data.page}
   <PageContent page={data.page} />
+{:else}
+  <main id="main-content" class="surface-enter mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
+    <section class="rounded-lg border border-border bg-card p-6 text-center">
+      <h1 class="text-2xl font-semibold">Page not found</h1>
+      <p class="mt-2 text-muted-foreground">The page you requested could not be loaded.</p>
+    </section>
+  </main>
 {/if}

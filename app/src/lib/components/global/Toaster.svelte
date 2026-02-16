@@ -25,4 +25,4 @@
   });
 </script>
 
-<Toaster />
+<Toaster closeButton duration={5000} />

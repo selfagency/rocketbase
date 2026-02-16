@@ -1,6 +1,6 @@
 ---
 # rocketbase-creq
-title: 'FAQ: create PocketBase collection + migration + API rules'
+title: "FAQ: create PocketBase collection + migration + API rules"
 status: completed
 type: task
 priority: critical
@@ -10,9 +10,11 @@ parent: rocketbase-15d7
 ---
 
 ## Goal
+
 Implement backend foundation for FAQs in PocketBase.
 
 ## Tasks
+
 - [x] Create `faqs` collection schema migration in `db/pb_migrations`
 - [x] Add fields: question, answer, slug, category, sort_order, is_published, locale
 - [x] Add indexes and sensible defaults for sorting/publishing
@@ -20,6 +22,7 @@ Implement backend foundation for FAQs in PocketBase.
 - [x] Regenerate and verify TypeScript types
 
 ## Acceptance Criteria
+
 - Migration applies cleanly
 - Collection rules enforce public/admin boundaries
 - Generated types include `faqs` and compile in app/db contexts

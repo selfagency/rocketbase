@@ -1,11 +1,11 @@
 ---
 # rocketbase-z8aw
 title: 'FAQ: build public /faqs page'
-status: todo
+status: in-progress
 type: task
 priority: critical
 created_at: 2026-02-16T02:04:16Z
-updated_at: 2026-02-16T02:11:31Z
+updated_at: 2026-02-16T02:22:29Z
 parent: rocketbase-15d7
 blocked_by:
     - rocketbase-creq

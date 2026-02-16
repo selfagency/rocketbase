@@ -13,7 +13,7 @@
   } = $props();
 </script>
 
-<Alert class="border-amber-400/60 bg-amber-50/80 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+<Alert class="surface-enter border-amber-400/60 bg-amber-50/80 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
   <AlertTitle>Recovered unsaved draft available</AlertTitle>
   <AlertDescription>
     {#if snapshotTimestamp}

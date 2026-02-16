@@ -331,6 +331,6 @@
   {/if}
 
   {#if warningMessage}
-    <p class="text-sm text-muted-foreground">{warningMessage}</p>
+    <p class="surface-enter text-sm text-muted-foreground">{warningMessage}</p>
   {/if}
 </div>

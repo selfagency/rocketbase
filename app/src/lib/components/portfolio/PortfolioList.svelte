@@ -28,7 +28,7 @@
 </script>
 
 {#if items.length === 0}
-  <div class="rounded-lg border border-dashed p-10 text-center">
+  <div class="surface-enter rounded-lg border border-dashed p-10 text-center">
     <h2 class="text-xl font-semibold">No portfolio items yet</h2>
     <p class="mt-2 text-muted-foreground">Check back soon for project updates.</p>
   </div>

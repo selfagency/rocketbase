@@ -69,7 +69,7 @@
   }
 </script>
 
-<Card class="mb-8">
+<Card class="surface-enter mb-8">
   <CardHeader class="flex flex-row items-center justify-between">
     <CardTitle>{m['account.profile_section']()}</CardTitle>
     <Badge variant="secondary" class="capitalize">{user.role}</Badge>
@@ -126,6 +126,7 @@
                     avatarPreview = null;
                     $form.avatar = undefined;
                   }}
+                  aria-label={m['account.avatar_remove_button']()}
                 >
                   {m['account.avatar_remove_button']()}
                 </Button>
@@ -163,13 +164,13 @@
           </Form.Field>
           {#if !user.verified}
             {#if verificationEmailSent}
-              <div class="mt-3 rounded-md bg-amber-50 p-3" data-testid="email-verification-sent">
+              <div class="surface-enter mt-3 rounded-md bg-amber-50 p-3" data-testid="email-verification-sent">
                 <p class="text-sm text-amber-800">
                   {m['account.email_verification_sent_help']()}
                 </p>
               </div>
             {:else}
-              <div class="mt-3 rounded-md bg-amber-50 p-3">
+              <div class="surface-enter mt-3 rounded-md bg-amber-50 p-3">
                 <p class="mb-2 text-sm text-amber-800">
                   {m['account.email_not_verified_description']()}
                 </p>

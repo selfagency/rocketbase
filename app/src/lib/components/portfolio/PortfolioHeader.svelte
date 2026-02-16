@@ -11,12 +11,12 @@
   let { item, cdnUrl }: Props = $props();
 </script>
 
-<header class="mb-8 font-sans">
+<header class="surface-enter mb-8 font-sans">
   <h1 class="p-name group mb-4 flex items-center gap-2 text-3xl leading-tight font-bold">
     {item.title || 'Untitled project'}
     <a
       href={`/portfolio/${item.slug}`}
-      class="u-url u-uid opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary"
+      class="u-url u-uid opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary focus-visible:outline-none"
       aria-label="Permalink"
     >
       <LinkIcon class="h-5 w-5" aria-hidden="true" />
@@ -44,7 +44,7 @@
     <img
       src={getFileUrl('portfolio', item.id, item.image, cdnUrl)}
       alt={item.title || 'Portfolio cover image'}
-      class="u-photo mb-6 h-72 w-full rounded-lg object-cover"
+      class="u-photo mb-6 h-72 w-full rounded-lg object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:scale-[1.01] motion-reduce:transform-none"
     />
   {/if}
 

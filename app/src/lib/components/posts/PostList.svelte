@@ -31,17 +31,17 @@
   function handlePageChange(pageNum: number) {
     const url = new URL(page.url);
     url.searchParams.set('page', pageNum.toString());
-    goto(url.toString(), { replaceState: true });
+    goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true });
   }
 </script>
 
 {#if posts.length === 0}
-  <div class="py-12 text-center">
+  <div class="surface-enter py-12 text-center">
     <h2 class="mb-2 text-2xl font-semibold">{emptyTitle}</h2>
     <p class="text-muted-foreground">{emptyDescription}</p>
   </div>
 {:else}
-  <div class="h-feed mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+  <div class="h-feed mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3" aria-live="polite">
     {#each posts as post (post.id)}
       <PostCard {post} {cdnUrl} {showAuthor} />
     {/each}

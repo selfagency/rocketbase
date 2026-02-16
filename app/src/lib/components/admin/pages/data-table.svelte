@@ -223,7 +223,7 @@
 </script>
 
 <Tooltip.Provider>
-  <div class="w-full">
+  <div class="surface-enter w-full">
     <div class="flex items-center gap-4 py-4">
       <Input
         placeholder={m['admin.pages.search_placeholder']()}
@@ -285,6 +285,7 @@
                     {#if (header.column.columnDef as any)?.meta?.sortKey}
                       {@const tooltip = (header.column.columnDef as any)?.meta?.tooltip}
                       <button
+                        type="button"
                         class={(header.column.columnDef as any).meta.sortKey === 'order'
                           ? 'flex w-full items-center justify-center text-xs transition-colors hover:text-foreground'
                           : 'flex items-center gap-2 text-xs transition-colors hover:text-foreground'}
@@ -405,7 +406,7 @@
     </div>
 
     <div class="flex items-center justify-between space-x-2 pt-4">
-      <div class="text-sm text-muted-foreground">
+      <div class="text-sm text-muted-foreground" aria-live="polite">
         Showing page {currentPage} of {totalPages} ({totalItems} total)
       </div>
       <div class="space-x-2">

@@ -148,7 +148,7 @@
 </script>
 
 <Tooltip.Provider>
-  <div class="w-full">
+  <div class="surface-enter w-full">
     <div class="flex flex-wrap items-center gap-4 py-4">
       <Input
         placeholder="Search portfolio by title, slug, or summary"
@@ -196,6 +196,7 @@
                   {#if !header.isPlaceholder}
                     {#if (header.column.columnDef as any)?.meta?.sortKey}
                       <button
+                        type="button"
                         class="flex items-center gap-2 text-xs transition-colors hover:text-foreground"
                         onclick={() => navigateToSort((header.column.columnDef as any).meta.sortKey)}
                       >
@@ -237,7 +238,9 @@
     </div>
 
     <div class="flex items-center justify-between space-x-2 pt-4">
-      <div class="text-sm text-muted-foreground">Showing page {currentPage} of {totalPages} ({totalItems} total)</div>
+      <div class="text-sm text-muted-foreground" aria-live="polite">
+        Showing page {currentPage} of {totalPages} ({totalItems} total)
+      </div>
       <div class="space-x-2">
         <Button variant="outline" size="sm" onclick={() => navigateToPage(currentPage - 1)} disabled={currentPage <= 1}>
           Previous

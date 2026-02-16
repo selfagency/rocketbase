@@ -19,12 +19,12 @@
   } = $props();
 </script>
 
-<Card>
+<Card class="surface-enter">
   <CardHeader>
     <CardTitle>{m['account.password_section']()}</CardTitle>
   </CardHeader>
   <CardContent>
-    <Alert class="mb-4">
+    <Alert class="surface-enter mb-4">
       <AlertTitle>{m['common.warning_title']()}</AlertTitle>
       <AlertDescription>{m['account.password_warning']()}</AlertDescription>
     </Alert>

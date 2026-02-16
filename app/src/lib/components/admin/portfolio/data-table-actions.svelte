@@ -61,7 +61,7 @@
       </Button>
     {/snippet}
   </Popover.Trigger>
-  <Popover.Content class="w-44 p-2" align="end" sideOffset={6}>
+  <Popover.Content class="surface-enter w-44 p-2" align="end" sideOffset={6}>
     <div class="flex flex-col gap-1">
       <Button
         variant="ghost"

@@ -8,7 +8,7 @@
   } = $props();
 </script>
 
-<Alert class="border-blue-400/60 bg-blue-50/80 text-blue-900 dark:bg-blue-950/40 dark:text-blue-100">
+<Alert class="surface-enter border-blue-400/60 bg-blue-50/80 text-blue-900 dark:bg-blue-950/40 dark:text-blue-100">
   <AlertTitle>Another editor is active</AlertTitle>
   <AlertDescription>
     {activeEditorCount === 1

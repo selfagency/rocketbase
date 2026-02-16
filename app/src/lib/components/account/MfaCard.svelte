@@ -30,19 +30,19 @@
   });
 </script>
 
-<Card class="mb-8">
+<Card class="surface-enter mb-8">
   <CardHeader>
     <CardTitle>{m['account.2fa_title']()}</CardTitle>
     <CardDescription>{m['account.2fa_description']()}</CardDescription>
   </CardHeader>
   <CardContent>
     {#if mfaRequired}
-      <Alert>
+      <Alert class="surface-enter">
         <AlertTitle>{m['account.2fa_required_title']()}</AlertTitle>
         <AlertDescription>{m['account.2fa_required_info']()}</AlertDescription>
       </Alert>
     {:else}
-      <Alert>
+      <Alert class="surface-enter">
         <AlertTitle>
           {$mfaForm.mfaOptIn ? m['account.2fa_enabled_title']() : m['account.2fa_not_required_title']()}
         </AlertTitle>

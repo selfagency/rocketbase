@@ -8,7 +8,7 @@
   } = $props();
 </script>
 
-<Alert variant="destructive">
+<Alert variant="destructive" class="surface-enter">
   <AlertTitle>This record changed while you were editing</AlertTitle>
   <AlertDescription>
     Another update was detected {recordChangedAt ? `at ${recordChangedAt}` : 'in a parallel session'}. Review carefully

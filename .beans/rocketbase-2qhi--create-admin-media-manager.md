@@ -3,9 +3,9 @@
 title: Create admin media manager
 status: todo
 type: feature
-priority: normal
+priority: critical
 created_at: 2026-02-15T05:56:05Z
-updated_at: 2026-02-15T08:09:31Z
+updated_at: 2026-02-16T02:11:31Z
 parent: rocketbase-3h6u
 ---
 

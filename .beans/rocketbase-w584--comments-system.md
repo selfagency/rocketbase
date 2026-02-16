@@ -3,9 +3,9 @@
 title: Comments System
 status: todo
 type: feature
-priority: normal
+priority: high
 created_at: 2026-02-15T23:49:01Z
-updated_at: 2026-02-15T23:58:59Z
+updated_at: 2026-02-16T02:11:36Z
 parent: rocketbase-mkca
 ---
 

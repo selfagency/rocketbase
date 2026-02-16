@@ -3,9 +3,9 @@
 title: Shop / E-Commerce
 status: todo
 type: feature
-priority: normal
+priority: low
 created_at: 2026-02-15T23:49:02Z
-updated_at: 2026-02-15T23:59:00Z
+updated_at: 2026-02-16T02:11:40Z
 parent: rocketbase-gx3z
 ---
 

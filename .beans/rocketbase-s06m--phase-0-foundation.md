@@ -3,9 +3,9 @@
 title: PHASE 0 - FOUNDATION
 status: todo
 type: milestone
-priority: normal
+priority: critical
 created_at: 2026-02-15T23:57:05Z
-updated_at: 2026-02-15T23:57:54Z
+updated_at: 2026-02-16T02:11:30Z
 ---
 
 Foundational platform and baseline capabilities.

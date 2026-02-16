@@ -3,8 +3,9 @@
 title: Missing tests review across existing implementations
 status: todo
 type: task
+priority: critical
 created_at: 2026-02-16T00:05:44Z
-updated_at: 2026-02-16T00:05:44Z
+updated_at: 2026-02-16T02:11:31Z
 parent: rocketbase-e0f9
 ---
 

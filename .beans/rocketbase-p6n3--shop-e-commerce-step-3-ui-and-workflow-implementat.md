@@ -3,8 +3,9 @@
 title: '[Shop / E-Commerce] Step 3: UI and workflow implementation'
 status: todo
 type: task
+priority: low
 created_at: 2026-02-16T00:00:35Z
-updated_at: 2026-02-16T00:00:35Z
+updated_at: 2026-02-16T02:11:40Z
 parent: rocketbase-h6ie
 ---
 

@@ -3,9 +3,9 @@
 title: Create admin settings page with metadata CRUD
 status: todo
 type: task
-priority: normal
+priority: critical
 created_at: 2026-02-12T20:13:22Z
-updated_at: 2026-02-15T23:07:16Z
+updated_at: 2026-02-16T02:11:30Z
 parent: rocketbase-alnr
 ---
 

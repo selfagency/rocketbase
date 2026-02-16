@@ -3,8 +3,9 @@
 title: Create Opportunities collection and admin page
 status: todo
 type: feature
+priority: critical
 created_at: 2026-02-16T01:57:35Z
-updated_at: 2026-02-16T01:57:35Z
+updated_at: 2026-02-16T02:11:30Z
 parent: rocketbase-alnr
 ---
 

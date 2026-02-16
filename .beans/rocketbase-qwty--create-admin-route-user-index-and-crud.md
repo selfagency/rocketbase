@@ -3,9 +3,9 @@
 title: Create admin route - user index and CRUD
 status: todo
 type: task
-priority: normal
+priority: critical
 created_at: 2026-02-12T20:13:22Z
-updated_at: 2026-02-15T08:40:55Z
+updated_at: 2026-02-16T02:11:30Z
 parent: rocketbase-alnr
 ---
 

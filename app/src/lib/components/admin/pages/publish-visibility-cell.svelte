@@ -20,6 +20,6 @@
 
   {#if !visible}
     <EyeOffIcon class="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-    <span class="sr-only">Hidden</span>
+    <span class="sr-only">Hidden from navigation</span>
   {/if}
 </div>

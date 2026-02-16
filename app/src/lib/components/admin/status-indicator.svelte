@@ -15,15 +15,15 @@
   const toneStyles: Record<StatusTone, { dot: string; pill: string }> = {
     published: {
       dot: 'bg-green-500',
-      pill: 'bg-green-100 text-green-800',
+      pill: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
     },
     draft: {
       dot: 'bg-gray-500',
-      pill: 'bg-gray-100 text-gray-800',
+      pill: 'bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-100',
     },
     trash: {
       dot: 'bg-rose-500',
-      pill: 'bg-rose-100 text-rose-800',
+      pill: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200',
     },
   };
 </script>

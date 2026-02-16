@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19"
 
@@ -31,7 +31,7 @@ jobs:
           echo "store_path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
 
       - name: Setup pnpm cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.pnpm-cache.outputs.store_path }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -108,7 +108,7 @@ jobs:
           PUBLIC_POCKETBASE_URL: http://localhost:8090
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -150,7 +150,7 @@ jobs:
           PUBLIC_POCKETBASE_URL: http://localhost:8090
 
       - name: Upload unit coverage reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: coverage-unit
@@ -159,7 +159,7 @@ jobs:
           retention-days: 7
 
       - name: Upload e2e coverage reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: coverage-e2e-playwright
@@ -168,7 +168,7 @@ jobs:
           retention-days: 7
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: test-results

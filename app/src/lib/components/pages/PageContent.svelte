@@ -53,7 +53,7 @@
   {@html `<style>${pageData.custom_css}</style>`}
 {/if}
 
-<div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
+<div class="surface-enter mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
   <article class="h-entry prose prose-lg max-w-none">
     {#if pageData.title}
       <header class="mb-8">
@@ -71,6 +71,8 @@
             src={`${page.url.origin}/api/pb/files/pages/${pageData.id}/${pageData.image}`}
             alt={pageData.title || 'Page image'}
             class="u-featured mt-6 h-64 w-full rounded-lg object-cover"
+            loading="eager"
+            decoding="async"
           />
         {/if}
       </header>
@@ -100,6 +102,8 @@
                   : getFileUrl('media', mediaItem.id, mediaItem.file)}
                 alt={mediaItem.alt_text || mediaItem.caption || 'Media file'}
                 class="h-full w-full rounded-lg object-cover"
+                loading="lazy"
+                decoding="async"
               />
             {/if}
           </div>

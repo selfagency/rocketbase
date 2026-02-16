@@ -101,6 +101,11 @@
                     </NavigationMenu.Link>
                   </li>
                   <li>
+                    <NavigationMenu.Link href="/admin/faqs">
+                      <div class="font-medium">FAQs</div>
+                    </NavigationMenu.Link>
+                  </li>
+                  <li>
                     <NavigationMenu.Link href="/admin/portfolio">
                       <div class="font-medium">Portfolio</div>
                     </NavigationMenu.Link>

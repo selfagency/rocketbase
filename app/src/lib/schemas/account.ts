@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const profileSchema = z.object({
   name: z.string().min(2, m['validation.name_min_length']()),
-  email: z.email(m['validation.email_invalid']()),
+  email: z.string().email(m['validation.email_invalid']()),
   title: z.string().optional(),
   bio: z.string().optional(),
   website: z.string().url().optional().or(z.literal('')),

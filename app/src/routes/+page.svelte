@@ -46,7 +46,7 @@
   <PageContent page={data.page} />
 {/if}
 
-<div class="container mx-auto max-w-2xl px-4 py-16">
+<div class="mx-auto w-full max-w-2xl px-4 py-12 md:py-16">
   <Card>
     <CardHeader>
       <h1 class="text-2xl leading-none font-semibold">

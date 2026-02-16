@@ -7,9 +7,9 @@
   import { mfaSchema, passwordSchema, profileSchema } from '$lib/schemas/account';
   import { toast } from '$lib/stores/toast';
   import {
-    createProfileHandlers,
     createMfaOnResultHandler,
     createPasswordOnResultHandler,
+    createProfileHandlers,
     handleVerifiedQueryFlag,
   } from '$lib/utils/account-page-handlers';
   import { onMount } from 'svelte';
@@ -81,7 +81,7 @@
 
 <MetaTags {...metaTags} />
 
-<div class="container mx-auto max-w-4xl py-8">
+<div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
   <h1 class="mb-8 text-3xl font-bold">{m['account.title']()}</h1>
   <p class="mb-8 text-muted-foreground">{m['account.description']()}</p>
 

@@ -34,12 +34,12 @@
 
 <MetaTags title="Create Page | Admin" robots="noindex, nofollow" />
 
-<div class="container mx-auto max-w-4xl py-8">
+<div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
   <div class="mb-8">
     <div class="flex items-center justify-between gap-3">
       <h1 class="text-3xl font-bold">Create Page</h1>
       <span
-        class="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-foreground"
+        class="surface-enter inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-foreground"
         role="status"
         aria-live="polite"
       >

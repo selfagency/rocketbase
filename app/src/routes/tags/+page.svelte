@@ -22,7 +22,7 @@
 
 <MetaTags {...metaTags} />
 
-<div class="container mx-auto px-4 py-8">
+<div class="mx-auto w-full max-w-6xl px-4 py-8 md:py-10">
   <div class="mb-8">
     <h1 class="mb-4 text-4xl font-bold tracking-tight">Tags</h1>
     {#if data.tags.length > 0}
@@ -42,7 +42,7 @@
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {#each data.tags as tag (tag.id)}
         <a href={`/tags/${tag.slug}`}>
-          <Card.Root class="transition-all hover:border-primary hover:shadow-md">
+          <Card.Root class="interactive-lift surface-enter transition-all hover:border-primary hover:shadow-md">
             <Card.Content class="p-6">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">

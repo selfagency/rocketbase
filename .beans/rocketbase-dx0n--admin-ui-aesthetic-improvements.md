@@ -1,11 +1,11 @@
 ---
 # rocketbase-dx0n
 title: Admin UI aesthetic improvements
-status: todo
+status: in-progress
 type: task
 priority: low
 created_at: 2026-02-14T02:26:02Z
-updated_at: 2026-02-15T08:18:01Z
+updated_at: 2026-02-16T00:12:47Z
 parent: rocketbase-90wn
 ---
 

@@ -22,7 +22,7 @@
 
 <MetaTags {...metaTags} />
 
-<div class="container mx-auto px-4 py-8">
+<div class="mx-auto w-full max-w-6xl px-4 py-8 md:py-10">
   <div class="mb-8">
     <h1 class="mb-4 text-4xl font-bold tracking-tight">{m.posts_title()}</h1>
     {#if data.pagination.totalItems > 0}

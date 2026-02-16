@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
-@import 'tw-animate-css';
+@import 'tailwind-animations';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -118,13 +118,41 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
   body {
-    @apply bg-muted pt-24 text-foreground;
+    @apply bg-muted pt-24 text-foreground antialiased;
+    background-image: radial-gradient(circle at top, oklch(0.97 0.015 274 / 0.7), transparent 55%);
   }
 
   input:not([type='checkbox']):not([type='radio']):not([type='file']),
   textarea,
   select {
     @apply bg-[oklch(0.985_0_0)]! dark:bg-[oklch(0.235_0.034_273.80697572834913)]!;
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply sr-only fixed top-3 left-3 z-[100] rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-lg focus:not-sr-only;
+  }
+
+  .page-shell {
+    @apply mx-auto w-full py-8 md:py-10;
+  }
+
+  .auth-shell {
+    @apply mx-auto flex min-h-[calc(100svh-10rem)] w-full max-w-md items-center justify-center px-4 py-8;
+  }
+
+  .surface-enter {
+    @apply motion-safe:animate-fade-in motion-reduce:animate-none;
+  }
+
+  .interactive-lift {
+    @apply motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:-translate-y-0.5 motion-reduce:transition-none;
   }
 }

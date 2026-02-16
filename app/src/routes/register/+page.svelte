@@ -35,8 +35,8 @@
 
 <MetaTags {...metaTags} />
 
-<div class="flex min-h-screen items-center justify-center px-4">
-  <Card class="w-full max-w-md">
+<div class="auth-shell">
+  <Card class="w-full border-border/70 shadow-sm">
     <CardHeader>
       <CardTitle>{m['auth.register.title']()}</CardTitle>
       <CardDescription>{m['auth.register.description']()}</CardDescription>

@@ -93,8 +93,11 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <MetaTags {...baseMetaTags} />
 <Toaster />
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
 <Nav navItems={data.navItems || []} />
 
-<div class="container mx-auto flex min-h-[80vh] w-full flex-col items-center justify-start p-4 md:p-8">
+<main id="main-content" class="page-shell" tabindex="-1">
   {@render children()}
-</div>
+</main>

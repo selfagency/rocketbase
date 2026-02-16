@@ -70,9 +70,9 @@
 
 <MetaTags {...metaTags} />
 
-<div class="container mx-auto max-w-4xl px-4 py-8">
+<div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
   <p
-    class="mb-6 rounded-md border border-dashed border-amber-500/70 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100"
+    class="surface-enter mb-6 rounded-md border border-dashed border-amber-500/70 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100"
   >
     This is a preview of an unpublished draft.
   </p>

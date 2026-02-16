@@ -38,7 +38,7 @@
 
 <MetaTags {...metaTags} />
 
-<div class="container mx-auto px-4 py-8">
+<div class="mx-auto w-full max-w-6xl px-4 py-8 md:py-10">
   <div class="mb-8">
     <h1 class="mb-4 text-4xl font-bold tracking-tight">Authors</h1>
     {#if data.authors.length > 0}
@@ -58,7 +58,7 @@
     <div class="h-feed grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {#each data.authors as author (author.id)}
         <a href={`/authors/${author.id}`} class="h-card u-url">
-          <Card.Root class="h-full transition-all hover:border-primary hover:shadow-md">
+          <Card.Root class="interactive-lift surface-enter h-full transition-all hover:border-primary hover:shadow-md">
             <Card.Content class="flex flex-col items-center p-6 text-center">
               <Avatar class="mb-4 h-20 w-20">
                 {#if author.avatar}

@@ -10,8 +10,8 @@
   let { data } = $props();
 </script>
 
-<div class="flex min-h-screen items-center justify-center px-4">
-  <Card class="w-full max-w-md">
+<div class="auth-shell">
+  <Card class="surface-enter w-full max-w-md border-border/70 shadow-sm">
     <CardHeader>
       <CardTitle>{m['verify.email_title']()}</CardTitle>
       <CardDescription>{m['verify.email_description']()}</CardDescription>

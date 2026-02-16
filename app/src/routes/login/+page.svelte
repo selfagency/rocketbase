@@ -84,8 +84,8 @@
 
 <MetaTags {...metaTags} />
 
-<div class="flex w-full items-center justify-center">
-  <Card class="w-full max-w-md">
+<div class="auth-shell">
+  <Card class="w-full border-border/70 shadow-sm">
     <CardHeader class="space-y-1">
       <CardTitle class="text-2xl">{m['auth.login.title']()}</CardTitle>
       <CardDescription>{m['auth.login.description']()}</CardDescription>

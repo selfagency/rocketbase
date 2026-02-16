@@ -10,7 +10,7 @@
 
 <MetaTags title="Admin Posts" description="Manage posts in the admin dashboard" robots="noindex, nofollow" />
 
-<div class="container mx-auto py-8">
+<div class="mx-auto w-full max-w-6xl px-4 py-8 md:py-10">
   <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
     <div>
       <h1 class="text-3xl font-bold">Posts</h1>

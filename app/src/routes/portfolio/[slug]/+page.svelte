@@ -109,7 +109,7 @@
 
 <MetaTags {...metaTags} />
 
-<div class="container mx-auto max-w-5xl px-4 py-8">
+<div class="mx-auto w-full max-w-5xl px-4 py-8 md:py-10">
   <article class="h-entry prose prose-lg max-w-none">
     <PortfolioHeader item={data.item} {cdnUrl} />
 
@@ -135,12 +135,12 @@
         <ul class="grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2" aria-label="Portfolio media gallery">
           {#each media as mediaItem (mediaItem.id)}
             <li>
-              <Card.Root class="overflow-hidden">
+              <Card.Root class="surface-enter overflow-hidden">
                 {#if mediaItem.file}
                   <Button
                     type="button"
                     variant="ghost"
-                    class="block h-auto w-full cursor-zoom-in rounded-none p-0 text-left"
+                    class="interactive-lift block h-auto w-full cursor-zoom-in rounded-none p-0 text-left"
                     onclick={() => openLightbox(mediaItem)}
                     aria-label={`Open ${getMediaLabel(mediaItem)} in full size`}
                   >

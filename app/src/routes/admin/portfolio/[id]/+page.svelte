@@ -8,7 +8,7 @@
 
 <MetaTags title={`Edit Portfolio: ${data.item.title || 'Untitled'} | Admin`} robots="noindex, nofollow" />
 
-<div class="container mx-auto max-w-4xl py-8">
+<div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
   <div class="mb-8">
     <h1 class="text-3xl font-bold">Edit Portfolio Item</h1>
     <p class="mt-2 text-muted-foreground">Update "{data.item.title || 'Untitled'}"</p>

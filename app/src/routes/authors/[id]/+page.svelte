@@ -63,7 +63,7 @@
 
 <MetaTags {...metaTags} />
 
-<div class="container mx-auto px-4 py-12">
+<div class="mx-auto w-full max-w-5xl px-4 py-10 md:py-12">
   <!-- Author Profile Header -->
   <div class="h-card mb-12 flex flex-col items-center text-center">
     <Avatar class="mb-6 h-32 w-32 border-4 border-background shadow-lg">

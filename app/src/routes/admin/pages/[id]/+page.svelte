@@ -19,7 +19,7 @@
 
 <MetaTags title={`Edit Page: ${data.page.title} | Admin`} robots="noindex, nofollow" />
 
-<div class="container mx-auto max-w-4xl py-8">
+<div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
   <div class="mb-8">
     <h1 class="text-3xl font-bold">Edit Page</h1>
     <p class="mt-2 text-muted-foreground">Update "{data.page.title || 'Untitled'}"</p>

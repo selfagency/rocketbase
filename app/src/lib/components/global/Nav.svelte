@@ -20,9 +20,9 @@
 
 <nav
   aria-label="Primary"
-  class="fixed top-0 left-0 z-40 w-screen border border-border/60 bg-background/80 shadow-md backdrop-blur-md"
+  class="fixed inset-x-0 top-0 z-40 border-b border-border/70 bg-background/85 shadow-sm backdrop-blur-lg"
 >
-  <div class="flex items-center justify-between gap-4 px-4 py-2">
+  <div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3">
     <NavigationMenu.Root viewport={$isMobile}>
       <NavigationMenu.List class="flex items-center">
         <NavigationMenu.Item>

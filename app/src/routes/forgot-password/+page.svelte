@@ -46,15 +46,15 @@
   export const snapshot = { capture, restore };
 </script>
 
-<div class="flex min-h-screen items-center justify-center px-4">
-  <Card class="w-full max-w-md">
+<div class="auth-shell">
+  <Card class="surface-enter w-full max-w-md border-border/70 shadow-sm">
     <CardHeader>
       <CardTitle>{m['auth.forgot_password.title']()}</CardTitle>
       <CardDescription>{m['auth.forgot_password.description']()}</CardDescription>
     </CardHeader>
     <CardContent>
       {#if showSuccess}
-        <Alert class="mb-4">
+        <Alert class="surface-enter mb-4">
           <AlertTitle>{m['auth.forgot_password.success_title']()}</AlertTitle>
           <AlertDescription>
             {actionData?.message}
@@ -80,7 +80,9 @@
 
         <div class="text-sm">
           {m['auth.forgot_password.login_link_text']()}
-          <a href="/login" class="text-primary hover:underline">{m['auth.forgot_password.login_link']()}</a>
+          <a href="/login" class="text-primary underline-offset-4 hover:underline"
+            >{m['auth.forgot_password.login_link']()}</a
+          >
         </div>
 
         <Button type="submit" class="w-full">{m['auth.forgot_password.submit_button']()}</Button>

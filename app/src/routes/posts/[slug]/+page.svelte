@@ -70,7 +70,7 @@
 
 <MetaTags {...metaTags} />
 
-<div class="container mx-auto max-w-4xl px-4 py-8">
+<div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-10">
   <article class="h-entry prose prose-lg max-w-none">
     {#if data.post.title}
       <PostHeader post={data.post} {cdnUrl} />

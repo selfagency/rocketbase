@@ -58,6 +58,7 @@
   let inputRef = $state<HTMLInputElement | null>(null);
   const localId = useId();
   const inputId = $derived(id ?? `multi-select-${localId}`);
+  const contentId = $derived(`${inputId}-content`);
 
   const normalizedValue = $derived(Array.isArray(value) ? value : []);
   const selectedSet = $derived(new Set(normalizedValue));
@@ -173,6 +174,9 @@
     }}
     tabindex={disabled ? -1 : 0}
     role="button"
+    aria-haspopup="listbox"
+    aria-expanded={open}
+    aria-controls={contentId}
     onkeydown={handleContainerKeyDown}
   >
     <div class="relative flex flex-1 flex-wrap items-center gap-1" aria-live="polite">
@@ -227,6 +231,10 @@
           type="button"
           class="size-5 rounded-sm text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none"
           aria-label="Clear selected options"
+          onmousedown={event => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
           onclick={clearSelection}
         >
           <XIcon class="size-4" />
@@ -241,6 +249,7 @@
   <div class="relative">
     {#if open}
       <Combobox.ContentStatic
+        id={contentId}
         class="surface-enter absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-hidden"
         onmouseup={() => {
           inputRef?.focus();

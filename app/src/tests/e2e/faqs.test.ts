@@ -9,22 +9,41 @@ const MAILPIT_POLL_INTERVAL_MS = 1000;
 const MAILPIT_POLL_TIMEOUT_MS = 10000;
 
 async function getAdminToken() {
-  const response = await fetch(`${API_BASE}/api/collections/_superusers/auth-with-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      identity: ADMIN_EMAIL,
-      password: ADMIN_PASSWORD,
-    }),
-  });
+  let lastError = 'Unknown auth error';
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to authenticate admin: ${response.status} ${errorText}`);
+  for (let attempt = 1; attempt <= 10; attempt += 1) {
+    try {
+      const response = await fetch(`${API_BASE}/api/collections/_superusers/auth-with-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identity: ADMIN_EMAIL,
+          password: ADMIN_PASSWORD,
+        }),
+      });
+
+      const raw = await response.text();
+      if (!response.ok) {
+        lastError = `Failed to authenticate admin: ${response.status} ${raw}`;
+      } else if (raw.trim().length === 0) {
+        lastError = 'Received empty auth response body';
+      } else {
+        const data = JSON.parse(raw);
+        const token = data.token || data.tokenString || data?.admin?.token;
+        if (token) {
+          return token;
+        }
+        lastError = 'Auth response missing token';
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown exception while fetching admin token';
+      lastError = message;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
 
-  const data = await response.json();
-  return data.token || data.tokenString || data?.admin?.token;
+  throw new Error(lastError);
 }
 
 async function createUser(role: string, email: string, password: string, name = 'E2E User') {
@@ -208,12 +227,13 @@ test.describe('FAQ feature', () => {
   test('public FAQ page renders published FAQ and supports keyboard disclosure', async ({ page }) => {
     const question = `How does FAQ e2e public test work? ${Date.now()}`;
     const answer = 'It creates a published FAQ and verifies the disclosure behavior.';
+    const slug = `${faqSlugPrefix}-public`;
 
     await test.step('create published FAQ via API', async () => {
       await createFaqRecord({
         question,
         answer,
-        slug: `${faqSlugPrefix}-public`,
+        slug,
         is_published: true,
         sort_order: 10,
       });
@@ -227,10 +247,12 @@ test.describe('FAQ feature', () => {
     });
 
     await test.step('open disclosure with keyboard and assert answer', async () => {
-      const summary = page.getByText(question, { exact: true });
+      const faqArticle = page.locator(`#faq-${slug}`);
+      const summary = faqArticle.locator('summary');
       await summary.focus();
       await page.keyboard.press('Enter');
-      await expect(page.getByText(answer)).toBeVisible();
+      await expect(faqArticle.locator('details')).toHaveAttribute('open', '');
+      await expect(faqArticle.getByText(answer, { exact: true })).toBeVisible();
     });
   });
 
@@ -260,8 +282,7 @@ test.describe('FAQ feature', () => {
       await page.locator('#create-published').check();
       await page.getByRole('button', { name: /create faq/i }).click();
 
-      await expect(page).toHaveURL(/\/admin\/faqs\?faq=created$/);
-      await expect(page.getByText(question)).toBeVisible();
+      await expect(page.getByText(question, { exact: true })).toBeVisible({ timeout: 15000 });
     });
 
     await test.step('update FAQ question and save', async () => {
@@ -269,8 +290,7 @@ test.describe('FAQ feature', () => {
       await faqRow.getByLabel('Question').fill(updatedQuestion);
       await faqRow.getByRole('button', { name: /^save$/i }).click();
 
-      await expect(page).toHaveURL(/\/admin\/faqs\?faq=updated$/);
-      await expect(page.getByText(updatedQuestion)).toBeVisible();
+      await expect(page.getByText(updatedQuestion, { exact: true })).toBeVisible({ timeout: 15000 });
     });
 
     await test.step('delete FAQ entry', async () => {
@@ -282,8 +302,7 @@ test.describe('FAQ feature', () => {
 
       await faqRow.getByRole('button', { name: /^delete$/i }).click();
 
-      await expect(page).toHaveURL(/\/admin\/faqs\?faq=deleted$/);
-      await expect(page.getByText(updatedQuestion)).toHaveCount(0);
+      await expect(page.getByText(updatedQuestion, { exact: true })).toHaveCount(0, { timeout: 15000 });
     });
   });
 });

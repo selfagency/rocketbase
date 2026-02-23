@@ -25,7 +25,7 @@
   "author": "Daniel Sieradski <daniel@self.agency> (https://self.agency)",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.19.0",
+    "@types/node": "^25.3.0",
     "consola": "^3.4.2",
     "execa": "^9.6.1",
     "ora": "^9.3.0",

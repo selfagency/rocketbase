@@ -26,9 +26,9 @@
   "author": "Daniel Sieradski <daniel@self.agency> (https://self.agency)",
   "license": "MIT",
   "devDependencies": {
-    "@humanwhocodes/crosspost": "^1.0.3",
+    "@humanwhocodes/crosspost": "^1.0.4",
     "@loglayer/transport-consola": "3.0.2",
-    "@trpc/server": "^11.10.0",
+    "@trpc/server": "^11.17.0",
     "@types/node": "^20.19.0",
     "@upyo/core": "^0.4.0",
     "@upyo/mock": "^0.4.0",
@@ -36,15 +36,15 @@
     "consola": "^3.4.2",
     "execa": "^9.6.1",
     "loglayer": "9.1.0",
-    "oxfmt": "^0.32.0",
-    "oxlint": "^1.47.0",
-    "oxlint-tsgolint": "^0.13.0",
-    "pocketbase": "^0.26.8",
+    "oxfmt": "^0.48.0",
+    "oxlint": "^1.63.0",
+    "oxlint-tsgolint": "^0.22.1",
+    "pocketbase": "^0.26.9",
     "pocketbase-queue": "^0.0.5",
-    "radashi": "^12.7.1",
+    "radashi": "^12.9.0",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.6"
   }
 }

@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20.19-alpine AS builder
+FROM node:26.1-alpine AS builder
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -19,7 +19,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run -C app build
 
 # Runtime stage: only the built bundle is required
-FROM node:20.19-alpine
+FROM node:26.1-alpine
 
 WORKDIR /app
 

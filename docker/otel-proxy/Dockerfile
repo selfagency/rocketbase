@@ -6,7 +6,7 @@ RUN go env -w GOPROXY=https://proxy.golang.org && \
 	go mod tidy
 RUN CGO_ENABLED=0 go build -o /bin/otel-proxy ./main.go
 
-FROM alpine:3.18
+FROM alpine:3.20
 RUN apk add --no-cache ca-certificates
 COPY --from=builder /bin/otel-proxy /usr/local/bin/otel-proxy
 EXPOSE 8080
